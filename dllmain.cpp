@@ -2791,7 +2791,7 @@ namespace Generator
                 UObject::Register_Name();
                 UObject::Register_Class();
                 UField::Register_Next();
-                //UField::Register_SuperField(); // Safe to comment out if "UStruct" has a "SuperField".
+                UField::Register_SuperField(); // Safe to comment out if "UStruct" has a "SuperField".
                 UEnum::Register_Names();
                 UConst::Register_Value();
                 UProperty::Register_ArrayDim();
