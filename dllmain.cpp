@@ -2568,6 +2568,7 @@ namespace Generator
         Printer::Header(definesFile, "GameDefines", "hpp", false);
 
         definesFile << "#pragma once\n";
+        definesFile << "#include <Windows.h>\n";
         definesFile << "#include <algorithm>\n";
         definesFile << "#include <locale>\n";
         definesFile << "#include <stdlib.h>\n";
@@ -2791,7 +2792,7 @@ namespace Generator
                 UObject::Register_Name();
                 UObject::Register_Class();
                 UField::Register_Next();
-                UField::Register_SuperField(); // Safe to comment out if "UStruct" has a "SuperField".
+                //UField::Register_SuperField(); // Safe to comment out if "UStruct" has a "SuperField".
                 UEnum::Register_Names();
                 UConst::Register_Value();
                 UProperty::Register_ArrayDim();
