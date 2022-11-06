@@ -8,9 +8,10 @@
 
 namespace Configuration
 {
+    const bool UsingWindows =                   true;           // When set to true this will auto include "Windows.h" in your sdk, along with renaming some windows macro functions.
     const bool UsingConstants =                 false;			// If you want to use class and function indexes instead of "FindClass/FindFunction".
     const bool UsingOffsets =                   false;			// If you're using the offsets below or patterns to initialize globals.
-    const bool UsingEventIndex =                true;			// If you want to use "ProcessEventIndex" change this to true, if not virutal voids will be generated from "ProcessEventPattern".
+    const bool UsingEventIndex =                false;			// If you want to use "ProcessEventIndex" change this to true, if not virutal voids will be generated from "ProcessEventPattern".
     const bool UsingEnumClasses =               true;			// If you want to use strongly typed enum classes over normal ones.
     const bool PrintFlagEnums =                 true;			// If you want the EFunctionFlags, EPropertyFlags, and EObjectFlags enums so be included in the final sdk.
     const bool RemoveNativeIndex =              true;			// If you want to remove the "iNative" index on functions before calling process event.

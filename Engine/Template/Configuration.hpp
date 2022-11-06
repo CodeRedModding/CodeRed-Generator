@@ -25,6 +25,7 @@ enum class EAlignment : int32_t
 
 namespace Configuration
 {
+	extern const bool UsingWindows;
 	extern const bool UsingConstants;
 	extern const bool UsingOffsets;
 	extern const bool UsingEventIndex;

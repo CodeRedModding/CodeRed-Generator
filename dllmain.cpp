@@ -1688,7 +1688,6 @@ namespace ClassGenerator
         }
 
         classStream << "};\n\n";
-
         file << classStream.str();
     }
 
@@ -1798,7 +1797,10 @@ namespace ParameterGenerator
                 else if (uFunction->FunctionFlags & EFunctionFlags::FUNC_Event) { propertyStream << "event"; }
                 else { propertyStream << "exec"; }
 
-                Utils::CreateWinFunction(functionName);
+                if (Configuration::UsingWindows)
+                {
+                    Utils::CreateWinFunction(functionName);
+                }
 
                 parameterStream << "\nstruct " << classNameCPP << "_" << propertyStream.str() << functionName << "_Params\n" << "{\n";
                 Printer::Empty(propertyStream);
@@ -1943,6 +1945,7 @@ namespace FunctionGenerator
         {
             file << "\n\t// FIX PROCESS EVENT IN CONFIGURATION.CPP, INVALID INDEX";
             Utils::Messagebox("Warning: Process event is not configured correctly in \"Configuration.cpp\", you set \"UsingOffsets\" to true yet you did not provide a valid index for process event!", (MB_OK | MB_ICONWARNING));
+            return;
         }
 
         if (processEventAddress != 0)
@@ -2133,7 +2136,10 @@ namespace FunctionGenerator
                     codeStream << "\nvoid";
                 }
 
-                Utils::CreateWinFunction(functionName);
+                if (Configuration::UsingWindows)
+                {
+                    Utils::CreateWinFunction(functionName);
+                }
 
                 if (uFunction->FunctionFlags & EFunctionFlags::FUNC_Exec) { codeStream << " " << classNameCPP << "::" << functionName << "("; }
                 else if (uFunction->FunctionFlags & EFunctionFlags::FUNC_Event) { codeStream << " " << classNameCPP << "::event" << functionName << "("; }
@@ -2200,7 +2206,8 @@ namespace FunctionGenerator
                 else { codeStream << "exec"; }
 
                 codeStream << functionName << "_Params " << functionName << "_Params;\n";
-                codeStream << "\tZeroMemory(&" << functionName << "_Params, sizeof(" << functionName << "_Params));\n";
+                codeStream << "\tmemset(&" << functionName << "_Params, 0, sizeof(" << functionName << "_Params));\n";
+                //codeStream << "\tZeroMemory(&" << functionName << "_Params, sizeof(" << functionName << "_Params));\n";
 
                 for (const auto& propertyPair : propertyParams)
                 {
@@ -2403,7 +2410,10 @@ namespace FunctionGenerator
                     functionStream << "\t" << (isStatic ? "static " : "") << "void";
                 }
 
-                Utils::CreateWinFunction(functionName);
+                if (Configuration::UsingWindows)
+                {
+                    Utils::CreateWinFunction(functionName);
+                }
 
                 if (uFunction->FunctionFlags & EFunctionFlags::FUNC_Exec) { functionStream << " " << functionName << "("; }
                 else if (uFunction->FunctionFlags & EFunctionFlags::FUNC_Event) { functionStream << " event" << functionName << "("; }
@@ -2568,7 +2578,12 @@ namespace Generator
         Printer::Header(definesFile, "GameDefines", "hpp", false);
 
         definesFile << "#pragma once\n";
-        definesFile << "#include <Windows.h>\n";
+
+        if (Configuration::UsingWindows)
+        {
+            definesFile << "#include <Windows.h>\n";
+        }
+
         definesFile << "#include <algorithm>\n";
         definesFile << "#include <locale>\n";
         definesFile << "#include <stdlib.h>\n";

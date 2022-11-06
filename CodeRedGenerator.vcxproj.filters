@@ -66,5 +66,8 @@
     <ClInclude Include="Printer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Changelog.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
