@@ -35,6 +35,9 @@ namespace Configuration
 	extern const bool RemoveNativeFlags;
 	extern const std::string EnumClassType;
 
+	extern const bool UsingPrecompiledHeaders;
+	extern const std::string PrecompiledHeaderName;
+
 	extern const int32_t CommentSpacer;
 	extern const int32_t ConstSpacer;
 	extern const int32_t EnumSpacer;
