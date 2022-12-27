@@ -78,9 +78,26 @@ namespace Printer
         stream << "#############################################################################################\n";
         stream << "*/\n";
 
-        if ((fileName != "SdkHeaders") && (fileName != "GameDefines"))
+        if (fileExtension == "cpp") {
+            if (fileName != "GameDefines")
+            {
+                if (Configuration::UsingPrecompiledHeaders)
+                {
+                    stream << "#include \"" + Configuration::PrecompiledHeaderName + "\"\n";
+                }
+                stream << "#include \"../SdkHeaders.hpp\"\n";
+            }
+            else
+            {
+                if (Configuration::UsingPrecompiledHeaders)
+                {
+                    stream << "#include \"" + Configuration::PrecompiledHeaderName + "\"\n";
+                }
+            }
+        }
+        else if (fileExtension == "hpp")
         {
-            if (fileExtension == "hpp")
+            if ((fileName != "SdkHeaders") && (fileName != "GameDefines"))
             {
                 stream << "#pragma once\n";
 
@@ -88,10 +105,6 @@ namespace Printer
                 {
                     stream << "#include \"../SdkConstants.hpp\"\n";
                 }
-            }
-            else if (fileExtension == "cpp")
-            {
-                stream << "#include \"../SdkHeaders.hpp\"\n";
             }
         }
 

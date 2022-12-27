@@ -18,6 +18,9 @@ namespace Configuration
     const bool RemoveNativeFlags =              true;			// If you want to remove the "FUNC_Native" flag on functions before calling process event.	
     const std::string EnumClassType =           "uint8_t";		// Underlying enum type if you set "UsingEnumClasses" to true.
 
+    const bool UsingPrecompiledHeaders = true;
+    const std::string PrecompiledHeaderName = "pch.h";
+
     const int32_t CommentSpacer =               30;
     const int32_t ConstSpacer =                 50;
     const int32_t EnumSpacer =                  50;
