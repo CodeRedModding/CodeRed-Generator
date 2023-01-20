@@ -28,14 +28,14 @@ namespace Printer
         stream <<  std::setfill(fill) << std::setw(width) << std::left;
     }
 
-    std::string Hex(uintptr_t decimal, size_t width)
+    std::string Hex(uint64_t decimal, size_t width)
     {
         std::ostringstream stream;
         stream << "0x" << std::setfill('0') << std::setw(width) << std::right << std::uppercase << std::hex << decimal;
         return stream.str();
     }
 
-    std::string Hex(uintptr_t decimal, EWidthTypes width)
+    std::string Hex(uint64_t decimal, EWidthTypes width)
     {
         return Hex(decimal, static_cast<size_t>(width));
     }
@@ -45,14 +45,14 @@ namespace Printer
         return Hex(reinterpret_cast<uintptr_t>(pointer), sizeof(uintptr_t));
     }
 
-    std::string Decimal(uintptr_t hex, size_t width)
+    std::string Decimal(uint64_t hex, size_t width)
     {
         std::ostringstream stream;
         stream << std::setfill('0') << std::setw(width) << std::right << std::uppercase << std::dec << hex;
         return stream.str();
     }
 
-    std::string Decimal(uintptr_t hex, EWidthTypes width)
+    std::string Decimal(uint64_t hex, EWidthTypes width)
     {
         return Decimal(hex, static_cast<size_t>(width));
     }

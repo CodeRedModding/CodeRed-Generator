@@ -26,11 +26,11 @@ namespace Printer
 	void FillLeft(std::ostringstream& stream, char fill, size_t width);
 	void FillRight(std::ofstream& stream, char fill, size_t width);
 	void FillLeft(std::ofstream& stream, char fill, size_t width);
-	std::string Hex(uintptr_t decimal, size_t width);
-	std::string Hex(uintptr_t decimal, EWidthTypes width);
+	std::string Hex(uint64_t decimal, size_t width);
+	std::string Hex(uint64_t decimal, EWidthTypes width);
 	std::string Hex(void* pointer);
-	std::string Decimal(uintptr_t hex, size_t width);
-	std::string Decimal(uintptr_t hex, EWidthTypes width);
+	std::string Decimal(uint64_t hex, size_t width);
+	std::string Decimal(uint64_t hex, EWidthTypes width);
 	std::string Precision(float value, size_t precision);
 
 	void Header(std::ostringstream& stream, const std::string& fileName, const std::string& fileExtension, bool bPragmaPush);
