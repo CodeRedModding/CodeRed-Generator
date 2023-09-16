@@ -154,12 +154,14 @@ namespace Utils
         size_t dfW = functionName.find("DeleteFile");
         size_t dtW = functionName.find("DrawText");
         size_t smW = functionName.find("SendMessage");
+        size_t gmW = functionName.find("GetMessage");
 
         if (gctW != std::string::npos
             || goW != std::string::npos
             || dfW != std::string::npos
             || dtW != std::string::npos
-            || smW != std::string::npos)
+            || smW != std::string::npos
+            || gmW != std::string::npos)
         {
             functionName += "W";
         }
@@ -275,7 +277,7 @@ namespace Retrievers
         }
     }
 
-    EPropertyTypes GetPropertyTypeInternal(class UProperty* uProperty, std::string& outPropertyType, bool bIgnoreEnum, bool bIsBitField)
+    EPropertyTypes GetPropertyTypeInternal(class UProperty* uProperty, std::string& outPropertyType, bool bIgnoreEnum, bool bDescription, bool bIsBitField)
     {
         if (uProperty)
         {
@@ -303,12 +305,23 @@ namespace Retrievers
                         outPropertyType = ("struct " + Utils::CreateValidName(structProperty->Struct->GetNameCPP()));
                     }
 
+                    if (bDescription && !(uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
+                    {
+                        outPropertyType = ("const " + outPropertyType + "&");
+                    }
+
                     return EPropertyTypes::TYPE_FSTRUCT;
                 }
             }
             else if (uProperty->IsA<UStrProperty>())
             {
                 outPropertyType = "class FString";
+
+                if (bDescription && !(uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
+                {
+                    outPropertyType = ("const " + outPropertyType + "&");
+                }
+
                 return EPropertyTypes::TYPE_FSTRING;
             }
             else if (uProperty->IsA<UQWordProperty>())
@@ -317,7 +330,7 @@ namespace Retrievers
                 return EPropertyTypes::TYPE_UINT64;
             }
             else if (uProperty->IsA<UObjectProperty>())
-            { 
+            {
                 UObjectProperty* objectProperty = static_cast<UObjectProperty*>(uProperty);
 
                 if (objectProperty && objectProperty->PropertyClass)
@@ -339,6 +352,12 @@ namespace Retrievers
             else if (uProperty->IsA<UNameProperty>())
             {
                 outPropertyType = "struct FName";
+
+                if (bDescription && !(uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
+                {
+                    outPropertyType = ("const " + outPropertyType + "&");
+                }
+
                 return EPropertyTypes::TYPE_FNAME;
             }
             else if (uProperty->IsA<UMapProperty>())
@@ -348,9 +367,15 @@ namespace Retrievers
 
                 if (mapProperty && mapProperty->Key && mapProperty->Value)
                 {
-                    if (GetPropertyTypeInternal(mapProperty->Key, mapKey, bIgnoreEnum, bIsBitField) != EPropertyTypes::TYPE_UNKNOWN && GetPropertyTypeInternal(mapProperty->Value, mapValue, bIgnoreEnum, bIsBitField) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (GetPropertyTypeInternal(mapProperty->Key, mapKey, bIgnoreEnum, false, bIsBitField) != EPropertyTypes::TYPE_UNKNOWN && GetPropertyTypeInternal(mapProperty->Value, mapValue, bIgnoreEnum, bDescription, bIsBitField) != EPropertyTypes::TYPE_UNKNOWN)
                     {
-                        outPropertyType = ("TMap<" + mapKey + ", " + mapValue + ">");
+                        outPropertyType = ("class TMap<" + mapKey + ", " + mapValue + ">");
+
+                        if (bDescription && !(uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
+                        {
+                            outPropertyType = ("const " + outPropertyType + "&");
+                        }
+
                         return EPropertyTypes::TYPE_TMAP;
                     }
                 }
@@ -373,11 +398,17 @@ namespace Retrievers
             else if (uProperty->IsA<UFloatProperty>())
             {
                 outPropertyType = "float";
-                return EPropertyTypes::TYPE_FLOAT;   
+                return EPropertyTypes::TYPE_FLOAT;
             }
             else if (uProperty->IsA<UDelegateProperty>())
             {
                 outPropertyType = "struct FScriptDelegate";
+
+                if (bDescription && !(uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
+                {
+                    outPropertyType = ("const " + outPropertyType + "&");
+                }
+
                 return EPropertyTypes::TYPE_FSCRIPTDELEGATE;
             }
             else if (uProperty->IsA<UByteProperty>())
@@ -415,21 +446,32 @@ namespace Retrievers
                 {
                     std::string innerProperty;
 
-                    if (GetPropertyTypeInternal(arrayProperty->Inner, innerProperty, bIgnoreEnum, bIsBitField) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (GetPropertyTypeInternal(arrayProperty->Inner, innerProperty, bIgnoreEnum, false, bIsBitField) != EPropertyTypes::TYPE_UNKNOWN)
                     {
-                        outPropertyType = ("TArray<" + innerProperty + ">");
+                        outPropertyType = ("class TArray<" + innerProperty + ">");
+
+                        if (bDescription && !(uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
+                        {
+                            outPropertyType = ("const " + outPropertyType + "&");
+                        }
+
                         return EPropertyTypes::TYPE_TARRAY;
                     }
                 }
             }
         }
-        
+
         return EPropertyTypes::TYPE_UNKNOWN;
+    }
+
+    EPropertyTypes GetPropertyTypeDesc(class UProperty* uProperty, std::string& outPropertyType, bool bIsBitField)
+    {
+        return GetPropertyTypeInternal(uProperty, outPropertyType, false, true, bIsBitField);
     }
 
     EPropertyTypes GetPropertyType(class UProperty* uProperty, std::string& outPropertyType, bool bIsBitField)
     {
-        return GetPropertyTypeInternal(uProperty, outPropertyType, false, bIsBitField);
+        return GetPropertyTypeInternal(uProperty, outPropertyType, false, false, bIsBitField);
     }
 
     size_t GetPropertySize(UProperty* uProperty, bool bIsBitField)
@@ -596,7 +638,7 @@ namespace ConstGenerator
                 file << "#define CONST_" << constName << Printer::Decimal(mapSize, EWidthTypes::BYTE);
                 Printer::FillLeft(file, ' ', (Configuration::ConstSpacer - constName.length()));
                 file << " " << constValue << "\n";
-            }   
+            }
         }
     }
 
@@ -1018,7 +1060,7 @@ namespace StructGenerator
 
                 std::string propertyType;
 
-                if (Retrievers::GetPropertyTypeInternal(uProperty, propertyType, true, true) != EPropertyTypes::TYPE_UNKNOWN)
+                if (Retrievers::GetPropertyTypeInternal(uProperty, propertyType, true, false, true) != EPropertyTypes::TYPE_UNKNOWN)
                 {
                     size_t correctElementSize = Retrievers::GetPropertySize(uProperty);
                     std::string propertyName = Utils::CreateValidName(uProperty->GetName());
@@ -1135,7 +1177,7 @@ namespace StructGenerator
                         Printer::Empty(propertyStream);
 
                         structStream << " (" << Printer::Hex(offsetError, EWidthTypes::SIZE) << ") FIX WRONG SIZE OF PREVIOUS PROPERTY";
-                        structStream << " [Original: " << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim),EWidthTypes::SIZE);
+                        structStream << " [Original: " << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE);
                         structStream << ", Missing: " << Printer::Hex(offsetError, EWidthTypes::SIZE) << "]\n";
 
                         unknownDataIndex++;
@@ -1241,7 +1283,7 @@ namespace StructGenerator
 
                 GenerateStruct(file, scriptStruct);
                 vGeneratedStructs.push_back(structFullName);
-            }   
+            }
         }
     }
 
@@ -1469,7 +1511,7 @@ namespace ClassGenerator
 
                     std::string propertyType;
 
-                    if (Retrievers::GetPropertyTypeInternal(uProperty, propertyType, false, true) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (Retrievers::GetPropertyTypeInternal(uProperty, propertyType, false, false, true) != EPropertyTypes::TYPE_UNKNOWN)
                     {
                         size_t correctElementSize = Retrievers::GetPropertySize(uProperty);
 
@@ -1688,6 +1730,7 @@ namespace ClassGenerator
         }
 
         classStream << "};\n\n";
+
         file << classStream.str();
     }
 
@@ -1737,7 +1780,7 @@ namespace ClassGenerator
 
                     GenerateClass(file, uClass);
                     mGeneratedClasses.emplace(classFullName, uClass->ObjectInternalInteger);
-                }   
+                }
             }
         }
     }
@@ -1830,7 +1873,7 @@ namespace ParameterGenerator
                         }
                         else
                         {
-                            returnPropertyType = Retrievers::GetPropertyTypeInternal(uProperty, propertyType, true, true);
+                            returnPropertyType = Retrievers::GetPropertyTypeInternal(uProperty, propertyType, true, false, true);
                         }
 
                         if (returnPropertyType != EPropertyTypes::TYPE_UNKNOWN)
@@ -1932,7 +1975,7 @@ namespace FunctionGenerator
     void GenerateVirtualFunctions(std::ofstream& file)
     {
         uintptr_t processEventAddress = 0;
-        
+
         if (!Configuration::UsingOffsets)
         {
             processEventAddress = Retrievers::FindPattern(GetModuleHandle(NULL), Configuration::ProcessEventPattern, Configuration::ProcessEventMask);
@@ -1945,7 +1988,6 @@ namespace FunctionGenerator
         {
             file << "\n\t// FIX PROCESS EVENT IN CONFIGURATION.CPP, INVALID INDEX";
             Utils::Messagebox("Warning: Process event is not configured correctly in \"Configuration.cpp\", you set \"UsingOffsets\" to true yet you did not provide a valid index for process event!", (MB_OK | MB_ICONWARNING));
-            return;
         }
 
         if (processEventAddress != 0)
@@ -2088,7 +2130,7 @@ namespace FunctionGenerator
 
                 std::string propertyType;
 
-                if (propertyReturnParm.first && Retrievers::GetPropertyType(propertyReturnParm.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                if (propertyReturnParm.first && Retrievers::GetPropertyTypeDesc(propertyReturnParm.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
                 {
                     Retrievers::GetAllPropertyFlags(functionStream, propertyReturnParm.first->PropertyFlags);
                     codeStream << "// ";
@@ -2101,7 +2143,7 @@ namespace FunctionGenerator
 
                 for (const auto& propertyPair : propertyParams)
                 {
-                    if (Retrievers::GetPropertyType(propertyPair.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (Retrievers::GetPropertyTypeDesc(propertyPair.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
                     {
                         Retrievers::GetAllPropertyFlags(functionStream, propertyPair.first->PropertyFlags);
                         codeStream << "// ";
@@ -2149,7 +2191,7 @@ namespace FunctionGenerator
 
                 for (const auto& propertyPair : propertyParams)
                 {
-                    if (Retrievers::GetPropertyType(propertyPair.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (Retrievers::GetPropertyTypeDesc(propertyPair.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
                     {
                         if (printComma)
                         {
@@ -2423,7 +2465,7 @@ namespace FunctionGenerator
 
                 for (const auto& propertyPair : propertyParams)
                 {
-                    if (Retrievers::GetPropertyType(propertyPair.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (Retrievers::GetPropertyTypeDesc(propertyPair.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
                     {
                         if (printComma)
                         {

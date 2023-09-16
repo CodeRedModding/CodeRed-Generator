@@ -23,7 +23,8 @@ namespace Retrievers
 {
 	void GetAllPropertyFlags(std::ostringstream& stream, uint64_t propertyFlags);
 	void GetAllFunctionFlags(std::ostringstream& stream, uint64_t functionFlags);
-	EPropertyTypes GetPropertyTypeInternal(class UProperty* uProperty, std::string& outPropertyType, bool bIgnoreEnum, bool bIsBitField = false);
+	EPropertyTypes GetPropertyTypeInternal(class UProperty* uProperty, std::string& outPropertyType, bool bIgnoreEnum, bool bDescription, bool bIsBitField);
+	EPropertyTypes GetPropertyTypeDesc(class UProperty* uProperty, std::string& outPropertyType, bool bIsBitField = false);
 	EPropertyTypes GetPropertyType(class UProperty* uProperty, std::string& outPropertyType, bool bIsBitField = false);
 	size_t GetPropertySize(class UProperty* uProperty, bool bIsBitField = true);
 	uintptr_t GetEntryPoint();
