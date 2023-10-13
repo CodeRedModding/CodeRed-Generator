@@ -1,7 +1,7 @@
 #pragma once
 /*
 	Changes in v1.0.3
-	- All function parameters that dont' have out/return flags on them will be const reference now, to avoid unnecessary copying of data.
+	- All function parameters that don't have out/return flags on them will be const reference now, to avoid unnecessary copying of data.
 
 	Changes in v1.0.2
 	- Added a bool option called "UsingWindows" in the template "Configuration.cpp" file, when set to true it will include "Windows.h" along with removing windows macro functions from unreal ones. Note that this only makes changes in the final generated sdk.
