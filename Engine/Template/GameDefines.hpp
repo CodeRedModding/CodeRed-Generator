@@ -696,7 +696,7 @@ public:
 		{
 			if (Names()->at(entryId))
 			{
-				if (!wcscmp(Names()->at(entryId)->Name, nameToFind))
+				if (wcscmp(Names()->at(entryId)->Name, nameToFind) == 0)
 				{
 					FNameEntryId = entryId;
 					return;
@@ -708,7 +708,7 @@ public:
 		{
 			if (Names()->at(i))
 			{
-				if (!wcscmp(Names()->at(i)->Name, nameToFind))
+				if (wcscmp(Names()->at(i)->Name, nameToFind) == 0)
 				{
 					foundNames.push_back(i);
 					FNameEntryId = i;
@@ -726,7 +726,7 @@ public:
 		{
 			if (Names()->at(entryId))
 			{
-				if (!strcmp(Names()->at(entryId)->Name, nameToFind))
+				if (strcmp(Names()->at(entryId)->Name, nameToFind) == 0)
 				{
 					FNameEntryId = entryId;
 					return;
@@ -738,7 +738,7 @@ public:
 		{
 			if (Names()->at(i))
 			{
-				if (!strcmp(Names()->at(i)->Name, nameToFind))
+				if (strcmp(Names()->at(i)->Name, nameToFind) == 0)
 				{
 					nameCache.push_back(i);
 					FNameEntryId = i;
@@ -946,22 +946,22 @@ public:
 #ifdef UTF16
 	bool operator==(const FString& other)
 	{
-		return (!wcscmp(ArrayData, other.ArrayData));
+		return (wcscmp(ArrayData, other.ArrayData) == 0);
 	}
 
 	bool operator!=(const FString& other)
 	{
-		return (wcscmp(ArrayData, other.ArrayData));
+		return (wcscmp(ArrayData, other.ArrayData) != 0);
 	}
 #else
 	bool operator==(const FString& other)
 	{
-		return (!strcmp(ArrayData, other.ArrayData));
+		return (strcmp(ArrayData, other.ArrayData) == 0);
 	}
 
 	bool operator!=(const FString& other)
 	{
-		return (strcmp(ArrayData, other.ArrayData));
+		return (strcmp(ArrayData, other.ArrayData) != 0);
 	}
 #endif
 };
