@@ -824,12 +824,12 @@ public:
 
 	bool operator==(const FName& other) const
 	{
-		return (FNameEntryId == other.FNameEntryId);
+		return ((FNameEntryId == other.FNameEntryId) && (InstanceNumber == other.InstanceNumber));
 	}
 
 	bool operator!=(const FName& other) const
 	{
-		return (FNameEntryId != other.FNameEntryId);
+		return !(*this == other);
 	}
 };
 

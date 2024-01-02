@@ -1,5 +1,8 @@
 #pragma once
 /*
+	Changes in v1.0.5
+	- Fixed the "FName" class not checking the instance number for the "==" and "!=" operators.
+
 	Changes in v1.0.4
 	- Fixed the "==" and "!=" operators not working properly for the "FString" class.
 

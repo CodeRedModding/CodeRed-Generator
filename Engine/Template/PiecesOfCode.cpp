@@ -603,12 +603,12 @@ namespace PiecesOfCode
 		"\n"
 		"\tbool operator==(const FName& other) const\n"
 		"\t{\n"
-		"\t\treturn (FNameEntryId == other.FNameEntryId);\n"
+		"\t\treturn return ((FNameEntryId == other.FNameEntryId) && (InstanceNumber == other.InstanceNumber));\n"
 		"\t}\n"
 		"\n"
 		"\tbool operator!=(const FName& other) const\n"
 		"\t{\n"
-		"\t\treturn (FNameEntryId != other.FNameEntryId);\n"
+		"\t\treturn !(*this == other);\n"
 		"\t}\n"
 		"};\n";
 
@@ -733,12 +733,12 @@ namespace PiecesOfCode
 		"\n"
 		"\tbool operator==(const FName& other) const\n"
 		"\t{\n"
-		"\t\treturn (FNameEntryId == other.FNameEntryId);\n"
+		"\t\treturn ((FNameEntryId == other.FNameEntryId) && (InstanceNumber == other.InstanceNumber));\n"
 		"\t}\n"
 		"\n"
 		"\tbool operator!=(const FName& other) const\n"
 		"\t{\n"
-		"\t\treturn (FNameEntryId != other.FNameEntryId);\n"
+		"\t\treturn !(*this == other);\n"
 		"\t}\n"
 		"};\n";
 
