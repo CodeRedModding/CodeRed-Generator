@@ -943,27 +943,23 @@ public:
 		return assign(other.c_str());
 	}
 
+	bool operator==(const FString& other)
+	{
 #ifdef UTF16
-	bool operator==(const FString& other)
-	{
 		return (wcscmp(ArrayData, other.ArrayData) == 0);
-	}
-
-	bool operator!=(const FString& other)
-	{
-		return (wcscmp(ArrayData, other.ArrayData) != 0);
-	}
 #else
-	bool operator==(const FString& other)
-	{
 		return (strcmp(ArrayData, other.ArrayData) == 0);
+#endif
 	}
 
 	bool operator!=(const FString& other)
 	{
+#ifdef UTF16
+		return (wcscmp(ArrayData, other.ArrayData) != 0);
+#else
 		return (strcmp(ArrayData, other.ArrayData) != 0);
-	}
 #endif
+	}
 };
 
 // FScriptDelegate [THIS STRUCT CAN BE GAME SPECIFIC, YOU'LL HAVE TO REVERSE IT BY HAND]

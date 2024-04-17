@@ -10,13 +10,13 @@ namespace Utils
 	bool SortProperty(class UProperty* uPropertyA, class UProperty* uPropertyB);
 	bool SortPropertyPair(const std::pair<class UProperty*, std::string>& pairA, const std::pair<class UProperty*, std::string>& pairB);
 	bool IsStructProperty(EPropertyTypes propertyType);
-	bool IsBitField(EPropertyTypes propertyType);
 	bool IsBitField(uint32_t arrayDim);
+	bool CantMemcpy(EPropertyTypes propertyType);
 
 	std::string CreateValidName(std::string name);
 	std::string CreateUniqueName(class UClass* uClass);
 	std::string CreateUniqueName(class UFunction* uFunction, class UClass* uClass);
-	void CreateWinFunction(std::string& functionName); // Some unreal functions can have the same name as windows macros, this renames some of them.
+	void MakeWinSafe(std::string& functionName);
 }
 
 namespace Retrievers
@@ -29,7 +29,7 @@ namespace Retrievers
 	size_t GetPropertySize(class UProperty* uProperty, bool bIsBitField = true);
 	uintptr_t GetEntryPoint();
 	uintptr_t GetOffset(void* pointer);
-	uintptr_t FindPattern(HMODULE hModule, const uint8_t* pattern, const char* mask);
+	uintptr_t FindPattern(const uint8_t* pattern, const std::string& mask);
 }
 
 namespace ConstGenerator
@@ -97,10 +97,10 @@ namespace Generator
 
 	bool Initialize(bool bCreateLog);
 	void DumpInstances(bool bNames, bool bObjects);
-	void DumpObjects();
-	void DumpNames();
+	void DumpGObjects();
+	void DumpGNames();
 
-	bool AreObjectsValid();
+	bool AreGObjectsValid();
 	bool AreGNamesValid();
 	bool AreGlobalsValid();
 }

@@ -1,4 +1,4 @@
-## CodeRed Generator 3 (v1.0.5)
+## CodeRed Generator 3 (v1.0.6)
 
 This is a C++20 Unreal Engine 3 SDK generator that was originally based off the source of [TheFeckless's UE3 SDK Generator](https://www.unknowncheats.me/forum/unreal-engine-3-a/71911-thefeckless-ue3-sdk-generator.html). It has since grown into its own project which utilizes C++20, strings, filesystem paths, and modern file streams; along with converting legacy UE3 features to more modern and user friendly ones while still being compatible with UE3.
 
@@ -30,7 +30,6 @@ In the `Configuration.hpp` file there are two defines, one is `NO_LOGGING` which
 Any further configuration **MUST BE DONE IN THE `Configuration.cpp` ONLY!** This file contains everything from class alignment, process event settings, global patterns and offsets, your games name and version, and most importantly the directory used for SDK generation.
 
 ![](https://i.imgur.com/q2tFJ7I.png)
-![](https://i.imgur.com/YK4iRMg.png)
 
 ## Generation
 

@@ -276,7 +276,7 @@ std::map<uintptr_t, Member> Member::GetRegistered(EClassTypes type)
 	case EClassTypes::CLASS_UFIELD:
 		returnMembers[RegisteredMembers[EMemberTypes::UFIELD_NEXT].Offset] = RegisteredMembers[EMemberTypes::UFIELD_NEXT];
 
-		if (RegisteredMembers.find(EMemberTypes::UFIELD_SUPERFIELD) != RegisteredMembers.end())
+		if (RegisteredMembers.contains(EMemberTypes::UFIELD_SUPERFIELD))
 		{
 			returnMembers[RegisteredMembers[EMemberTypes::UFIELD_SUPERFIELD].Offset] = RegisteredMembers[EMemberTypes::UFIELD_SUPERFIELD];
 		}
@@ -295,7 +295,7 @@ std::map<uintptr_t, Member> Member::GetRegistered(EClassTypes type)
 		returnMembers[RegisteredMembers[EMemberTypes::UPROPERTY_OFFSET].Offset] = RegisteredMembers[EMemberTypes::UPROPERTY_OFFSET];
 		break;
 	case EClassTypes::CLASS_USTRUCT:
-		if (RegisteredMembers.find(EMemberTypes::USTRUCT_SUPERFIELD) != RegisteredMembers.end())
+		if (RegisteredMembers.contains(EMemberTypes::USTRUCT_SUPERFIELD))
 		{
 			returnMembers[RegisteredMembers[EMemberTypes::USTRUCT_SUPERFIELD].Offset] = RegisteredMembers[EMemberTypes::USTRUCT_SUPERFIELD];
 		}

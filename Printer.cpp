@@ -64,17 +64,29 @@ namespace Printer
         return stream.str();
     }
 
+    std::string ToUpper(std::string str)
+    {
+        std::transform(str.begin(), str.end(), str.begin(), toupper);
+        return str;
+    }
+
+    std::string ToLower(std::string str)
+    {
+        std::transform(str.begin(), str.end(), str.begin(), tolower);
+        return str;
+    }
+
     void Header(std::ostringstream& stream, const std::string& fileName, const std::string& fileExtension, bool bPragmaPush)
     {
         stream << "/*\n";
         stream << "#############################################################################################\n";
-        stream << "# " << Configuration::GameName << " (" << Configuration::GameVersion + ") SDK\n";
-        stream << "# Generated with the " << Engine::GeneratorName << " " << Engine::GeneratorVersion << "\n";
+        stream << "# " << GConfig::GetGameNameLong() << " (" << GConfig::GetGameNameShort() + ") SDK " << GConfig::GetGameVersion() << "\n";
+        stream << "# Generated with the " << GEngine::GetName() << " " << GEngine::GetVersion() << "\n";
         stream << "# ========================================================================================= #\n";
         stream << "# File: " << fileName << "." << fileExtension << "\n";
         stream << "# ========================================================================================= #\n";
-        stream << "# Credits: " << Engine::GeneratorCredits << "\n";
-        stream << "# Links: " << Engine::GeneratorLinks << "\n";
+        stream << "# Credits: " << GEngine::GetCredits() << "\n";
+        stream << "# Links: " << GEngine::GetLinks() << "\n";
         stream << "#############################################################################################\n";
         stream << "*/\n";
 
@@ -84,7 +96,7 @@ namespace Printer
             {
                 stream << "#pragma once\n";
 
-                if (Configuration::UsingConstants)
+                if (GConfig::UsingConstants())
                 {
                     stream << "#include \"../SdkConstants.hpp\"\n";
                 }
@@ -98,7 +110,7 @@ namespace Printer
         if (bPragmaPush)
         {
             stream << "\n#ifdef _MSC_VER\n";
-            stream << "\t#pragma pack(push, 0x" + std::to_string(Configuration::FinalAlignment) + ")\n";
+            stream << "\t#pragma pack(push, " + Hex(GConfig::GetFinalAlignment(), 1) + ")\n";
             stream << "#endif\n";
         }
     }

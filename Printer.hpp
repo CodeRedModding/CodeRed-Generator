@@ -32,6 +32,8 @@ namespace Printer
 	std::string Decimal(uint64_t hex, size_t width);
 	std::string Decimal(uint64_t hex, EWidthTypes width);
 	std::string Precision(float value, size_t precision);
+	std::string ToUpper(std::string str);
+	std::string ToLower(std::string str);
 
 	void Header(std::ostringstream& stream, const std::string& fileName, const std::string& fileExtension, bool bPragmaPush);
 	void Header(std::ofstream& stream, const std::string& fileName, const std::string& fileExtension, bool bPragmaPush);

@@ -6,12 +6,32 @@
 # ========================================================================================= #
 */
 
-namespace Engine
+std::string GEngine::m_name = "CodeRedGenerator";
+
+std::string GEngine::m_version = "v1.0.6";
+
+std::string GEngine::m_credits = "ItsBranK, TheFeckless";
+
+std::string GEngine::m_links = "www.github.com/CodeRedModding/CodeRed-Generator";
+
+const std::string& GEngine::GetName()
 {
-    std::string GeneratorName = "CodeRedGenerator";
-    std::string GeneratorVersion = "v1.0.5";
-    std::string GeneratorCredits = "TheFeckless, ItsBranK";
-    std::string GeneratorLinks = "www.github.com/CodeRedModding/CodeRed-Generator";
+	return m_name;
+}
+
+const std::string& GEngine::GetVersion()
+{
+	return m_version;
+}
+
+const std::string& GEngine::GetCredits()
+{
+	return m_credits;
+}
+
+const std::string& GEngine::GetLinks()
+{
+	return m_links;
 }
 
 /*
