@@ -2497,7 +2497,6 @@ namespace FunctionGenerator
 
 namespace Generator
 {
-    bool GlobalsInitialized = false;
     std::ofstream LogFile;
     std::vector<class UObject*> vPackages{};
     std::vector<class UObject*> vIncludes{};
@@ -2793,7 +2792,7 @@ namespace Generator
 
     bool Initialize(bool bCreateLog)
     {
-        if (!GlobalsInitialized)
+        if (!AreGlobalsValid())
         {
             if (GConfig::UsingOffsets())
             {
@@ -2843,7 +2842,6 @@ namespace Generator
                 UByteProperty::Register_Enum();
                 UBoolProperty::Register_BitMask();
                 UArrayProperty::Register_Inner();
-                GlobalsInitialized = true;
             }
             else
             {
@@ -2852,7 +2850,7 @@ namespace Generator
             }
         }
 
-        if (GlobalsInitialized)
+        if (AreGlobalsValid())
         {
             if (GConfig::HasOutputPath())
             {
@@ -3004,7 +3002,14 @@ namespace Generator
 
     bool AreGlobalsValid()
     {
-        return (AreGObjectsValid() && AreGNamesValid());
+        static bool globalsValid = false;
+
+        if (!globalsValid)
+        {
+            globalsValid = (AreGObjectsValid() && AreGNamesValid());
+        }
+
+        return globalsValid;
     }
 }
 

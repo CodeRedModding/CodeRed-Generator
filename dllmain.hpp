@@ -78,7 +78,6 @@ namespace FunctionGenerator
 
 namespace Generator
 {
-	extern bool GlobalsInitialized;
 	extern std::ofstream LogFile;
 	extern std::vector<class UObject*> vPackages;
 	extern std::vector<class UObject*> vIncludes;
