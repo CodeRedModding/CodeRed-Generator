@@ -47,7 +47,6 @@ namespace EnumGenerator
 
 namespace StructGenerator
 {
-	extern std::vector<std::string> vGeneratedStructs;
 	class UScriptStruct* FindLargestStruct(const std::string& structFullName);
 	void GenerateStructFields(std::ofstream& structStream, EClassTypes structType);
 	void GenerateStruct(std::ofstream& file, class UScriptStruct* scriptStruct);
@@ -57,7 +56,6 @@ namespace StructGenerator
 
 namespace ClassGenerator
 {
-	extern std::unordered_map<std::string, int32_t> mGeneratedClasses;
 	void GenerateClassFields(std::ostringstream& classStream, class UClass* uClass, EClassTypes classType);
 	void GenerateClass(std::ofstream& file, class UClass* uClass);
 	void GenerateClassProperties(std::ofstream& file, class UClass* uClass, class UObject* packageObj);

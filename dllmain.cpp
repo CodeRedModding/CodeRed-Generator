@@ -818,7 +818,7 @@ namespace EnumGenerator
 
 namespace StructGenerator
 {
-    std::vector<std::string> vGeneratedStructs{};
+    static std::vector<std::string> m_generatedStructs;
 
     class UScriptStruct* FindLargestStruct(const std::string& structFullName)
     {
@@ -1222,11 +1222,11 @@ namespace StructGenerator
                 return;
             }
 
-            if (find(vGeneratedStructs.begin(), vGeneratedStructs.end(), structFullName) == vGeneratedStructs.end())
+            if (std::find(m_generatedStructs.begin(), m_generatedStructs.end(), structFullName) == m_generatedStructs.end())
             {
                 scriptStruct = FindLargestStruct(structFullName);
 
-                if (scriptStruct->SuperField && scriptStruct->SuperField != scriptStruct && std::find(vGeneratedStructs.begin(), vGeneratedStructs.end(), (static_cast<UScriptStruct*>(scriptStruct->SuperField))->GetFullName()) == vGeneratedStructs.end())
+                if (scriptStruct->SuperField && scriptStruct->SuperField != scriptStruct && std::find(m_generatedStructs.begin(), m_generatedStructs.end(), (static_cast<UScriptStruct*>(scriptStruct->SuperField))->GetFullName()) == m_generatedStructs.end())
                 {
                     GenerateStructProperties(file, static_cast<UScriptStruct*>(scriptStruct->SuperField), packageObj);
                 }
@@ -1240,7 +1240,7 @@ namespace StructGenerator
                     {
                         UScriptStruct* propertyStruct = static_cast<UScriptStruct*>(static_cast<UStructProperty*>(structChild)->Struct);
 
-                        if (propertyStruct && propertyStruct != scriptStruct && std::find(vGeneratedStructs.begin(), vGeneratedStructs.end(), propertyStruct->GetFullName()) == vGeneratedStructs.end())
+                        if (propertyStruct && propertyStruct != scriptStruct && std::find(m_generatedStructs.begin(), m_generatedStructs.end(), propertyStruct->GetFullName()) == m_generatedStructs.end())
                         {
                             GenerateStructProperties(file, propertyStruct, packageObj);
                         }
@@ -1251,7 +1251,7 @@ namespace StructGenerator
 
                         if (propertyStruct != scriptStruct
                             && Retrievers::GetPropertyType(static_cast<UArrayProperty*>(structChild)->Inner, propertyType) == EPropertyTypes::TYPE_FSTRUCT
-                            && std::find(vGeneratedStructs.begin(), vGeneratedStructs.end(), propertyStruct->GetFullName()) == vGeneratedStructs.end())
+                            && std::find(m_generatedStructs.begin(), m_generatedStructs.end(), propertyStruct->GetFullName()) == m_generatedStructs.end())
                         {
                             GenerateStructProperties(file, propertyStruct, packageObj);
                         }
@@ -1259,7 +1259,7 @@ namespace StructGenerator
                 }
 
                 GenerateStruct(file, scriptStruct);
-                vGeneratedStructs.push_back(structFullName);
+                m_generatedStructs.push_back(structFullName);
             }
         }
     }
@@ -1283,7 +1283,7 @@ namespace StructGenerator
 
 namespace ClassGenerator
 {
-    extern std::unordered_map<std::string, int32_t> mGeneratedClasses{};
+    static std::map<std::string, int32_t> m_generatedClasses;
 
     void GenerateClassFields(std::ostringstream& classStream, class UClass* uClass, EClassTypes classType)
     {
@@ -1745,18 +1745,18 @@ namespace ClassGenerator
 
             if (className.find("Default__") == std::string::npos)
             {
-                if (mGeneratedClasses.find(classFullName) == mGeneratedClasses.end())
+                if (!m_generatedClasses.contains(classFullName))
                 {
-                    if (uClass->SuperField && uClass->SuperField != uClass)
+                    if (uClass->SuperField && (uClass->SuperField != uClass))
                     {
-                        if (mGeneratedClasses.find(uClass->SuperField->GetFullName()) == mGeneratedClasses.end())
+                        if (!m_generatedClasses.contains(uClass->SuperField->GetFullName()))
                         {
                             GenerateClassProperties(file, static_cast<UClass*>(uClass->SuperField), uPackageObj);
                         }
                     }
 
                     GenerateClass(file, uClass);
-                    mGeneratedClasses.emplace(classFullName, uClass->ObjectInternalInteger);
+                    m_generatedClasses[classFullName] = uClass->ObjectInternalInteger;
                 }
             }
         }
@@ -2696,7 +2696,7 @@ namespace Generator
 
                     if (packageObject)
                     {
-                        if (find(vPackages.begin(), vPackages.end(), packageObject) == vPackages.end())
+                        if (std::find(vPackages.begin(), vPackages.end(), packageObject) == vPackages.end())
                         {
                             vPackages.push_back(packageObject);
                             std::string packageName = Utils::CreateValidName(packageObject->GetName());
