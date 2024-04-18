@@ -40,8 +40,6 @@ namespace ConstGenerator
 
 namespace EnumGenerator
 {
-	extern std::unordered_map<std::string, std::vector<class UEnum*>> mEnumCache;
-	extern std::unordered_map<UEnum*, std::string> mGeneratedNames;
 	std::string GenerateEnumName(class UEnum* uEnum);
 	void GenerateEnum(std::ofstream& file, class UEnum* uEnum);
 	void ProcessEnums(std::ofstream& file, class UObject* packageObj);

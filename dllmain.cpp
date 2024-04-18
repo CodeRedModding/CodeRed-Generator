@@ -579,12 +579,10 @@ namespace Retrievers
 
 namespace ConstGenerator
 {
+    static std::multimap<std::string, std::string> m_generatedConsts;
+
     void GenerateConst(std::ofstream& file, class UConst* constant)
     {
-        std::ostringstream constStream;
-        std::ostringstream valueStream;
-
-        static std::multimap<std::string, std::string> nameValueMap;
         std::string constName = Utils::CreateValidName(constant->GetName());
 
         if (constName.find("Default__") == std::string::npos)
@@ -602,20 +600,18 @@ namespace ConstGenerator
             }
 #endif
             std::string constValue = constant->Value.ToString();
-            size_t mapSize = nameValueMap.count(constName);
+            size_t mapSize = m_generatedConsts.count(constName);
 
             if (mapSize == 0)
             {
-                nameValueMap.insert(std::make_pair(constName, constValue));
-
+                m_generatedConsts.insert({ constName, constValue });
                 file << "#define CONST_" << constName;
                 Printer::FillLeft(file, ' ', (GConfig::GetConstSpacing() - constName.length()));
                 file << " " << constValue << "\n";
             }
-            else if (!Utils::MapExists(nameValueMap, constName, constValue))
+            else if (!Utils::MapExists(m_generatedConsts, constName, constValue))
             {
-                nameValueMap.insert(std::make_pair(constName, constValue));
-
+                m_generatedConsts.insert({ constName, constValue });
                 file << "#define CONST_" << constName << Printer::Decimal(mapSize, EWidthTypes::BYTE);
                 Printer::FillLeft(file, ' ', (GConfig::GetConstSpacing() - constName.length()));
                 file << " " << constValue << "\n";
@@ -642,8 +638,8 @@ namespace ConstGenerator
 
 namespace EnumGenerator
 {
-    std::unordered_map<std::string, std::vector<class UEnum*>> m_enumCache{};
-    std::unordered_map<class UEnum*, std::string> m_enumNames{};
+    static std::map<std::string, std::vector<class UEnum*>> m_enumCache;
+    static std::map<class UEnum*, std::string> m_generatedNames;
 
     std::string GenerateEnumName(class UEnum* uEnum)
     {
@@ -656,7 +652,7 @@ namespace EnumGenerator
                     UEnum* newEnum = static_cast<UEnum*>(uObject);
                     std::string enumName = Utils::CreateValidName(newEnum->GetName());
 
-                    if (m_enumCache.find(enumName) == m_enumCache.end())
+                    if (!m_enumCache.contains(enumName))
                     {
                         m_enumCache[enumName] = { newEnum };
                     }
@@ -670,15 +666,15 @@ namespace EnumGenerator
 
         if (uEnum)
         {
-            if (m_enumNames.find(uEnum) == m_enumNames.end())
+            if (!m_generatedNames.contains(uEnum))
             {
                 std::string enumName = Utils::CreateValidName(uEnum->GetName());
 
-                if (m_enumCache.find(enumName) != m_enumCache.end())
+                if (m_enumCache.contains(enumName))
                 {
                     if (m_enumCache[enumName].size() > 1)
                     {
-                        uint32_t index = 0;
+                        size_t index = 0;
 
                         for (UEnum* cachedEnum : m_enumCache[enumName])
                         {
@@ -704,10 +700,10 @@ namespace EnumGenerator
                     enumName = ("E" + enumName);
                 }
 
-                m_enumNames[uEnum] = enumName;
+                m_generatedNames[uEnum] = enumName;
             }
 
-            return m_enumNames[uEnum];
+            return m_generatedNames[uEnum];
         }
 
         return "UnknownName";
