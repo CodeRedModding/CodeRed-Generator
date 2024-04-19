@@ -1,3 +1,4 @@
+
 ## CodeRed Generator 3 (v1.0.6)
 
 This is a C++20 Unreal Engine 3 SDK generator that was originally based off the source of [TheFeckless's UE3 SDK Generator](https://www.unknowncheats.me/forum/unreal-engine-3-a/71911-thefeckless-ue3-sdk-generator.html). It has since grown into its own project which utilizes C++20, strings, filesystem paths, and modern file streams; along with converting legacy UE3 features to more modern and user friendly ones while still being compatible with UE3.
@@ -55,3 +56,27 @@ Here is an example what it should look like:
 #include "SDK_HEADERS\Engine_parameters.hpp"
 ...etc...
 ```
+## Changelog
+
+### v1.0.6
+- This update will break your previous configuration files, as I've reformatted them entirely! Remember that before just copy pasting files. I'm in the process of remaking a lot of stuff and this is just the first step.
+- Changed the namespaces in "Engine.hpp/cpp" as well as in "Configuration.hpp/cpp" to store their variables in classes as opposed to externs.
+- Got rid of the "EAlignment" enum in "Configuration.hpp", it was just to serve as an example but it could be confusing to new people.
+- Fixed the process event index still being used even if you had the boolean set to false.
+- Internal improvements to naming standards and code organization.
+
+### v1.0.5
+- Fixed some incorrect operators being printed from "PiecesOfCode.cpp".
+
+### v1.0.4
+- Fixed the "==" and "!=" operators not working properly for the "FString" class.
+
+### v1.0.3
+- All function parameters that don't have out/return flags on them will be const references now, to avoid unnecessary copying of data.
+
+### v1.0.2
+- Added a bool option called "UsingWindows" in the template "Configuration.cpp" file, when set to true it will include "Windows.h" along with removing windows macro functions from unreal ones. Note that this only makes changes in the final generated sdk.
+- Decided to replace the "ZeroMemory" macro with use memset instead, "ZeroMemory" calls this anyway.
+
+### v1.0.1
+- Added an include for "Windows.h" in the generated "GameDefines.hpp" file, this is needed for the "ZeroMemory" maco.
