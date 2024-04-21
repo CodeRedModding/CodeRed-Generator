@@ -967,7 +967,7 @@ struct FQWord
 // Comment this out if "SuperField" is located in UField instead of UStruct!
 #define SUPERFIELDS_IN_UFIELD
 
-// Commenting this out will disabling using the "MinAlignment" field in UStruct, it is recommended you keep this commented.
+// Uncommenting this will disabling using the "MinAlignment" field in UStruct, it is recommended you keep this commented.
 //#define SKIP_MIN_ALIGNMENT
 
 // Class Core.Object

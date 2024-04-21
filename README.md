@@ -42,7 +42,7 @@ Once you have your custom engine folder setup, all that's left is to fill out yo
 
 Any class/struct member outside of whats in the `EMemberTypes` does NOT need to be registered with the `REGISTER_MEMBER` macro, so feel free to place padding or buffers in between.
 
-![](https://i.imgur.com/gbYgLoZ.png)
+![](https://i.imgur.com/k9vawPv.png)
 
 Once all your classes are filled out and you've made the necessary changes in `Configuration.cpp`, double check you didn't forget to set an out path in `Configuration.cpp` and have the right files included in `Engine.hpp`. After that just compile as a DLL and manually inject into your game, generation will start automatically and will prompt you when it is completed.
 
