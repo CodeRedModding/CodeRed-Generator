@@ -1225,7 +1225,7 @@ namespace StructGenerator
                 lastOffset += missedOffset;
             }
 
-#ifdef SKIP_MIN_ALIGNMENT
+#ifndef SKIP_MIN_ALIGNMENT
             if (scriptStruct->MinAlignment)
             {
                 int32_t actualSize = 0;
