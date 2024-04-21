@@ -83,11 +83,11 @@ uint32_t GConfig::m_gameAlignment = 0x4;
 uint32_t GConfig::m_finalAlignment = 0x4;
 
 // Names of classes or structs you don't want generated in the final sdk.
-std::vector<std::string> GConfig::m_blacklistedTypes = { "Pointer", "QWord", "ScriptDelegate" };
+std::vector<std::string> GConfig::m_blacklistedTypes = { "FPointer", "FQWord", "FScriptDelegate" };
 
 // Names of classes or structs you want to override with your own custom one.
 std::map<std::string, std::string> GConfig::m_typeOverrides = {
-    { "ExampleStruct", PiecesOfTypes::Example_Struct }
+    { "FExampleStruct", PiecesOfTypes::Example_Struct }
 };
 
 bool GConfig::UsingWindows()
