@@ -1,4 +1,5 @@
 #include "Configuration.hpp"
+#include "PiecesOfCode.hpp"
 
 /*
 # ========================================================================================= #
@@ -81,6 +82,14 @@ uint32_t GConfig::m_gameAlignment = 0x4;
 // Forced alignment used in the final sdk.
 uint32_t GConfig::m_finalAlignment = 0x4;
 
+// Names of classes or structs you don't want generated in the final sdk.
+std::vector<std::string> GConfig::m_blacklistedTypes = { "FPointer", "FQWord", "FScriptDelegate" };
+
+// Names of classes or structs you want to override with your own custom one.
+std::map<std::string, std::string> GConfig::m_typeOverrides = {
+    { "ExampleStruct", PiecesOfTypes::Example_Struct }
+};
+
 bool GConfig::UsingWindows()
 {
     return m_useWindows;
@@ -124,6 +133,36 @@ uint32_t GConfig::GetGameAlignment()
 uint32_t GConfig::GetFinalAlignment()
 {
     return m_finalAlignment;
+}
+
+bool GConfig::IsTypeBlacklisted(const std::string& name)
+{
+    if (!m_blacklistedTypes.empty() && !name.empty())
+    {
+        return (std::find(m_blacklistedTypes.begin(), m_blacklistedTypes.end(), name) != m_blacklistedTypes.end());
+    }
+
+    return false;
+}
+
+bool GConfig::IsTypeOveridden(const std::string& name)
+{
+    if (!name.empty())
+    {
+        return m_typeOverrides.contains(name);
+    }
+
+    return false;
+}
+
+std::string GConfig::GetTypeOverride(const std::string& name)
+{
+    if (IsTypeOveridden(name))
+    {
+        return m_typeOverrides[name];
+    }
+
+    return "";
 }
 
 /*

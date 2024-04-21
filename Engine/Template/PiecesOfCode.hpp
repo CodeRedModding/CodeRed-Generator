@@ -30,6 +30,13 @@ namespace PiecesOfCode
 	extern const std::string EEnumFlags;
 }
 
+// Here's where you can store your custom type overrides for your custom configuration file.
+
+namespace PiecesOfTypes
+{
+	extern const std::string Example_Struct;
+}
+
 /*
 # ========================================================================================= #
 #

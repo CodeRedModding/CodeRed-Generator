@@ -138,7 +138,6 @@
     <ClCompile Include="Printer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Changelog.hpp" />
     <ClInclude Include="dllmain.hpp" />
     <ClInclude Include="Engine\Engine.hpp" />
     <ClInclude Include="Engine\Template\Configuration.hpp" />

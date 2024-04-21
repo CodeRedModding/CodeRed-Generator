@@ -5,7 +5,10 @@
 
 namespace Utils
 {
-	void Messagebox(const std::string& message, uint32_t flags);
+	void MessageboxInfo(const std::string& message);
+	void MessageboxWarn(const std::string& message);
+	void MessageboxError(const std::string& message);
+
 	bool MapExists(std::multimap<std::string, std::string>& map, const std::string& key, const std::string& value);
 	bool SortProperty(class UProperty* uPropertyA, class UProperty* uPropertyB);
 	bool SortPropertyPair(const std::pair<class UProperty*, std::string>& pairA, const std::pair<class UProperty*, std::string>& pairB);
@@ -81,7 +84,6 @@ namespace Generator
 	extern std::ofstream LogFile;
 	extern std::vector<class UObject*> vPackages;
 	extern std::vector<class UObject*> vIncludes;
-	extern std::vector<std::pair<std::string, int32_t>> vConstants;
 
 	std::string GenerateIndex(class UObject* uObject, bool bPushBack = true);
 	void GenerateConstants();

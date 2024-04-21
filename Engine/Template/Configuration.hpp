@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <string>
 #include <filesystem>
 
@@ -44,6 +45,8 @@ private: // Generator Settings
 	static std::string m_enumClassType;
 	static uint32_t m_gameAlignment;
 	static uint32_t m_finalAlignment;
+	static std::vector<std::string> m_blacklistedTypes;
+	static std::map<std::string, std::string> m_typeOverrides;
 
 public:
 	static bool UsingWindows();
@@ -55,6 +58,9 @@ public:
 	static const std::string& GetEnumClassType();
 	static uint32_t GetGameAlignment();
 	static uint32_t GetFinalAlignment();
+	static bool IsTypeBlacklisted(const std::string& name);
+	static bool IsTypeOveridden(const std::string& name);
+	static std::string GetTypeOverride(const std::string& name);
 
 private: // Process Event
 	static bool m_useIndex;

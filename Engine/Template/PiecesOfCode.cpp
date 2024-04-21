@@ -410,13 +410,13 @@ namespace PiecesOfCode
 		"};\n";
 
 	const std::string FNameEntry_Struct = 
-		"struct FNameEntry\n"
+		"class FNameEntry\n"
 		"{\n"
 		"public:";
 
 	const std::string FNameEntry_Struct_UTF16 =
 		"\npublic:\n"
-		"\tFNameEntry() : Flags(0), Index(-1) {}\n"
+		"\tFNameEntry() : Flags(0), Index(-1), HashNext(nullptr)\n"
 		"\t~FNameEntry() {}\n"
 		"\n"
 		"public:\n"
@@ -456,7 +456,7 @@ namespace PiecesOfCode
 
 	const std::string FNameEntry_Struct_UTF8 =
 		"\npublic:\n"
-		"\tFNameEntry() : Flags(0), Index(-1) {}\n"
+		"\tFNameEntry() : FNameEntry() : Flags(0), Index(-1), HashNext(nullptr) {}\n"
 		"\t~FNameEntry() {}\n"
 		"\n"
 		"public:\n"
@@ -482,7 +482,7 @@ namespace PiecesOfCode
 		"};\n";
 
 	const std::string FName_Struct_UTF16 =
-		"struct FName\n"
+		"class FName\n"
 		"{\n"
 		"public:\n"
 		"\tusing ElementType = const wchar_t;\n"
@@ -613,7 +613,7 @@ namespace PiecesOfCode
 		"};\n";
 
 	const std::string FName_Struct_UTF8 =
-		"struct FName\n"
+		"class FName\n"
 		"{\n"
 		"public:\n"
 		"\tusing ElementType = const char;\n"
@@ -1293,6 +1293,18 @@ namespace PiecesOfCode
 		"\tRF_Dynamic =\t\t\t\t\t\t\t0x04000000,\n"
 		"\tRF_WillBeLoaded =\t\t\t\t\t\t0x08000000,\n"
 		"};\n";
+}
+
+namespace PiecesOfTypes
+{
+	const std::string Example_Struct =
+		"struct FExampleStruct\n"
+		"{\n"
+		"\tstruct FQuat Quaternion;\n"
+		"\tstruct FVector Location;\n"
+		"\tstruct FVector LinearVelocity;\n"
+		"\tstruct FVector AngularVelocity;\n"
+		"};\n\n";
 }
 
 /*

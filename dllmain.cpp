@@ -2,9 +2,26 @@
 
 namespace Utils
 {
-    void Messagebox(const std::string& message, uint32_t flags)
+    void MessageboxExt(const std::string& message, uint32_t flags)
     {
+#ifdef _WIN32
         MessageBoxA(NULL, message.c_str(), GEngine::GetName().c_str(), flags);
+#endif
+    }
+
+    void MessageboxInfo(const std::string& message)
+    {
+        MessageboxExt(message, (MB_OK | MB_ICONINFORMATION));
+    }
+
+    void MessageboxWarn(const std::string& message)
+    {
+        MessageboxExt(message, (MB_OK | MB_ICONWARNING));
+    }
+
+    void MessageboxError(const std::string& message)
+    {
+        MessageboxExt(message, (MB_OK | MB_ICONERROR));
     }
 
     bool MapExists(std::multimap<std::string, std::string>& map, const std::string& key, const std::string& value)
@@ -40,14 +57,13 @@ namespace Utils
 
     bool IsStructProperty(EPropertyTypes propertyType)
     {
-        return ((propertyType == EPropertyTypes::TYPE_TARRAY)
-            || (propertyType == EPropertyTypes::TYPE_TMAP)
-            || (propertyType == EPropertyTypes::TYPE_FNAMEENTRY)
-            || (propertyType == EPropertyTypes::TYPE_FNAME)
-            || (propertyType == EPropertyTypes::TYPE_FSTRING)
-            || (propertyType == EPropertyTypes::TYPE_FSCRIPTDELEGATE)
-            || (propertyType == EPropertyTypes::TYPE_FPOINTER)
-            || (propertyType == EPropertyTypes::TYPE_FSTRUCT));
+        return ((propertyType == EPropertyTypes::TArray)
+            || (propertyType == EPropertyTypes::TMap)
+            || (propertyType == EPropertyTypes::FName)
+            || (propertyType == EPropertyTypes::FString)
+            || (propertyType == EPropertyTypes::FScriptDelegate)
+            || (propertyType == EPropertyTypes::FPointer)
+            || (propertyType == EPropertyTypes::FStruct));
     }
 
     bool IsBitField(uint32_t arrayDim)
@@ -57,9 +73,7 @@ namespace Utils
 
     bool CantMemcpy(EPropertyTypes propertyType)
     {
-        return ((propertyType == EPropertyTypes::TYPE_LONG)
-            || (propertyType == EPropertyTypes::TYPE_ULONG)
-            || (propertyType == EPropertyTypes::TYPE_BOOL));
+        return (propertyType == EPropertyTypes::Bool);
     }
 
     std::string CreateValidName(std::string name)
@@ -286,7 +300,7 @@ namespace Retrievers
                         outPropertyType = ("const " + outPropertyType + "&");
                     }
 
-                    return EPropertyTypes::TYPE_FSTRUCT;
+                    return EPropertyTypes::FStruct;
                 }
             }
             else if (uProperty->IsA<UStrProperty>())
@@ -298,12 +312,12 @@ namespace Retrievers
                     outPropertyType = ("const " + outPropertyType + "&");
                 }
 
-                return EPropertyTypes::TYPE_FSTRING;
+                return EPropertyTypes::FString;
             }
             else if (uProperty->IsA<UQWordProperty>())
             {
                 outPropertyType = "uint64_t";
-                return EPropertyTypes::TYPE_UINT64;
+                return EPropertyTypes::UInt64;
             }
             else if (uProperty->IsA<UObjectProperty>())
             {
@@ -312,7 +326,7 @@ namespace Retrievers
                 if (objectProperty && objectProperty->PropertyClass)
                 {
                     outPropertyType = ("class " + Utils::CreateValidName(objectProperty->PropertyClass->GetNameCPP()) + "*");
-                    return EPropertyTypes::TYPE_UPOINTER;
+                    return EPropertyTypes::UPointer;
                 }
             }
             else if (uProperty->IsA<UClassProperty>())
@@ -322,7 +336,7 @@ namespace Retrievers
                 if (classProperty && classProperty->MetaClass)
                 {
                     outPropertyType = ("class " + Utils::CreateValidName(classProperty->MetaClass->GetNameCPP()) + "*");
-                    return EPropertyTypes::TYPE_UPOINTER;
+                    return EPropertyTypes::UPointer;
                 }
             }
             else if (uProperty->IsA<UNameProperty>())
@@ -334,7 +348,7 @@ namespace Retrievers
                     outPropertyType = ("const " + outPropertyType + "&");
                 }
 
-                return EPropertyTypes::TYPE_FNAME;
+                return EPropertyTypes::FName;
             }
             else if (uProperty->IsA<UMapProperty>())
             {
@@ -343,7 +357,7 @@ namespace Retrievers
 
                 if (mapProperty && mapProperty->Key && mapProperty->Value)
                 {
-                    if (GetPropertyTypeInternal(mapProperty->Key, mapKey, bIgnoreEnum, false, bIsBitField) != EPropertyTypes::TYPE_UNKNOWN && GetPropertyTypeInternal(mapProperty->Value, mapValue, bIgnoreEnum, bDescription, bIsBitField) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (GetPropertyTypeInternal(mapProperty->Key, mapKey, bIgnoreEnum, false, bIsBitField) != EPropertyTypes::Unknown && GetPropertyTypeInternal(mapProperty->Value, mapValue, bIgnoreEnum, bDescription, bIsBitField) != EPropertyTypes::Unknown)
                     {
                         outPropertyType = ("class TMap<" + mapKey + ", " + mapValue + ">");
 
@@ -352,14 +366,14 @@ namespace Retrievers
                             outPropertyType = ("const " + outPropertyType + "&");
                         }
 
-                        return EPropertyTypes::TYPE_TMAP;
+                        return EPropertyTypes::TMap;
                     }
                 }
             }
             else if (uProperty->IsA<UIntProperty>())
             {
                 outPropertyType = "int32_t";
-                return EPropertyTypes::TYPE_INT32;
+                return EPropertyTypes::Int32;
             }
             else if (uProperty->IsA<UInterfaceProperty>())
             {
@@ -368,13 +382,13 @@ namespace Retrievers
                 if (interfaceProperty && interfaceProperty->InterfaceClass)
                 {
                     outPropertyType = ("class " + Utils::CreateValidName(interfaceProperty->InterfaceClass->GetNameCPP()) + "*");
-                    return EPropertyTypes::TYPE_UPOINTER;
+                    return EPropertyTypes::UPointer;
                 }
             }
             else if (uProperty->IsA<UFloatProperty>())
             {
                 outPropertyType = "float";
-                return EPropertyTypes::TYPE_FLOAT;
+                return EPropertyTypes::Float;
             }
             else if (uProperty->IsA<UDelegateProperty>())
             {
@@ -385,7 +399,7 @@ namespace Retrievers
                     outPropertyType = ("const " + outPropertyType + "&");
                 }
 
-                return EPropertyTypes::TYPE_FSCRIPTDELEGATE;
+                return EPropertyTypes::FScriptDelegate;
             }
             else if (uProperty->IsA<UByteProperty>())
             {
@@ -396,23 +410,23 @@ namespace Retrievers
                     if (byteProperty && byteProperty->Enum)
                     {
                         outPropertyType = EnumGenerator::GenerateEnumName(byteProperty->Enum);
-                        return EPropertyTypes::TYPE_UINT8;
+                        return EPropertyTypes::UInt8;
                     }
                 }
 
                 outPropertyType = "uint8_t";
-                return EPropertyTypes::TYPE_UINT8;
+                return EPropertyTypes::UInt8;
             }
             else if (uProperty->IsA<UBoolProperty>())
             {
                 if (bIsBitField)
                 {
                     outPropertyType = "uint32_t";
-                    return EPropertyTypes::TYPE_UINT32;
+                    return EPropertyTypes::UInt32;
                 }
 
                 outPropertyType = "bool";
-                return EPropertyTypes::TYPE_BOOL;
+                return EPropertyTypes::Bool;
             }
             else if (uProperty->IsA<UArrayProperty>())
             {
@@ -422,7 +436,7 @@ namespace Retrievers
                 {
                     std::string innerProperty;
 
-                    if (GetPropertyTypeInternal(arrayProperty->Inner, innerProperty, bIgnoreEnum, false, bIsBitField) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (GetPropertyTypeInternal(arrayProperty->Inner, innerProperty, bIgnoreEnum, false, bIsBitField) != EPropertyTypes::Unknown)
                     {
                         outPropertyType = ("class TArray<" + innerProperty + ">");
 
@@ -431,13 +445,13 @@ namespace Retrievers
                             outPropertyType = ("const " + outPropertyType + "&");
                         }
 
-                        return EPropertyTypes::TYPE_TARRAY;
+                        return EPropertyTypes::TArray;
                     }
                 }
             }
         }
 
-        return EPropertyTypes::TYPE_UNKNOWN;
+        return EPropertyTypes::Unknown;
     }
 
     EPropertyTypes GetPropertyTypeDesc(class UProperty* uProperty, std::string& outPropertyType, bool bIsBitField)
@@ -780,7 +794,7 @@ namespace EnumGenerator
 
                 enumStream << "\t";
                 Printer::FillLeft(enumStream, ' ', GConfig::GetEnumSpacing());
-                enumStream << propertyStream.str() << " = " << std::to_string(i);
+                enumStream << propertyStream.str() << " = " << i;
 
                 if (i != lastName)
                 {
@@ -847,27 +861,51 @@ namespace StructGenerator
 
     void GenerateStructFields(std::ofstream& structStream, EClassTypes structType)
     {
-        std::ostringstream propertyStream;
-
-        size_t localSize = 0;
-        size_t startOffset = 0;
-        size_t missedOffset = 0;
-        size_t lastOffset = 0;
-
-        localSize = Member::GetClassSize(structType);
-        startOffset = Member::GetClassOffset(structType);
-        std::map<uintptr_t, Member> members = Member::GetRegistered(structType);
-
-        if (!members.empty())
+        if (structType != EClassTypes::Unknown)
         {
-            lastOffset = startOffset;
-            int32_t unknownDataIndex = 0;
+            std::ostringstream propertyStream;
 
-            for (const auto& member : members)
+            size_t localSize = 0;
+            size_t startOffset = 0;
+            size_t missedOffset = 0;
+            size_t lastOffset = 0;
+
+            localSize = Member::GetClassSize(structType);
+            startOffset = Member::GetClassOffset(structType);
+            std::map<uintptr_t, Member*> members = Member::GetRegistered(structType);
+
+            if (!members.empty())
             {
-                if ((lastOffset + member.second.Size) < member.second.Offset)
+                lastOffset = startOffset;
+                int32_t unknownDataIndex = 0;
+
+                for (const auto& member : members)
                 {
-                    missedOffset = (member.second.Offset - lastOffset);
+                    if ((lastOffset + member.second->Size) < member.second->Offset)
+                    {
+                        missedOffset = (member.second->Offset - lastOffset);
+
+                        if (missedOffset >= GConfig::GetGameAlignment())
+                        {
+                            propertyStream << "\tuint8_t UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
+                            propertyStream << "[" << Printer::Hex(missedOffset, EWidthTypes::NONE) << "];";
+
+                            structStream << propertyStream.str() << " // " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
+                            structStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") DYNAMIC FIELD PADDING\n";
+                            Printer::Empty(propertyStream);
+
+                            unknownDataIndex++;
+                        }
+                    }
+
+                    structStream << "\t" << member.second->Label << " // " << Printer::Hex(member.second->Offset, EWidthTypes::SIZE);
+                    structStream << " (" << Printer::Hex(member.second->Size, EWidthTypes::SIZE) << ")\n";
+                    lastOffset = (member.second->Offset + member.second->Size);
+                }
+
+                if ((structType != EClassTypes::FNameEntry) && (lastOffset < localSize))
+                {
+                    missedOffset = (localSize - lastOffset);
 
                     if (missedOffset >= GConfig::GetGameAlignment())
                     {
@@ -876,37 +914,16 @@ namespace StructGenerator
 
                         structStream << propertyStream.str() << " // " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
                         structStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") DYNAMIC FIELD PADDING\n";
-                        Printer::Empty(propertyStream);
-
-                        unknownDataIndex++;
                     }
                 }
-
-                structStream << "\t" << member.second.Label << " // " << Printer::Hex(member.second.Offset, EWidthTypes::SIZE);
-                structStream << " (" << Printer::Hex(member.second.Size, EWidthTypes::SIZE) << ")\n";
-                lastOffset = (member.second.Offset + member.second.Size);
             }
-
-            if ((structType != EClassTypes::STRUCT_FNAMEENTRY) && (lastOffset < localSize))
+            else
             {
-                missedOffset = (localSize - lastOffset);
-
-                if (missedOffset >= GConfig::GetGameAlignment())
-                {
-                    propertyStream << "\tuint8_t UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
-                    propertyStream << "[" << Printer::Hex(missedOffset, EWidthTypes::NONE) << "];";
-
-                    structStream << propertyStream.str() << " // " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
-                    structStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") DYNAMIC FIELD PADDING\n";
-                }
-            }
-        }
-        else
-        {
 #ifndef NO_LOGGING
-            Generator::LogFile << "Error: No registered members found for class type \"" << std::to_string(static_cast<int32_t>(structType)) << "\"\n";
+                Generator::LogFile << "Error: No registered members found for struct type \"" << Member::GetName(structType) << "\"\n";
 #endif
-            Utils::Messagebox("Error: No registered members found for class type \"" + std::to_string(static_cast<int32_t>(structType)) + "\"!", (MB_OK | MB_ICONERROR));
+                Utils::MessageboxError("Error: No registered members found for struct type \"" + Member::GetName(structType) + "\"!");
+            }
         }
     }
 
@@ -921,10 +938,11 @@ namespace StructGenerator
         std::string structNameCPP = Utils::CreateValidName(scriptStruct->GetNameCPP());
         std::string structOuterNameCPP = Utils::CreateValidName(scriptStruct->Outer->GetNameCPP());
 
-        if (structNameCPP == "FPointer" || structNameCPP == "FQWord")
+        if (GConfig::IsTypeBlacklisted(structNameCPP))
         {
             return;
         }
+
 #ifndef NO_LOGGING
         if (Generator::LogFile.is_open())
         {
@@ -937,273 +955,312 @@ namespace StructGenerator
             Generator::LogFile << " - Instance: " << Printer::Hex(scriptStruct) << std::endl;
         }
 #endif
+
         structStream << "// " << structFullName << "\n";
 
-        size_t size = 0;
-        size_t lastOffset = 0;
-        size_t missedOffset = 0;
-
-        UScriptStruct* superField = static_cast<UScriptStruct*>(scriptStruct->SuperField);
-        uint32_t structCount = UObject::CountObject<UScriptStruct>(structName);
-
-        if (superField && superField != scriptStruct)
+        if (!GConfig::IsTypeOveridden(structNameCPP))
         {
-            size = scriptStruct->PropertySize - superField->PropertySize;
-            lastOffset = superField->PropertySize;
+            size_t size = 0;
+            size_t lastOffset = 0;
+            size_t missedOffset = 0;
 
-            std::string fieldName = Utils::CreateValidName(superField->GetName());
-            std::string fieldNameCPP = Utils::CreateValidName(superField->GetNameCPP());
-            std::string fieldOuterNameCPP = Utils::CreateValidName(superField->Outer->GetNameCPP());
+            UScriptStruct* superField = static_cast<UScriptStruct*>(scriptStruct->SuperField);
+            uint32_t structCount = UObject::CountObject<UScriptStruct>(structName);
 
-            uint32_t fieldStructCount = UObject::CountObject<UScriptStruct>(fieldName);
-
-            structStream << "// " << Printer::Hex(size, EWidthTypes::SIZE);
-            structStream << " (" << Printer::Hex(superField->PropertySize, EWidthTypes::SIZE);
-            structStream << " - " << Printer::Hex(scriptStruct->PropertySize, EWidthTypes::SIZE);
-            structStream << ")\n";
-
-            if (structCount > 1)
+            if (superField && superField != scriptStruct)
             {
-                structStream << "struct " << structOuterNameCPP << "_" << structNameCPP << " : ";
-            }
-            else
-            {
-                structStream << "struct " << structNameCPP << " : ";
-            }
+                size = scriptStruct->PropertySize - superField->PropertySize;
+                lastOffset = superField->PropertySize;
 
-            if (fieldStructCount > 1)
-            {
-                structStream << fieldOuterNameCPP << "_" << fieldNameCPP << "\n";
-            }
-            else
-            {
-                structStream << fieldNameCPP << "\n";
-            }
-        }
-        else
-        {
-            size = scriptStruct->PropertySize;
-            structStream << "// " << Printer::Hex(size, EWidthTypes::SIZE) << "\n";
+                std::string fieldName = Utils::CreateValidName(superField->GetName());
+                std::string fieldNameCPP = Utils::CreateValidName(superField->GetNameCPP());
+                std::string fieldOuterNameCPP = Utils::CreateValidName(superField->Outer->GetNameCPP());
 
-            if (structCount > 1)
-            {
-                structStream << "struct " << structOuterNameCPP << "_" << structNameCPP << "\n";
-            }
-            else
-            {
-                structStream << "struct " << structNameCPP << "\n";
-            }
-        }
+                uint32_t fieldStructCount = UObject::CountObject<UScriptStruct>(fieldName);
 
-        structStream << "{\n";
-        std::vector<UProperty*> structProperties;
+                structStream << "// " << Printer::Hex(size, EWidthTypes::SIZE);
+                structStream << " (" << Printer::Hex(superField->PropertySize, EWidthTypes::SIZE);
+                structStream << " - " << Printer::Hex(scriptStruct->PropertySize, EWidthTypes::SIZE);
+                structStream << ")\n";
 
-        for (UProperty* uProperty = static_cast<UProperty*>(scriptStruct->Children); uProperty; uProperty = static_cast<UProperty*>(uProperty->Next))
-        {
-            if ((uProperty->ElementSize > 0) && !uProperty->IsA<UScriptStruct>())
-            {
-                structProperties.push_back(uProperty);
-            }
-        }
-
-        std::sort(structProperties.begin(), structProperties.end(), Utils::SortProperty);
-        std::map<std::string, uint32_t> propertyNameMap;
-        uint32_t unknownDataIndex = 0;
-
-        for (UProperty* uProperty : structProperties)
-        {
-            if (uProperty)
-            {
-                if (lastOffset < uProperty->Offset)
+                if (structCount > 1)
                 {
-                    missedOffset = (uProperty->Offset - lastOffset);
-
-                    if (missedOffset >= GConfig::GetGameAlignment())
-                    {
-                        propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
-                        propertyStream << "[" << Printer::Hex(missedOffset, EWidthTypes::NONE) << "];";
-
-                        structStream << "\t";
-                        Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
-                        structStream << "uint8_t ";
-                        Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
-                        structStream << propertyStream.str() << "\t\t// " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
-                        structStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") MISSED OFFSET\n";
-                        Printer::Empty(propertyStream);
-
-                        unknownDataIndex++;
-                    }
-                }
-
-                std::string propertyType;
-
-                if (Retrievers::GetPropertyTypeInternal(uProperty, propertyType, true, false, true) != EPropertyTypes::TYPE_UNKNOWN)
-                {
-                    size_t correctElementSize = Retrievers::GetPropertySize(uProperty);
-                    std::string propertyName = Utils::CreateValidName(uProperty->GetName());
-
-                    if (propertyNameMap.count(propertyName) == 0)
-                    {
-                        propertyNameMap[propertyName] = 1;
-                        propertyStream << propertyName;
-                    }
-                    else
-                    {
-                        propertyStream << propertyName << Printer::Decimal(propertyNameMap[propertyName], EWidthTypes::BYTE);
-                        propertyNameMap[propertyName]++;
-                    }
-
-                    if (uProperty->ArrayDim > 1)
-                    {
-                        if (!uProperty->IsA<UInterfaceProperty>())
-                        {
-                            propertyStream << "[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "]";
-                        }
-
-                        correctElementSize *= uProperty->ArrayDim;
-                    }
-
-                    if (uProperty->IsA<UBoolProperty>())
-                    {
-                        propertyStream << " : 1";
-                    }
-
-                    Retrievers::GetAllPropertyFlags(flagStream, uProperty->PropertyFlags);
-                    int32_t offsetError = ((uProperty->ElementSize * uProperty->ArrayDim) - (correctElementSize * uProperty->ArrayDim));
-
-                    if (uProperty->IsA<UInterfaceProperty>())
-                    {
-                        size_t interfaceSize = Retrievers::GetPropertySize(uProperty);
-
-                        if (offsetError == interfaceSize)
-                        {
-                            offsetError -= interfaceSize;
-                        }
-
-                        structStream << "\t";
-                        Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
-                        structStream << propertyType << " " << propertyStream.str();
-
-                        if (uProperty->ArrayDim > 1)
-                        {
-                            structStream << "_Object[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "];";
-                        }
-                        else
-                        {
-                            structStream << "_Object;";
-                        }
-
-                        Printer::FillRight(structStream, ' ', GConfig::GetStructSpacing() - (propertyStream.str().size() + 8));
-                        structStream << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
-                        structStream << " (" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE) << ")";
-                        structStream << " [" << Printer::Hex(uProperty->PropertyFlags, EWidthTypes::PROPERTY_FLAGS) << "] ";
-                        structStream << flagStream.str() << "\n";
-
-                        structStream << "\t";
-                        Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
-                        structStream << propertyType << " " << propertyStream.str();
-
-                        if (uProperty->ArrayDim > 1)
-                        {
-                            structStream << "_Interface[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "];";
-                        }
-                        else
-                        {
-                            structStream << "_Interface;";
-                        }
-
-                        Printer::FillRight(structStream, ' ', GConfig::GetStructSpacing() - (propertyStream.str().size() + 11));
-                        structStream << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
-                        structStream << " (" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE) << ")";
-                        structStream << " [" << Printer::Hex(uProperty->PropertyFlags, EWidthTypes::PROPERTY_FLAGS) << "] ";
-                        Printer::FillLeft(structStream, ' ', static_cast<size_t>(EWidthTypes::WIDTH_FIELD));
-                    }
-                    else
-                    {
-                        structStream << "\t";
-                        Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
-                        structStream << propertyType << " " << propertyStream.str() << ";";
-
-                        Printer::FillRight(structStream, ' ', GConfig::GetStructSpacing() - (propertyStream.str().size() + 1));
-                        structStream << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
-                        structStream << " (" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE) << ")";
-                        structStream << " [" << Printer::Hex(uProperty->PropertyFlags, EWidthTypes::PROPERTY_FLAGS) << "] ";
-
-                        if (uProperty->IsA<UBoolProperty>())
-                        {
-                            structStream << "[" << Printer::Hex(static_cast<UBoolProperty*>(uProperty)->BitMask, EWidthTypes::BITMASK) << "] ";
-                        }
-                        else
-                        {
-                            Printer::FillLeft(structStream, ' ', static_cast<size_t>(EWidthTypes::WIDTH_FIELD));
-                        }
-                    }
-
-                    structStream << flagStream.str() << "\n";
-
-                    if (offsetError > 0)
-                    {
-                        propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
-                        propertyStream << "[" << Printer::Hex(offsetError, EWidthTypes::NONE) << "];";
-
-                        structStream << "\t";
-                        Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
-                        structStream << "uint8_t ";
-                        Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
-                        structStream << propertyStream.str() << "// " << Printer::Hex(uProperty->Offset + offsetError, EWidthTypes::SIZE);
-                        Printer::Empty(propertyStream);
-
-                        structStream << " (" << Printer::Hex(offsetError, EWidthTypes::SIZE) << ") FIX WRONG SIZE OF PREVIOUS PROPERTY";
-                        structStream << " [Original: " << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE);
-                        structStream << ", Missing: " << Printer::Hex(offsetError, EWidthTypes::SIZE) << "]\n";
-
-                        unknownDataIndex++;
-                    }
-
-                    Printer::Empty(propertyStream);
-                    Printer::Empty(flagStream);
+                    structStream << "struct " << structOuterNameCPP << "_" << structNameCPP << " : ";
                 }
                 else
                 {
-                    propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
-                    propertyStream << "[" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::NONE) << "];";
+                    structStream << "struct " << structNameCPP << " : ";
+                }
 
-                    structStream << "\t";
+                if (fieldStructCount > 1)
+                {
+                    structStream << fieldOuterNameCPP << "_" << fieldNameCPP << "\n";
+                }
+                else
+                {
+                    structStream << fieldNameCPP << "\n";
+                }
+            }
+            else
+            {
+                size = scriptStruct->PropertySize;
+                structStream << "// " << Printer::Hex(size, EWidthTypes::SIZE) << "\n";
+
+                if (structCount > 1)
+                {
+                    structStream << "struct " << structOuterNameCPP << "_" << structNameCPP << "\n";
+                }
+                else
+                {
+                    structStream << "struct " << structNameCPP << "\n";
+                }
+            }
+
+            structStream << "{\n";
+            std::vector<UProperty*> structProperties;
+
+            for (UProperty* uProperty = static_cast<UProperty*>(scriptStruct->Children); uProperty; uProperty = static_cast<UProperty*>(uProperty->Next))
+            {
+                if ((uProperty->ElementSize > 0) && !uProperty->IsA<UScriptStruct>())
+                {
+                    structProperties.push_back(uProperty);
+                }
+            }
+
+            std::sort(structProperties.begin(), structProperties.end(), Utils::SortProperty);
+            std::map<std::string, uint32_t> propertyNameMap;
+            uint32_t unknownDataIndex = 0;
+
+            for (UProperty* uProperty : structProperties)
+            {
+                if (uProperty)
+                {
+                    if (lastOffset < uProperty->Offset)
+                    {
+                        missedOffset = (uProperty->Offset - lastOffset);
+
+                        if (missedOffset >= GConfig::GetGameAlignment())
+                        {
+                            propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
+                            propertyStream << "[" << Printer::Hex(missedOffset, EWidthTypes::NONE) << "];";
+
+                            structStream << "\t";
+                            Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
+                            structStream << "uint8_t ";
+                            Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
+                            structStream << propertyStream.str() << "\t\t// " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
+                            structStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") MISSED OFFSET\n";
+                            Printer::Empty(propertyStream);
+
+                            unknownDataIndex++;
+                        }
+                    }
+
+                    std::string propertyType;
+
+                    if (Retrievers::GetPropertyTypeInternal(uProperty, propertyType, true, false, true) != EPropertyTypes::Unknown)
+                    {
+                        size_t correctElementSize = Retrievers::GetPropertySize(uProperty);
+                        std::string propertyName = Utils::CreateValidName(uProperty->GetName());
+
+                        if (propertyNameMap.count(propertyName) == 0)
+                        {
+                            propertyNameMap[propertyName] = 1;
+                            propertyStream << propertyName;
+                        }
+                        else
+                        {
+                            propertyStream << propertyName << Printer::Decimal(propertyNameMap[propertyName], EWidthTypes::BYTE);
+                            propertyNameMap[propertyName]++;
+                        }
+
+                        if (uProperty->ArrayDim > 1)
+                        {
+                            if (!uProperty->IsA<UInterfaceProperty>())
+                            {
+                                propertyStream << "[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "]";
+                            }
+
+                            correctElementSize *= uProperty->ArrayDim;
+                        }
+
+                        if (uProperty->IsA<UBoolProperty>())
+                        {
+                            propertyStream << " : 1";
+                        }
+
+                        Retrievers::GetAllPropertyFlags(flagStream, uProperty->PropertyFlags);
+                        int32_t offsetError = ((uProperty->ElementSize * uProperty->ArrayDim) - (correctElementSize * uProperty->ArrayDim));
+
+                        if (uProperty->IsA<UInterfaceProperty>())
+                        {
+                            size_t interfaceSize = Retrievers::GetPropertySize(uProperty);
+
+                            if (offsetError == interfaceSize)
+                            {
+                                offsetError -= interfaceSize;
+                            }
+
+                            structStream << "\t";
+                            Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
+                            structStream << propertyType << " " << propertyStream.str();
+
+                            if (uProperty->ArrayDim > 1)
+                            {
+                                structStream << "_Object[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "];";
+                            }
+                            else
+                            {
+                                structStream << "_Object;";
+                            }
+
+                            Printer::FillRight(structStream, ' ', GConfig::GetStructSpacing() - (propertyStream.str().size() + 8));
+                            structStream << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
+                            structStream << " (" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE) << ")";
+                            structStream << " [" << Printer::Hex(uProperty->PropertyFlags, EWidthTypes::PROPERTY_FLAGS) << "] ";
+                            structStream << flagStream.str() << "\n";
+
+                            structStream << "\t";
+                            Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
+                            structStream << propertyType << " " << propertyStream.str();
+
+                            if (uProperty->ArrayDim > 1)
+                            {
+                                structStream << "_Interface[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "];";
+                            }
+                            else
+                            {
+                                structStream << "_Interface;";
+                            }
+
+                            Printer::FillRight(structStream, ' ', GConfig::GetStructSpacing() - (propertyStream.str().size() + 11));
+                            structStream << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
+                            structStream << " (" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE) << ")";
+                            structStream << " [" << Printer::Hex(uProperty->PropertyFlags, EWidthTypes::PROPERTY_FLAGS) << "] ";
+                            Printer::FillLeft(structStream, ' ', static_cast<size_t>(EWidthTypes::WIDTH_FIELD));
+                        }
+                        else
+                        {
+                            structStream << "\t";
+                            Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
+                            structStream << propertyType << " " << propertyStream.str() << ";";
+
+                            Printer::FillRight(structStream, ' ', GConfig::GetStructSpacing() - (propertyStream.str().size() + 1));
+                            structStream << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
+                            structStream << " (" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE) << ")";
+                            structStream << " [" << Printer::Hex(uProperty->PropertyFlags, EWidthTypes::PROPERTY_FLAGS) << "] ";
+
+                            if (uProperty->IsA<UBoolProperty>())
+                            {
+                                structStream << "[" << Printer::Hex(static_cast<UBoolProperty*>(uProperty)->BitMask, EWidthTypes::BITMASK) << "] ";
+                            }
+                            else
+                            {
+                                Printer::FillLeft(structStream, ' ', static_cast<size_t>(EWidthTypes::WIDTH_FIELD));
+                            }
+                        }
+
+                        structStream << flagStream.str() << "\n";
+
+                        if (offsetError > 0)
+                        {
+                            propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
+                            propertyStream << "[" << Printer::Hex(offsetError, EWidthTypes::NONE) << "];";
+
+                            structStream << "\t";
+                            Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
+                            structStream << "uint8_t ";
+                            Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
+                            structStream << propertyStream.str() << "// " << Printer::Hex(uProperty->Offset + offsetError, EWidthTypes::SIZE);
+                            Printer::Empty(propertyStream);
+
+                            structStream << " (" << Printer::Hex(offsetError, EWidthTypes::SIZE) << ") FIX WRONG SIZE OF PREVIOUS PROPERTY";
+                            structStream << " [Original: " << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE);
+                            structStream << ", Missing: " << Printer::Hex(offsetError, EWidthTypes::SIZE) << "]\n";
+
+                            unknownDataIndex++;
+                        }
+
+                        Printer::Empty(propertyStream);
+                        Printer::Empty(flagStream);
+                    }
+                    else
+                    {
+                        propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
+                        propertyStream << "[" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::NONE) << "];";
+
+                        structStream << "\t";
+                        Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
+                        structStream << "uint8_t ";
+                        Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
+                        structStream << propertyStream.str() << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
+                        structStream << " (" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE);
+                        structStream << ") UNKNOWN PROPERTY: " << uProperty->GetFullName() << "\n";
+                        Printer::Empty(propertyStream);
+
+                        unknownDataIndex++;
+                    }
+
+                    lastOffset = (uProperty->Offset + (uProperty->ElementSize * uProperty->ArrayDim));
+                }
+            }
+
+            if (lastOffset < scriptStruct->PropertySize)
+            {
+                missedOffset = (scriptStruct->PropertySize - lastOffset);
+
+                if (missedOffset >= GConfig::GetGameAlignment())
+                {
+                    propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
+                    propertyStream << "[" << Printer::Hex(missedOffset, EWidthTypes::NONE) << "];\t";
+
                     Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
                     structStream << "uint8_t ";
                     Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
-                    structStream << propertyStream.str() << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
-                    structStream << " (" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE);
-                    structStream << ") UNKNOWN PROPERTY: " << uProperty->GetFullName() << "\n";
+                    structStream << propertyStream.str() << "\t\t// " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
+                    structStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") MISSED OFFSET\n";
                     Printer::Empty(propertyStream);
-
-                    unknownDataIndex++;
                 }
 
-                lastOffset = (uProperty->Offset + (uProperty->ElementSize * uProperty->ArrayDim));
+                lastOffset += missedOffset;
             }
-        }
 
-        if (lastOffset < scriptStruct->PropertySize)
-        {
-            missedOffset = (scriptStruct->PropertySize - lastOffset);
-
-            if (missedOffset >= GConfig::GetGameAlignment())
+#ifdef SKIP_MIN_ALIGNMENT
+            if (scriptStruct->MinAlignment)
             {
-                propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
-                propertyStream << "[" << Printer::Hex(missedOffset, EWidthTypes::NONE) << "];";
+                int32_t actualSize = 0;
 
-                structStream << "\t";
-                Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
-                structStream << "uint8_t ";
-                Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
-                structStream << propertyStream.str() << "\t\t// " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
-                structStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") MISSED OFFSET\n";
-                Printer::Empty(propertyStream);
+                for (int32_t i = 0; actualSize < scriptStruct->PropertySize; i++)
+                {
+                    actualSize += scriptStruct->MinAlignment;
+                }
+
+                if ((lastOffset < actualSize) && (actualSize > scriptStruct->PropertySize))
+                {
+                    int32_t padding = (actualSize - lastOffset);
+#ifndef NO_LOGGING
+                    if (Generator::LogFile.is_open())
+                    {
+                        Generator::LogFile << "Info: EXTRA PADDING DETECTED!\n";
+                        Generator::LogFile << "Info: LAST PROPERTY OFFSET " << Printer::Hex(lastOffset, 1) << "\n";
+                        Generator::LogFile << "Info: PROVIDED STRUCT SIZE " << Printer::Hex(scriptStruct->PropertySize, 1) << "\n";
+                        Generator::LogFile << "Info: CALCULATED STRUCT SIZE " << Printer::Hex(actualSize, 1) << "\n";
+                        Generator::LogFile << "Info: MIN ALIGNMENT " << Printer::Hex(scriptStruct->MinAlignment, 1) << "\n";
+                        Generator::LogFile << "Info: ADDED PADDING " << Printer::Hex(padding, 1) << std::endl;
+                    }
+#endif
+                    structStream << "\tuint8_t MinClassPadding[" << Printer::Hex(padding, EWidthTypes::BYTE) << "];\n";
+                }
             }
-        }
+#endif
 
-        structStream << "};\n\n";
+            structStream << "};\n\n";
+        }
+        else
+        {
+            structStream << "// (Custom Override)\n";
+            structStream << GConfig::GetTypeOverride(structNameCPP);
+        }
 
         file << structStream.str();
     }
@@ -1236,7 +1293,7 @@ namespace StructGenerator
                     std::string propertyType;
                     EPropertyTypes childType = Retrievers::GetPropertyType(structChild, propertyType);
 
-                    if (childType == EPropertyTypes::TYPE_FSTRUCT)
+                    if (childType == EPropertyTypes::FStruct)
                     {
                         UScriptStruct* propertyStruct = static_cast<UScriptStruct*>(static_cast<UStructProperty*>(structChild)->Struct);
 
@@ -1245,13 +1302,13 @@ namespace StructGenerator
                             GenerateStructProperties(file, propertyStruct, packageObj);
                         }
                     }
-                    else if (childType == EPropertyTypes::TYPE_TARRAY)
+                    else if (childType == EPropertyTypes::TArray)
                     {
                         UScriptStruct* propertyStruct = static_cast<UScriptStruct*>(static_cast<UStructProperty*>(static_cast<UArrayProperty*>(structChild)->Inner)->Struct);
 
-                        if (propertyStruct != scriptStruct
-                            && Retrievers::GetPropertyType(static_cast<UArrayProperty*>(structChild)->Inner, propertyType) == EPropertyTypes::TYPE_FSTRUCT
-                            && std::find(m_generatedStructs.begin(), m_generatedStructs.end(), propertyStruct->GetFullName()) == m_generatedStructs.end())
+                        if ((propertyStruct != scriptStruct)
+                            && (Retrievers::GetPropertyType(static_cast<UArrayProperty*>(structChild)->Inner, propertyType) == EPropertyTypes::FStruct)
+                            && (std::find(m_generatedStructs.begin(), m_generatedStructs.end(), propertyStruct->GetFullName()) == m_generatedStructs.end()))
                         {
                             GenerateStructProperties(file, propertyStruct, packageObj);
                         }
@@ -1287,29 +1344,54 @@ namespace ClassGenerator
 
     void GenerateClassFields(std::ostringstream& classStream, class UClass* uClass, EClassTypes classType)
     {
-        std::ostringstream propertyStream;
-
-        size_t localSize = 0;
-        size_t startOffset = 0;
-        size_t missedOffset = 0;
-        size_t lastOffset = 0;
-
-        localSize = Member::GetClassSize(classType);
-        startOffset = Member::GetClassOffset(classType);
-        std::map<uintptr_t, Member> members = Member::GetRegistered(classType);
-
-        if (!members.empty())
+        if (classType != EClassTypes::Unknown)
         {
-            if (uClass->PropertySize == localSize)
-            {
-                lastOffset = startOffset;
-                int32_t unknownDataIndex = 0;
+            std::ostringstream propertyStream;
 
-                for (const auto& member : members)
+            size_t localSize = 0;
+            size_t startOffset = 0;
+            size_t missedOffset = 0;
+            size_t lastOffset = 0;
+
+            localSize = Member::GetClassSize(classType);
+            startOffset = Member::GetClassOffset(classType);
+            std::map<uintptr_t, Member*> members = Member::GetRegistered(classType);
+
+            if (!members.empty())
+            {
+                if (uClass->PropertySize == localSize)
                 {
-                    if ((lastOffset + member.second.Size) < member.second.Offset)
+                    lastOffset = startOffset;
+                    int32_t unknownDataIndex = 0;
+
+                    for (const auto& member : members)
                     {
-                        missedOffset = (member.second.Offset - lastOffset);
+                        if ((lastOffset + member.second->Size) < member.second->Offset)
+                        {
+                            missedOffset = (member.second->Offset - lastOffset);
+
+                            if (missedOffset >= GConfig::GetGameAlignment())
+                            {
+                                propertyStream << "\tuint8_t UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
+                                propertyStream << "[" << Printer::Hex(missedOffset, EWidthTypes::NONE) << "];";
+
+                                classStream << propertyStream.str() << " // " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
+                                classStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") DYNAMIC FIELD PADDING\n";
+                                Printer::Empty(propertyStream);
+
+                                unknownDataIndex++;
+                            }
+                        }
+
+                        classStream << "\t" << member.second->Label << " // " << Printer::Hex(member.second->Offset, EWidthTypes::SIZE);
+                        classStream << " (" << Printer::Hex(member.second->Size, EWidthTypes::SIZE) << ")\n";
+
+                        lastOffset = (member.second->Offset + member.second->Size);
+                    }
+
+                    if (lastOffset < uClass->PropertySize)
+                    {
+                        missedOffset = (uClass->PropertySize - lastOffset);
 
                         if (missedOffset >= GConfig::GetGameAlignment())
                         {
@@ -1318,51 +1400,29 @@ namespace ClassGenerator
 
                             classStream << propertyStream.str() << " // " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
                             classStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") DYNAMIC FIELD PADDING\n";
-                            Printer::Empty(propertyStream);
-
-                            unknownDataIndex++;
                         }
                     }
-
-                    classStream << "\t" << member.second.Label << " // " << Printer::Hex(member.second.Offset, EWidthTypes::SIZE);
-                    classStream << " (" << Printer::Hex(member.second.Size, EWidthTypes::SIZE) << ")\n";
-
-                    lastOffset = (member.second.Offset + member.second.Size);
                 }
-
-                if (lastOffset < uClass->PropertySize)
+                else
                 {
-                    missedOffset = (uClass->PropertySize - lastOffset);
-
-                    if (missedOffset >= GConfig::GetGameAlignment())
+#ifndef NO_LOGGING
+                    if (Generator::LogFile.is_open())
                     {
-                        propertyStream << "\tuint8_t UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
-                        propertyStream << "[" << Printer::Hex(missedOffset, EWidthTypes::NONE) << "];";
-
-                        classStream << propertyStream.str() << " // " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
-                        classStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") DYNAMIC FIELD PADDING\n";
+                        Generator::LogFile << "Error: INCORRECT CLASS SIZE DETECTED FOR CLASS " << uClass->GetName() << "\n";
+                        Generator::LogFile << "Error: REGISTERED CLASS SIZE " << localSize << "\n";
+                        Generator::LogFile << "Error: ACTUAL CLASS SIZE " << uClass->PropertySize << std::endl;
                     }
+#endif
+                    Utils::MessageboxError("Error: Incorrect class size detected for \"" + Member::GetName(classType) + "\", check the log file for more details!");
                 }
             }
             else
             {
 #ifndef NO_LOGGING
-                if (Generator::LogFile.is_open())
-                {
-                    Generator::LogFile << "Error: INCORRECT CLASS SIZE DETECTED FOR CLASS " << uClass->GetName() << "\n";
-                    Generator::LogFile << "Error: REGISTERED CLASS SIZE: " << std::to_string(localSize) << "\n";
-                    Generator::LogFile << "Error: ACTUAL CLASS SIZE: " << std::to_string(uClass->PropertySize) << "\n";
-                }
+                Generator::LogFile << "Error: No registered members found for class type \"" << Member::GetName(classType) << "\"\n";
 #endif
-                Utils::Messagebox("Error: Incorrect class size detected, check the log file for more details!", (MB_OK | MB_ICONERROR));
+                Utils::MessageboxError("Error: No registered members found for class type \"" + Member::GetName(classType) + "\"!");
             }
-        }
-        else
-        {
-#ifndef NO_LOGGING
-            Generator::LogFile << "Error: No registered members found for class \"" << uClass->GetName() << "\"\n";
-#endif
-            Utils::Messagebox("Error: No registered members found for class \"" + uClass->GetName() + "\"!", (MB_OK | MB_ICONERROR));
         }
     }
 
@@ -1381,6 +1441,11 @@ namespace ClassGenerator
         std::string classNameCPP = Utils::CreateValidName(uClass->GetNameCPP());
         std::string classFullName = uClass->GetFullName();
 
+        if (GConfig::IsTypeBlacklisted(classNameCPP))
+        {
+            return;
+        }
+
 #ifndef NO_LOGGING
         if (Generator::LogFile.is_open())
         {
@@ -1393,320 +1458,328 @@ namespace ClassGenerator
             Generator::LogFile << " - Instance: " << Printer::Hex(uClass) << std::endl;
         }
 #endif
-        std::vector<UProperty*> classProperties;
-
-        for (UProperty* uProperty = static_cast<UProperty*>(uClass->Children); uProperty; uProperty = static_cast<UProperty*>(uProperty->Next))
-        {
-            if (!uProperty->IsA<UFunction>()
-                && !uProperty->IsA<UConst>()
-                && !uProperty->IsA<UEnum>()
-                && !uProperty->IsA<UScriptStruct>()
-                && (uProperty->ElementSize > 0)
-                && (!uSuperClass || (uSuperClass && uSuperClass != uClass && uProperty->Offset >= uSuperClass->PropertySize)))
-            {
-                classProperties.push_back(uProperty);
-            }
-        }
-
-        std::sort(classProperties.begin(), classProperties.end(), Utils::SortProperty);
         classStream << "// " << classFullName << "\n";
-
-        if (uSuperClass && uSuperClass != uClass)
+        if (!GConfig::IsTypeOveridden(classNameCPP))
         {
-            size = uClass->PropertySize - uSuperClass->PropertySize;
-            lastOffset = uSuperClass->PropertySize;
+            std::vector<UProperty*> classProperties;
 
-            classStream << "// " << Printer::Hex(size, EWidthTypes::SIZE);
-            classStream << " (" << Printer::Hex(uSuperClass->PropertySize, EWidthTypes::SIZE);
-            classStream << " - " << Printer::Hex(uClass->PropertySize, EWidthTypes::SIZE);
-            classStream << ")\n" << "class " << classNameCPP << " : public " << Utils::CreateValidName(uSuperClass->GetNameCPP());
-        }
-        else
-        {
-            size = uClass->PropertySize;
-
-            classStream << "// " << Printer::Hex(size, EWidthTypes::SIZE) << "\n";
-            classStream << "class " << classNameCPP;
-        }
-
-        classStream << "\n{\npublic:\n";
-
-        if (uClass == UField::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_UFIELD); }
-        else if (uClass == UEnum::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_UENUM); }
-        else if (uClass == UConst::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_UCONST); }
-        else if (uClass == UProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_UPROPERTY); }
-        else if (uClass == UStruct::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_USTRUCT); }
-        else if (uClass == UFunction::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_UFUNCTION); }
-        else if (uClass == UStructProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_USTRUCTPROPERTY); }
-        else if (uClass == UObjectProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_UOBJECTPROPERTY); }
-        else if (uClass == UMapProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_UMAPPROPERTY); }
-        else if (uClass == UInterfaceProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_UINTERFACEPROPERTY); }
-        else if (uClass == UDelegateProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_UDELEGATEPROPERTY); }
-        else if (uClass == UByteProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_UBYTEPROPERTY); }
-        else if (uClass == UBoolProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_UBOOLPROPERTY); }
-        else if (uClass == UArrayProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::CLASS_UARRAYPROPERTY); }
-        else
-        {
-            std::map<std::string, uint32_t> propertyNameMap;
-            uint32_t unknownDataIndex = 0;
-
-            for (UProperty* uProperty : classProperties)
+            for (UProperty* uProperty = static_cast<UProperty*>(uClass->Children); uProperty; uProperty = static_cast<UProperty*>(uProperty->Next))
             {
-                if (uProperty)
+                if (!uProperty->IsA<UFunction>()
+                    && !uProperty->IsA<UConst>()
+                    && !uProperty->IsA<UEnum>()
+                    && !uProperty->IsA<UScriptStruct>()
+                    && (uProperty->ElementSize > 0)
+                    && (!uSuperClass || (uSuperClass && uSuperClass != uClass && uProperty->Offset >= uSuperClass->PropertySize)))
                 {
-                    std::string propertyName = Utils::CreateValidName(uProperty->GetName());
+                    classProperties.push_back(uProperty);
+                }
+            }
 
-                    if (uClass == UObject::StaticClass())
+            std::sort(classProperties.begin(), classProperties.end(), Utils::SortProperty);
+
+            if (uSuperClass && uSuperClass != uClass)
+            {
+                size = uClass->PropertySize - uSuperClass->PropertySize;
+                lastOffset = uSuperClass->PropertySize;
+
+                classStream << "// " << Printer::Hex(size, EWidthTypes::SIZE);
+                classStream << " (" << Printer::Hex(uSuperClass->PropertySize, EWidthTypes::SIZE);
+                classStream << " - " << Printer::Hex(uClass->PropertySize, EWidthTypes::SIZE);
+                classStream << ")\n" << "class " << classNameCPP << " : public " << Utils::CreateValidName(uSuperClass->GetNameCPP());
+            }
+            else
+            {
+                size = uClass->PropertySize;
+
+                classStream << "// " << Printer::Hex(size, EWidthTypes::SIZE) << "\n";
+                classStream << "class " << classNameCPP;
+            }
+
+            classStream << "\n{\npublic:\n";
+
+            if (uClass == UField::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UField); }
+            else if (uClass == UEnum::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UEnum); }
+            else if (uClass == UConst::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UConst); }
+            else if (uClass == UProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UProperty); }
+            else if (uClass == UStruct::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UStruct); }
+            else if (uClass == UFunction::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UFunction); }
+            else if (uClass == UStructProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UStructProperty); }
+            else if (uClass == UObjectProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UObjectProperty); }
+            else if (uClass == UClassProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UClassProperty); }
+            else if (uClass == UMapProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UMapProperty); }
+            else if (uClass == UInterfaceProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UInterfaceProperty); }
+            else if (uClass == UByteProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UByteProperty); }
+            else if (uClass == UBoolProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UBoolProperty); }
+            else if (uClass == UArrayProperty::StaticClass()) { GenerateClassFields(classStream, uClass, EClassTypes::UArrayProperty); }
+            else
+            {
+                std::map<std::string, uint32_t> propertyNameMap;
+                uint32_t unknownDataIndex = 0;
+
+                for (UProperty* uProperty : classProperties)
+                {
+                    if (uProperty)
                     {
-                        if (!GConfig::UsingProcessEventIndex() && (propertyName.find("VfTable") != std::string::npos))
+                        std::string propertyName = Utils::CreateValidName(uProperty->GetName());
+
+                        if (uClass == UObject::StaticClass())
                         {
-                            lastOffset = (uProperty->Offset + (uProperty->ElementSize * uProperty->ArrayDim));
-                            continue;
-                        }
-                    }
-
-                    if (lastOffset < uProperty->Offset)
-                    {
-                        missedOffset = (uProperty->Offset - lastOffset);
-
-                        if (missedOffset >= GConfig::GetGameAlignment())
-                        {
-                            propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
-                            propertyStream << "[" << Printer::Hex(missedOffset, EWidthTypes::NONE) << "];";
-
-                            classStream << "\t";
-                            Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
-                            classStream << "uint8_t ";
-                            Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing() - 3);
-                            classStream << propertyStream.str() << "// " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
-                            classStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") MISSED OFFSET\n";
-                            Printer::Empty(propertyStream);
-
-                            unknownDataIndex++;
-                        }
-                    }
-
-                    std::string propertyType;
-
-                    if (Retrievers::GetPropertyTypeInternal(uProperty, propertyType, false, false, true) != EPropertyTypes::TYPE_UNKNOWN)
-                    {
-                        size_t correctElementSize = Retrievers::GetPropertySize(uProperty);
-
-                        if (propertyNameMap.count(propertyName) == 0)
-                        {
-                            propertyNameMap[propertyName] = 1;
-                            propertyStream << propertyName;
-                        }
-                        else
-                        {
-                            propertyStream << propertyName << Printer::Decimal(propertyNameMap[propertyName], EWidthTypes::BYTE);
-                            propertyNameMap[propertyName]++;
-                        }
-
-                        if (uProperty->ArrayDim > 1)
-                        {
-                            if (!uProperty->IsA<UInterfaceProperty>())
+                            if (!GConfig::UsingProcessEventIndex() && (propertyName.find("VfTable") != std::string::npos))
                             {
-                                propertyStream << "[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "]";
+                                lastOffset = (uProperty->Offset + (uProperty->ElementSize * uProperty->ArrayDim));
+                                continue;
                             }
-
-                            correctElementSize *= uProperty->ArrayDim;
                         }
 
-                        if (uProperty->IsA<UBoolProperty>())
+                        if (lastOffset < uProperty->Offset)
                         {
-                            propertyStream << " : 1";
-                        }
+                            missedOffset = (uProperty->Offset - lastOffset);
 
-                        Retrievers::GetAllPropertyFlags(flagStream, uProperty->PropertyFlags);
-
-                        int32_t offsetError = ((uProperty->ElementSize * uProperty->ArrayDim) - (correctElementSize * uProperty->ArrayDim));
-
-                        if (uProperty->IsA<UInterfaceProperty>())
-                        {
-                            size_t interfaceSize = Retrievers::GetPropertySize(uProperty);
-
-                            if (offsetError == interfaceSize)
+                            if (missedOffset >= GConfig::GetGameAlignment())
                             {
-                                offsetError -= interfaceSize;
+                                propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
+                                propertyStream << "[" << Printer::Hex(missedOffset, EWidthTypes::NONE) << "];";
+
+                                classStream << "\t";
+                                Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
+                                classStream << "uint8_t ";
+                                Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing() - 3);
+                                classStream << propertyStream.str() << "// " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
+                                classStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") MISSED OFFSET\n";
+                                Printer::Empty(propertyStream);
+
+                                unknownDataIndex++;
                             }
+                        }
 
-                            classStream << "\t";
-                            Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
-                            classStream << propertyType << " " << propertyStream.str();
+                        std::string propertyType;
 
-                            if (uProperty->ArrayDim > 1)
+                        if (Retrievers::GetPropertyTypeInternal(uProperty, propertyType, false, false, true) != EPropertyTypes::Unknown)
+                        {
+                            size_t correctElementSize = Retrievers::GetPropertySize(uProperty);
+
+                            if (propertyNameMap.count(propertyName) == 0)
                             {
-                                classStream << "_Object[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "];";
+                                propertyNameMap[propertyName] = 1;
+                                propertyStream << propertyName;
                             }
                             else
                             {
-                                classStream << "_Object;";
+                                propertyStream << propertyName << Printer::Decimal(propertyNameMap[propertyName], EWidthTypes::BYTE);
+                                propertyNameMap[propertyName]++;
                             }
-
-                            Printer::FillRight(classStream, ' ', GConfig::GetClassSpacing() - (propertyStream.str().size() + 8));
-                            classStream << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
-                            classStream << " (" << Printer::Hex(((uProperty->ElementSize * uProperty->ArrayDim) - interfaceSize), EWidthTypes::SIZE) << ")";
-                            classStream << " [" << Printer::Hex(uProperty->PropertyFlags, EWidthTypes::PROPERTY_FLAGS) << "] ";
-                            classStream << flagStream.str() << "\n";
-
-                            classStream << "\t";
-                            Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
-                            classStream << propertyType << " " << propertyStream.str();
 
                             if (uProperty->ArrayDim > 1)
                             {
-                                classStream << "_Interface[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "];";
-                            }
-                            else
-                            {
-                                classStream << "_Interface;";
-                            }
+                                if (!uProperty->IsA<UInterfaceProperty>())
+                                {
+                                    propertyStream << "[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "]";
+                                }
 
-                            Printer::FillRight(classStream, ' ', GConfig::GetClassSpacing() - (propertyStream.str().size() + 11));
-                            classStream << "// " << Printer::Hex(uProperty->Offset + interfaceSize, EWidthTypes::SIZE);
-                            classStream << " (" << Printer::Hex(((uProperty->ElementSize * uProperty->ArrayDim) - interfaceSize), EWidthTypes::SIZE) << ")";
-                            classStream << " [" << Printer::Hex(uProperty->PropertyFlags, EWidthTypes::PROPERTY_FLAGS) << "] ";
-                            Printer::FillLeft(classStream, ' ', static_cast<size_t>(EWidthTypes::WIDTH_FIELD));
-                        }
-                        else
-                        {
-                            classStream << "\t";
-                            Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
-                            classStream << propertyType << " " << propertyStream.str() << ";";
-
-                            Printer::FillRight(classStream, ' ', GConfig::GetClassSpacing() - (propertyStream.str().size() + 1));
-                            classStream << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
-                            classStream << " (" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE) << ")";
-                            classStream << " [" << Printer::Hex(uProperty->PropertyFlags, EWidthTypes::PROPERTY_FLAGS) << "] ";
+                                correctElementSize *= uProperty->ArrayDim;
+                            }
 
                             if (uProperty->IsA<UBoolProperty>())
                             {
-                                classStream << "[" << Printer::Hex(static_cast<UBoolProperty*>(uProperty)->BitMask, EWidthTypes::BITMASK) << "] ";
+                                propertyStream << " : 1";
+                            }
+
+                            Retrievers::GetAllPropertyFlags(flagStream, uProperty->PropertyFlags);
+
+                            int32_t offsetError = ((uProperty->ElementSize * uProperty->ArrayDim) - (correctElementSize * uProperty->ArrayDim));
+
+                            if (uProperty->IsA<UInterfaceProperty>())
+                            {
+                                size_t interfaceSize = Retrievers::GetPropertySize(uProperty);
+
+                                if (offsetError == interfaceSize)
+                                {
+                                    offsetError -= interfaceSize;
+                                }
+
+                                classStream << "\t";
+                                Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
+                                classStream << propertyType << " " << propertyStream.str();
+
+                                if (uProperty->ArrayDim > 1)
+                                {
+                                    classStream << "_Object[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "];";
+                                }
+                                else
+                                {
+                                    classStream << "_Object;";
+                                }
+
+                                Printer::FillRight(classStream, ' ', GConfig::GetClassSpacing() - (propertyStream.str().size() + 8));
+                                classStream << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
+                                classStream << " (" << Printer::Hex(((uProperty->ElementSize * uProperty->ArrayDim) - interfaceSize), EWidthTypes::SIZE) << ")";
+                                classStream << " [" << Printer::Hex(uProperty->PropertyFlags, EWidthTypes::PROPERTY_FLAGS) << "] ";
+                                classStream << flagStream.str() << "\n";
+
+                                classStream << "\t";
+                                Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
+                                classStream << propertyType << " " << propertyStream.str();
+
+                                if (uProperty->ArrayDim > 1)
+                                {
+                                    classStream << "_Interface[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "];";
+                                }
+                                else
+                                {
+                                    classStream << "_Interface;";
+                                }
+
+                                Printer::FillRight(classStream, ' ', GConfig::GetClassSpacing() - (propertyStream.str().size() + 11));
+                                classStream << "// " << Printer::Hex(uProperty->Offset + interfaceSize, EWidthTypes::SIZE);
+                                classStream << " (" << Printer::Hex(((uProperty->ElementSize * uProperty->ArrayDim) - interfaceSize), EWidthTypes::SIZE) << ")";
+                                classStream << " [" << Printer::Hex(uProperty->PropertyFlags, EWidthTypes::PROPERTY_FLAGS) << "] ";
+                                Printer::FillLeft(classStream, ' ', static_cast<size_t>(EWidthTypes::WIDTH_FIELD));
                             }
                             else
                             {
-                                Printer::FillLeft(classStream, ' ', static_cast<size_t>(EWidthTypes::WIDTH_FIELD));
+                                classStream << "\t";
+                                Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
+                                classStream << propertyType << " " << propertyStream.str() << ";";
+
+                                Printer::FillRight(classStream, ' ', GConfig::GetClassSpacing() - (propertyStream.str().size() + 1));
+                                classStream << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
+                                classStream << " (" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE) << ")";
+                                classStream << " [" << Printer::Hex(uProperty->PropertyFlags, EWidthTypes::PROPERTY_FLAGS) << "] ";
+
+                                if (uProperty->IsA<UBoolProperty>())
+                                {
+                                    classStream << "[" << Printer::Hex(static_cast<UBoolProperty*>(uProperty)->BitMask, EWidthTypes::BITMASK) << "] ";
+                                }
+                                else
+                                {
+                                    Printer::FillLeft(classStream, ' ', static_cast<size_t>(EWidthTypes::WIDTH_FIELD));
+                                }
                             }
+
+                            classStream << flagStream.str() << "\n";
+
+                            if (offsetError > 0)
+                            {
+                                propertyStream << "_UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
+                                propertyStream << "[" << Printer::Hex(offsetError, EWidthTypes::NONE) << "];";
+
+                                classStream << "\t";
+                                Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
+                                classStream << "uint8_t ";
+                                Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing() - 3);
+                                classStream << propertyStream.str() << "// " << Printer::Hex((uProperty->Offset + offsetError), EWidthTypes::SIZE);
+                                classStream << " (" << Printer::Hex(offsetError, EWidthTypes::SIZE) << ") FIX WRONG SIZE OF PREVIOUS PROPERTY ";
+                                classStream << " [Original:" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE);
+                                classStream << ", Missing: " << Printer::Hex(offsetError, EWidthTypes::SIZE) << "]\n";
+                                Printer::Empty(propertyStream);
+
+                                unknownDataIndex++;
+                            }
+
+                            Printer::Empty(propertyStream);
+                            Printer::Empty(flagStream);
                         }
-
-                        classStream << flagStream.str() << "\n";
-
-                        if (offsetError > 0)
+                        else
                         {
-                            propertyStream << "_UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
-                            propertyStream << "[" << Printer::Hex(offsetError, EWidthTypes::NONE) << "];";
+                            propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
+                            propertyStream << "[" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::NONE) << "];";
 
                             classStream << "\t";
                             Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
                             classStream << "uint8_t ";
                             Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing() - 3);
-                            classStream << propertyStream.str() << "// " << Printer::Hex((uProperty->Offset + offsetError), EWidthTypes::SIZE);
-                            classStream << " (" << Printer::Hex(offsetError, EWidthTypes::SIZE) << ") FIX WRONG SIZE OF PREVIOUS PROPERTY ";
-                            classStream << " [Original:" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE);
-                            classStream << ", Missing: " << Printer::Hex(offsetError, EWidthTypes::SIZE) << "]\n";
+                            classStream << propertyStream.str() << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
+                            classStream << " (" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE) << ") UNKNOWN PROPERTY: " << uProperty->GetFullName() << "\n";
                             Printer::Empty(propertyStream);
 
                             unknownDataIndex++;
                         }
 
-                        Printer::Empty(propertyStream);
-                        Printer::Empty(flagStream);
+                        lastOffset = (uProperty->Offset + (uProperty->ElementSize * uProperty->ArrayDim));
                     }
-                    else
+                }
+
+                if (lastOffset < uClass->PropertySize)
+                {
+                    missedOffset = (uClass->PropertySize - lastOffset);
+
+                    if (missedOffset >= GConfig::GetGameAlignment())
                     {
                         propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
-                        propertyStream << "[" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::NONE) << "];";
+                        propertyStream << "[" << Printer::Hex(missedOffset, EWidthTypes::NONE) << "];";
 
                         classStream << "\t";
                         Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
                         classStream << "uint8_t ";
                         Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing() - 3);
-                        classStream << propertyStream.str() << "// " << Printer::Hex(uProperty->Offset, EWidthTypes::SIZE);
-                        classStream << " (" << Printer::Hex((uProperty->ElementSize * uProperty->ArrayDim), EWidthTypes::SIZE) << ") UNKNOWN PROPERTY: " << uProperty->GetFullName() << "\n";
+                        classStream << propertyStream.str() << "// " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
+                        classStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") MISSED OFFSET\n";
                         Printer::Empty(propertyStream);
-
-                        unknownDataIndex++;
                     }
-
-                    lastOffset = (uProperty->Offset + (uProperty->ElementSize * uProperty->ArrayDim));
                 }
             }
 
-            if (lastOffset < uClass->PropertySize)
+            classStream << "\npublic:\n";
+
+            if (GConfig::UsingConstants())
             {
-                missedOffset = (uClass->PropertySize - lastOffset);
+                classStream << "\tstatic UClass* StaticClass()\n";
+                classStream << "\t{\n";
+                classStream << "\t\tstatic UClass* uClassPointer = nullptr;\n\n";
+                classStream << "\t\tif (!uClassPointer)\n";
+                classStream << "\t\t{\n";
+                classStream << "\t\t\tuClassPointer = reinterpret_cast<UClass*>(UObject::GObjObjects()->At(" << Utils::CreateValidName(Generator::GenerateIndex(uClass)) << "));\n";
+                classStream << "\t\t}\n\n";
+                classStream << "\t\treturn uClassPointer;\n";
+                classStream << "\t};\n\n";;
+            }
+            else
+            {
+                classStream << "\tstatic UClass* StaticClass()\n";
+                classStream << "\t{\n";
+                classStream << "\t\tstatic UClass* uClassPointer = nullptr;\n\n";
+                classStream << "\t\tif (!uClassPointer)\n";
+                classStream << "\t\t{\n";
+                classStream << "\t\t\tuClassPointer = UObject::FindClass(\"" << classFullName << "\");\n";
+                classStream << "\t\t}\n\n";
+                classStream << "\t\treturn uClassPointer;\n";
+                classStream << "\t};\n\n";
+            }
 
-                if (missedOffset >= GConfig::GetGameAlignment())
+            if (uClass == UObject::StaticClass())
+            {
+                classStream << PiecesOfCode::UObject_FunctionDescriptions;
+            }
+
+            file << classStream.str();
+            Printer::Empty(classStream);
+
+            FunctionGenerator::GenerateFunctionDescription(file, uClass);
+
+            if (uClass == UObject::StaticClass())
+            {
+                if (GConfig::UsingProcessEventIndex())
                 {
-                    propertyStream << "UnknownData" << Printer::Decimal(unknownDataIndex, EWidthTypes::BYTE);
-                    propertyStream << "[" << Printer::Hex(missedOffset, EWidthTypes::NONE) << "];";
-
-                    classStream << "\t";
-                    Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
-                    classStream << "uint8_t ";
-                    Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing() - 3);
-                    classStream << propertyStream.str() << "// " << Printer::Hex(lastOffset, EWidthTypes::SIZE);
-                    classStream << " (" << Printer::Hex(missedOffset, EWidthTypes::SIZE) << ") MISSED OFFSET\n";
-                    Printer::Empty(propertyStream);
+                    classStream << "\tvoid ProcessEvent(class UFunction* uFunction, void* uParams, void* uResult = nullptr);\n";
+                }
+                else if (GConfig::GetProcessEventIndex() != -1)
+                {
+                    FunctionGenerator::GenerateVirtualFunctions(file);
                 }
             }
-        }
+            else if (uClass == UFunction::StaticClass())
+            {
+                classStream << "\tstatic UFunction* FindFunction(const std::string& functionFullName);\n";
+            }
 
-        classStream << "\npublic:\n";
-
-        if (GConfig::UsingConstants())
-        {
-            classStream << "\tstatic UClass* StaticClass()\n";
-            classStream << "\t{\n";
-            classStream << "\t\tstatic UClass* uClassPointer = nullptr;\n\n";
-            classStream << "\t\tif (!uClassPointer)\n";
-            classStream << "\t\t{\n";
-            classStream << "\t\t\tuClassPointer = reinterpret_cast<UClass*>(UObject::GObjObjects()->At(" << Utils::CreateValidName(Generator::GenerateIndex(uClass)) << "));\n";
-            classStream << "\t\t}\n\n";
-            classStream << "\t\treturn uClassPointer;\n";
-            classStream << "\t};\n\n";;
+            classStream << "};\n\n";
         }
         else
         {
-            classStream << "\tstatic UClass* StaticClass()\n";
-            classStream << "\t{\n";
-            classStream << "\t\tstatic UClass* uClassPointer = nullptr;\n\n";
-            classStream << "\t\tif (!uClassPointer)\n";
-            classStream << "\t\t{\n";
-            classStream << "\t\t\tuClassPointer = UObject::FindClass(\"" << classFullName << "\");\n";
-            classStream << "\t\t}\n\n";
-            classStream << "\t\treturn uClassPointer;\n";
-            classStream << "\t};\n\n";
+            classStream << "// (Custom Override)\n";
+            classStream << GConfig::GetTypeOverride(classNameCPP);
         }
-
-        if (uClass == UObject::StaticClass())
-        {
-            classStream << PiecesOfCode::UObject_FunctionDescriptions;
-        }
-
-        file << classStream.str();
-        Printer::Empty(classStream);
-
-        FunctionGenerator::GenerateFunctionDescription(file, uClass);
-
-        if (uClass == UObject::StaticClass())
-        {
-            if (GConfig::UsingProcessEventIndex())
-            {
-                classStream << "\tvoid ProcessEvent(class UFunction* uFunction, void* uParams, void* uResult = nullptr);\n";
-            }
-            else if (GConfig::GetProcessEventIndex() != -1)
-            {
-                FunctionGenerator::GenerateVirtualFunctions(file);
-            }
-        }
-        else if (uClass == UFunction::StaticClass())
-        {
-            classStream << "\tstatic UFunction* FindFunction(const std::string& functionFullName);\n";
-        }
-
-        classStream << "};\n\n";
 
         file << classStream.str();
     }
@@ -1810,7 +1883,7 @@ namespace ParameterGenerator
 
                 if ((uFunction->FunctionFlags & EFunctionFlags::FUNC_Native) && uFunction->iNative)
                 {
-                    parameterStream << " (iNative[" << std::to_string(uFunction->iNative) << "])";
+                    parameterStream << " (iNative[" << uFunction->iNative << "])";
                 }
 
                 if (uFunction->FunctionFlags & EFunctionFlags::FUNC_Exec) { propertyStream << "exec"; }
@@ -1842,7 +1915,7 @@ namespace ParameterGenerator
                     if (uProperty)
                     {
                         std::string propertyType;
-                        EPropertyTypes returnPropertyType = EPropertyTypes::TYPE_UNKNOWN;
+                        EPropertyTypes returnPropertyType = EPropertyTypes::Unknown;
 
                         if ((uProperty->PropertyFlags & EPropertyFlags::CPF_OutParm) || (uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
                         {
@@ -1853,7 +1926,7 @@ namespace ParameterGenerator
                             returnPropertyType = Retrievers::GetPropertyTypeInternal(uProperty, propertyType, true, false, true);
                         }
 
-                        if (returnPropertyType != EPropertyTypes::TYPE_UNKNOWN)
+                        if (returnPropertyType != EPropertyTypes::Unknown)
                         {
                             std::string propertyName = Utils::CreateValidName(uProperty->GetName());
 
@@ -1964,7 +2037,7 @@ namespace FunctionGenerator
         else
         {
             file << "\n\t// FIX PROCESS EVENT IN CONFIGURATION.CPP, INVALID INDEX";
-            Utils::Messagebox("Warning: Process event is not configured correctly in \"Configuration.cpp\", you set \"UsingOffsets\" to true yet you did not provide a valid index for process event!", (MB_OK | MB_ICONWARNING));
+            Utils::MessageboxWarn("Warning: ProcessEvent is not configured correctly in \"Configuration.cpp\", you set \"UsingOffsets\" to true yet you did not provide a valid index for process event!");
         }
 
         if (processEventAddress != 0)
@@ -1983,7 +2056,7 @@ namespace FunctionGenerator
                 }
                 else
                 {
-                    file << "\tvirtual void VirtualFunction" << std::to_string(index) << "();";
+                    file << "\tvirtual void VirtualFunction" << index << "();";
                     file << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t// " << Printer::Hex(virtualFunction, sizeof(virtualFunction)) << "\n";
                 }
             }
@@ -1991,7 +2064,7 @@ namespace FunctionGenerator
         else
         {
             file << "\n\t// FIX PROCESS EVENT IN CONFIGURATION.CPP, INVALID ADDRESS";
-            Utils::Messagebox("Warning: Process event is not configured correctly in \"Configuration.cpp\", failed to find a valid address!", (MB_OK | MB_ICONWARNING));
+            Utils::MessageboxWarn("Warning: ProcessEvent is not configured correctly in \"Configuration.cpp\", failed to find a valid address!");
         }
     }
 
@@ -2054,7 +2127,7 @@ namespace FunctionGenerator
 
                 if ((uFunction->FunctionFlags & EFunctionFlags::FUNC_Native) && uFunction->iNative)
                 {
-                    codeStream << " (iNative[" << std::to_string(uFunction->iNative) << "])";
+                    codeStream << " (iNative[" << uFunction->iNative << "])";
                 }
 
                 std::vector<std::pair<UProperty*, std::string>> propertyParams;
@@ -2107,7 +2180,7 @@ namespace FunctionGenerator
 
                 std::string propertyType;
 
-                if (propertyReturnParm.first && Retrievers::GetPropertyTypeDesc(propertyReturnParm.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                if (propertyReturnParm.first && Retrievers::GetPropertyTypeDesc(propertyReturnParm.first, propertyType) != EPropertyTypes::Unknown)
                 {
                     Retrievers::GetAllPropertyFlags(functionStream, propertyReturnParm.first->PropertyFlags);
                     codeStream << "// ";
@@ -2120,7 +2193,7 @@ namespace FunctionGenerator
 
                 for (const auto& propertyPair : propertyParams)
                 {
-                    if (Retrievers::GetPropertyTypeDesc(propertyPair.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (Retrievers::GetPropertyTypeDesc(propertyPair.first, propertyType) != EPropertyTypes::Unknown)
                     {
                         Retrievers::GetAllPropertyFlags(functionStream, propertyPair.first->PropertyFlags);
                         codeStream << "// ";
@@ -2134,7 +2207,7 @@ namespace FunctionGenerator
 
                 for (const auto& propertyPair : propertyOutParams)
                 {
-                    if (Retrievers::GetPropertyType(propertyPair.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (Retrievers::GetPropertyType(propertyPair.first, propertyType) != EPropertyTypes::Unknown)
                     {
                         Retrievers::GetAllPropertyFlags(functionStream, propertyPair.first->PropertyFlags);
                         codeStream << "// ";
@@ -2146,7 +2219,7 @@ namespace FunctionGenerator
                     }
                 }
 
-                if (propertyReturnParm.first && Retrievers::GetPropertyType(propertyReturnParm.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                if (propertyReturnParm.first && Retrievers::GetPropertyType(propertyReturnParm.first, propertyType) != EPropertyTypes::Unknown)
                 {
                     codeStream << "\n" << propertyType;
                 }
@@ -2168,7 +2241,7 @@ namespace FunctionGenerator
 
                 for (const auto& propertyPair : propertyParams)
                 {
-                    if (Retrievers::GetPropertyTypeDesc(propertyPair.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (Retrievers::GetPropertyTypeDesc(propertyPair.first, propertyType) != EPropertyTypes::Unknown)
                     {
                         if (printComma)
                         {
@@ -2182,7 +2255,7 @@ namespace FunctionGenerator
 
                 for (const auto& propertyPair : propertyOutParams)
                 {
-                    if (Retrievers::GetPropertyType(propertyPair.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (Retrievers::GetPropertyType(propertyPair.first, propertyType) != EPropertyTypes::Unknown)
                     {
                         if (propertyPair.first->PropertyFlags & EPropertyFlags::CPF_Parm)
                         {
@@ -2234,9 +2307,9 @@ namespace FunctionGenerator
                     {
                         EPropertyTypes propertyTypeResult = Retrievers::GetPropertyType(propertyPair.first, propertyType);
 
-                        if (propertyTypeResult != EPropertyTypes::TYPE_UNKNOWN)
+                        if (propertyTypeResult != EPropertyTypes::Unknown)
                         {
-                            if ((propertyTypeResult != EPropertyTypes::TYPE_BOOL) && (!Utils::CantMemcpy(propertyTypeResult) || !Utils::IsBitField(propertyPair.first->ArrayDim)))
+                            if ((propertyTypeResult != EPropertyTypes::Bool) && (!Utils::CantMemcpy(propertyTypeResult) || !Utils::IsBitField(propertyPair.first->ArrayDim)))
                             {
                                 codeStream << "\tmemcpy_s(&" << functionName << "_Params." << propertyPair.second << ", sizeof(" << functionName << "_Params." << propertyPair.second;
                                 codeStream << "), &" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
@@ -2258,9 +2331,9 @@ namespace FunctionGenerator
                     {
                         EPropertyTypes propertyTypeResult = Retrievers::GetPropertyType(propertyPair.first, propertyType);
 
-                        if (propertyTypeResult != EPropertyTypes::TYPE_UNKNOWN)
+                        if (propertyTypeResult != EPropertyTypes::Unknown)
                         {
-                            if ((propertyTypeResult != EPropertyTypes::TYPE_BOOL) && (!Utils::CantMemcpy(propertyTypeResult) || !Utils::IsBitField(propertyPair.first->ArrayDim)))
+                            if ((propertyTypeResult != EPropertyTypes::Bool) && (!Utils::CantMemcpy(propertyTypeResult) || !Utils::IsBitField(propertyPair.first->ArrayDim)))
                             {
                                 codeStream << "\tmemcpy_s(&" << functionName << "_Params." << propertyPair.second << ", sizeof(" << functionName << "_Params." << propertyPair.second;
                                 codeStream << "), &" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
@@ -2309,7 +2382,7 @@ namespace FunctionGenerator
 
                 if (isNativeFunction && hasNativeIndex && GConfig::RemoveNativeIndex())
                 {
-                    codeStream << "\tuFn" << functionName << "->iNative = " << std::to_string(uFunction->iNative) << ";\n";
+                    codeStream << "\tuFn" << functionName << "->iNative = " << uFunction->iNative << ";\n";
                 }
 
                 if (!propertyOutParams.empty())
@@ -2322,9 +2395,9 @@ namespace FunctionGenerator
                         {
                             EPropertyTypes propertyTypeResult = Retrievers::GetPropertyType(propertyPair.first, propertyType);
 
-                            if (propertyTypeResult != EPropertyTypes::TYPE_UNKNOWN)
+                            if (propertyTypeResult != EPropertyTypes::Unknown)
                             {
-                                if ((propertyTypeResult != EPropertyTypes::TYPE_BOOL) && (!Utils::CantMemcpy(propertyTypeResult) || !Utils::IsBitField(propertyPair.first->ArrayDim)))
+                                if ((propertyTypeResult != EPropertyTypes::Bool) && (!Utils::CantMemcpy(propertyTypeResult) || !Utils::IsBitField(propertyPair.first->ArrayDim)))
                                 {
                                     codeStream << "\tmemcpy_s(&" << propertyPair.second << ", sizeof(" << propertyPair.second;
                                     codeStream << "), &" << functionName << "_Params." << propertyPair.second << ", sizeof(" << functionName << "_Params." << propertyPair.second;
@@ -2339,7 +2412,7 @@ namespace FunctionGenerator
                     }
                 }
 
-                if (propertyReturnParm.first && Retrievers::GetPropertyType(propertyReturnParm.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                if (propertyReturnParm.first && Retrievers::GetPropertyType(propertyReturnParm.first, propertyType) != EPropertyTypes::Unknown)
                 {
                     codeStream << "\n\treturn " << functionName << "_Params." << propertyReturnParm.second << ";\n";
                 }
@@ -2420,7 +2493,7 @@ namespace FunctionGenerator
 
                 std::string propertyType;
 
-                if (propertyReturnParm.first && Retrievers::GetPropertyType(propertyReturnParm.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                if (propertyReturnParm.first && Retrievers::GetPropertyType(propertyReturnParm.first, propertyType) != EPropertyTypes::Unknown)
                 {
                     functionStream << "\t" << (isStatic ? "static " : "") << propertyType;
                 }
@@ -2442,7 +2515,7 @@ namespace FunctionGenerator
 
                 for (const auto& propertyPair : propertyParams)
                 {
-                    if (Retrievers::GetPropertyTypeDesc(propertyPair.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (Retrievers::GetPropertyTypeDesc(propertyPair.first, propertyType) != EPropertyTypes::Unknown)
                     {
                         if (printComma)
                         {
@@ -2456,7 +2529,7 @@ namespace FunctionGenerator
 
                 for (const auto& propertyPair : propertyOutParams)
                 {
-                    if (Retrievers::GetPropertyType(propertyPair.first, propertyType) != EPropertyTypes::TYPE_UNKNOWN)
+                    if (Retrievers::GetPropertyType(propertyPair.first, propertyType) != EPropertyTypes::Unknown)
                     {
                         if (propertyPair.first->PropertyFlags & EPropertyFlags::CPF_Parm)
                         {
@@ -2500,7 +2573,7 @@ namespace Generator
     std::ofstream LogFile;
     std::vector<class UObject*> vPackages{};
     std::vector<class UObject*> vIncludes{};
-    std::vector<std::pair<std::string, int32_t>> vConstants{};
+    static std::vector<std::pair<std::string, int32_t>> m_constants;
 
     std::string GenerateIndex(class UObject* uObject, bool bPushBack)
     {
@@ -2518,11 +2591,11 @@ namespace Generator
 
         if (GConfig::UsingConstants() && bPushBack)
         {
-            std::pair<std::string, int32_t> pConstant = std::make_pair(objectFullName, uObject->ObjectInternalInteger);
+            std::pair<std::string, int32_t> newConstant{ objectFullName, uObject->ObjectInternalInteger };
 
-            if (std::find(vConstants.begin(), vConstants.end(), pConstant) == vConstants.end())
+            if (std::find(m_constants.begin(), m_constants.end(), newConstant) == m_constants.end())
             {
-                vConstants.push_back(pConstant);
+                m_constants.push_back(newConstant);
             }
         }
 
@@ -2543,21 +2616,21 @@ namespace Generator
                     if (object->IsA<UFunction>() || object->IsA<UClass>())
                     {
                         std::string objectFullName = Generator::GenerateIndex(object, false);
-                        std::pair<std::string, int32_t> constant = std::make_pair(objectFullName, object->ObjectInternalInteger);
+                        std::pair<std::string, int32_t> newConstant = std::make_pair(objectFullName, object->ObjectInternalInteger);
 
-                        if (std::find(vConstants.begin(), vConstants.end(), constant) == vConstants.end())
+                        if (std::find(m_constants.begin(), m_constants.end(), newConstant) == m_constants.end())
                         {
-                            vConstants.push_back(constant);
+                            m_constants.push_back(newConstant);
                         }
                     }
                 }
             }
 
-            for (const auto& constant : vConstants)
+            for (const auto& constant : m_constants)
             {
                 constantsFile << "#define " << constant.first;
                 Printer::FillRight(constantsFile, ' ', (175 - constant.first.size()));
-                constantsFile << std::to_string(constant.second) << "\n";
+                constantsFile << constant.second << "\n";
             }
 
             constantsFile.close();
@@ -2653,7 +2726,7 @@ namespace Generator
 
         Printer::Section(definesFile, "Structs");
         definesFile << PiecesOfCode::FNameEntry_Struct << "\n";
-        StructGenerator::GenerateStructFields(definesFile, EClassTypes::STRUCT_FNAMEENTRY);
+        StructGenerator::GenerateStructFields(definesFile, EClassTypes::FNameEntry);
 
 #ifdef UTF16
         definesFile << PiecesOfCode::FNameEntry_Struct_UTF16 << "\n";
@@ -2746,7 +2819,7 @@ namespace Generator
         }
         else
         {
-            Utils::Messagebox("Failed locate the given directory, cannot generate an SDK at this time!", (MB_OK | MB_ICONERROR));
+            Utils::MessageboxError("Failed locate the given directory, cannot generate an SDK at this time!");
         }
     }
 
@@ -2763,7 +2836,7 @@ namespace Generator
         {
             if (Initialize(true))
             {
-                Utils::Messagebox("SDK generation has started, do not close the game until prompted to do so!", (MB_OK | MB_ICONINFORMATION));
+                Utils::MessageboxInfo("SDK generation has started, do not close the game until prompted to do so!");
                 std::chrono::time_point startTime = std::chrono::system_clock::now();
 
                 ProcessPackages(headerDirectory);
@@ -2781,12 +2854,12 @@ namespace Generator
                     LogFile.close();
                 }
 #endif
-                Utils::Messagebox("SDK generation complete, finished in " + formattedTime + " seconds!", (MB_OK | MB_ICONINFORMATION));
+                Utils::MessageboxInfo("SDK generation complete, finished in " + formattedTime + " seconds!");
             }
         }
         else
         {
-            Utils::Messagebox("Failed to create the desired directory, cannot generate an SDK at this time!", (MB_OK | MB_ICONERROR));
+            Utils::MessageboxError("Failed to create the desired directory, cannot generate an SDK!");
         }
     }
 
@@ -2808,25 +2881,32 @@ namespace Generator
             if (AreGlobalsValid())
             {
                 // Here is where that "REGISTER_MEMBER" macro is used, these functions calculate offsets for each class member.
-                // There might be a better and automated way of doing this, so maybe I'll change this in the future.
+                // There might be a better and automated way of doing this, so maybe I'll change this in the future when I'm less lazy.
 
+                // Structs
                 FNameEntry::Register_Flags();
                 FNameEntry::Register_Index();
                 FNameEntry::Register_Name();
+
+                // Objects
                 UObject::Register_VfTableObject();
                 UObject::Register_ObjectInternalInteger();
                 UObject::Register_Outer();
                 UObject::Register_Name();
                 UObject::Register_Class();
                 UField::Register_Next();
-                //UField::Register_SuperField(); // Safe to comment out if "UStruct" has a "SuperField".
+#ifdef SUPERFIELDS_IN_UFIELD
+                UField::Register_SuperField(); // Not needed if SuperField is in the UStruct class, leave "SUPERFIELDS_IN_UFIELD" in your "GameDefines.hpp" file!
+#endif
                 UEnum::Register_Names();
                 UConst::Register_Value();
                 UProperty::Register_ArrayDim();
                 UProperty::Register_ElementSize();
                 UProperty::Register_PropertyFlags();
                 UProperty::Register_Offset();
-                UStruct::Register_SuperField(); // Safe to comment out if "UField" has a "SuperField".
+#ifndef SUPERFIELDS_IN_UFIELD
+                UStruct::Register_SuperField(); // Not needed if SuperField is in the UStruct class, leave "SUPERFIELDS_IN_UFIELD" in your "GameDefines.hpp" file!
+#endif
                 UStruct::Register_Children();
                 UStruct::Register_PropertySize();
                 UFunction::Register_FunctionFlags();
@@ -2837,15 +2917,13 @@ namespace Generator
                 UMapProperty::Register_Key();
                 UMapProperty::Register_Value();
                 UInterfaceProperty::Register_InterfaceClass();
-                //UDelegateProperty::Register_Function(); // Not actually needed in sdk generation at the moment.
-                //UDelegateProperty::Register_DelegateName(); // Not actually needed in sdk generation at the moment.
                 UByteProperty::Register_Enum();
                 UBoolProperty::Register_BitMask();
                 UArrayProperty::Register_Inner();
             }
             else
             {
-                Utils::Messagebox("Failed to validate GObject & GNames, please make sure you have them configured properly!", (MB_OK | MB_ICONERROR));
+                Utils::MessageboxError("Failed to validate GObject & GNames, please make sure you have them configured properly in \"Configuration.cpp\"!");
                 return false;
             }
         }
@@ -2871,7 +2949,7 @@ namespace Generator
                     }
                     else
                     {
-                        Utils::Messagebox("Error: Failed to create the log file, might not have the right permissions or your directory is invalid!", (MB_OK | MB_ICONERROR));
+                        Utils::MessageboxError("Error: Failed to create the log file, might not have the right permissions or your directory is invalid!");
                         return false;
                     }
                 }
@@ -2880,7 +2958,7 @@ namespace Generator
             }
             else
             {
-                Utils::Messagebox("Looks like you forgot to set an output path for the generator! Please edit the output path in \"Configuration.cpp\" and recompile.", (MB_OK | MB_ICONERROR));
+                Utils::MessageboxError("Looks like you forgot to set an output path for the generator! Please edit the output path in \"Configuration.cpp\" and recompile.");
                 return false;
             }
         }
@@ -2902,7 +2980,7 @@ namespace Generator
                 DumpGObjects();
             }
 
-            Utils::Messagebox("Finished dumping instances!", (MB_OK | MB_ICONINFORMATION));
+            Utils::MessageboxInfo("Finished dumping instances!");
         }
     }
 
@@ -2930,7 +3008,7 @@ namespace Generator
 
                         file << "Name[";
                         Printer::FillRight(file, '0', 6);
-                        file << std::to_string(nameEntry->GetIndex()) << "] " << name << " ";
+                        file << nameEntry->GetIndex() << "] " << name << " ";
                         Printer::FillRight(file, ' ', (50 - name.length()));
                         file << Printer::Hex(nameEntry) << std::endl;
                     }
@@ -2965,7 +3043,7 @@ namespace Generator
 
                         file << "UObject[";
                         Printer::FillRight(file, '0', 6);
-                        file << std::to_string(uObject->ObjectInternalInteger) << "] " << objectName << " ";
+                        file << uObject->ObjectInternalInteger << "] " << objectName << " ";
                         Printer::FillRight(file, ' ', (50 - objectName.length()));
                         file << Printer::Hex(uObject) << std::endl;
                     }

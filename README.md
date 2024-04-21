@@ -1,5 +1,5 @@
 
-## CodeRed Generator 3 (v1.0.6)
+## CodeRed Generator 3 (v1.0.7)
 
 This is a C++20 Unreal Engine 3 SDK generator that was originally based off the source of [TheFeckless's UE3 SDK Generator](https://www.unknowncheats.me/forum/unreal-engine-3-a/71911-thefeckless-ue3-sdk-generator.html). It has since grown into its own project which utilizes C++20, strings, filesystem paths, and modern file streams; along with converting legacy UE3 features to more modern and user friendly ones while still being compatible with UE3.
 
@@ -32,14 +32,19 @@ Any further configuration **MUST BE DONE IN THE `Configuration.cpp` ONLY!** This
 
 ![](https://i.imgur.com/q2tFJ7I.png)
 
+![](https://i.imgur.com/2GrLwTD.png)
+
+![](https://i.imgur.com/K6sAwPm.png)
+
 ## Generation
 
 Once you have your custom engine folder setup, all that's left is to fill out your class and struct fields for your game. This generator uses a unique `REGISTER_MEMBER` macro to define class/struct members. This is very important for your final generated SDK as it's used to calculate offsets and unknown data all automatically, without needing to modify your `PiecesOfCode.cpp` unlike in Feckless's generator.
 
 Any class/struct member outside of whats in the `EMemberTypes` does NOT need to be registered with the `REGISTER_MEMBER` macro, so feel free to place padding or buffers in between.
 
-![](https://i.imgur.com/k0ewmaC.png)
-Once all your classes are filled out and you've made the necessary changes in `Configuration.cpp`, double check you didn't forget to set a path in `Configuration::Directory` and have the right files included in `Engine.hpp`. After that just compile as a DLL and manually inject into your game, generation will start automatically and will prompt you when it is completed.
+![](https://i.imgur.com/gbYgLoZ.png)
+
+Once all your classes are filled out and you've made the necessary changes in `Configuration.cpp`, double check you didn't forget to set an out path in `Configuration.cpp` and have the right files included in `Engine.hpp`. After that just compile as a DLL and manually inject into your game, generation will start automatically and will prompt you when it is completed.
 
 ## Finalization
 
@@ -57,6 +62,22 @@ Here is an example what it should look like:
 ...etc...
 ```
 ## Changelog
+
+### v1.0.7
+- This update will require you to change your "GameDefines.hpp" file, as I've renamed all the enum values for the "REGISTER_MEMBER" macro, also delete the "EPropertyTypes" enum that same file as I've moved it to "Member.hpp" to prevent a multiple declarations error.
+- Added a new "SUPERFIELDS_IN_UFIELD" #define in "GameDefines.hpp", which is used by "Member.cpp" to grab class offsets.
+- Added support for the "MinAlignment" member in the "UStruct" class, this is necessary to account for padding not defined in structs "PropertySize". This is required for certain games such as Rocket League for proper struct sizes and class offsets.
+- Added the "HashNext" member for the "FNameEntry" struct so it can be generated in the final sdk now.
+- Added a new "BlacklistedTypes" vector in "Configuration.hpp/cpp", this allows you to prevent certain structs or classes from being generated in the final sdk.
+- Added a new "TypeOverrides" vector in "Configuration.hpp/cpp", this allows you to override a struct or class fields with your own custom string in the final sdk.
+- Added a new "PiecesOfTypes" namespace in "PiecesOfCode.hpp/cpp" which is used for the new "TypeOverrides" feature.
+- Fixed "UClassProperty" members not being generated in the final sdk.
+- Fixed "UClassProperty" not calculating the right class size in the final sdk, resulting in adding padding that wasn't needed.
+- Moved the "EPropertyTypes" enum from "GameDefines.hpp" to "Member.hpp", it should have been in there from the start.
+- Renamed all the values for "EClassTypes", EMemberTypes", and "EPropertyTypes" enums.
+- Remade the "Member" class to be more dynamic on calculating class properties and registered members.
+- Removed "UDelegateProperty" from registered members as its not used for anything at the moment.
+- Internal improvements to memory streams and logging.
 
 ### v1.0.6
 - This update will break your previous configuration files, as I've reformatted them entirely! Remember that before just copy pasting files. I'm in the process of remaking a lot of stuff and this is just the first step.

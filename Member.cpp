@@ -6,7 +6,7 @@
 # ========================================================================================= #
 */
 
-Member::Member() : Type(EMemberTypes::UNKNOWN), Label(GetLabel(Type)), Offset(0x0), Size(1) {}
+Member::Member() : Type(EMemberTypes::Unknown), Label(GetLabel(Type)), Offset(0), Size(1) {}
 
 Member::Member(EMemberTypes type, size_t size) : Type(type), Label(GetLabel(type)), Offset(GetOffset(type)), Size(size) {}
 
@@ -14,77 +14,118 @@ Member::Member(const Member& member) : Type(member.Type), Label(member.Label), O
 
 Member::~Member() {}
 
+std::string Member::GetName(EClassTypes type)
+{
+	switch (type)
+	{
+	case EClassTypes::FNameEntry:
+		return "FNameEntry";
+	case EClassTypes::UObject:
+		return "UObject";
+	case EClassTypes::UField:
+		return "UField";
+	case EClassTypes::UEnum:
+		return "UEnum";
+	case EClassTypes::UConst:
+		return "UConst";
+	case EClassTypes::UProperty:
+		return "UProperty";
+	case EClassTypes::UStruct:
+		return "UStruct";
+	case EClassTypes::UFunction:
+		return "UFunction";
+	case EClassTypes::UStructProperty:
+		return "UStructProperty";
+	case EClassTypes::UObjectProperty:
+		return "UObjectProperty";
+	case EClassTypes::UClassProperty:
+		return "UClassProperty";
+	case EClassTypes::UMapProperty:
+		return "UMapProperty";
+	case EClassTypes::UInterfaceProperty:
+		return "UInterfaceProperty";
+	case EClassTypes::UByteProperty:
+		return "UByteProperty";
+	case EClassTypes::UBoolProperty:
+		return "UBoolProperty";
+	case EClassTypes::UArrayProperty:
+		return "UArrayProperty";
+	default:
+		return "Unknown";
+	}
+}
+
 std::string Member::GetLabel(EMemberTypes type)
 {
 	switch (type)
 	{
-	case EMemberTypes::FNAMEENTRY_FLAGS:
-		return "uint64_t Flags;";
-	case EMemberTypes::FNAMEENTRY_INDEX:
+	case EMemberTypes::FNameEntry_HashNext:
+		return "struct FNameEntry* HashNext;";
+	case EMemberTypes::FNameEntry_Index:
 		return "int32_t Index;";
-	case EMemberTypes::FNAMEENTRY_NAME:
+	case EMemberTypes::FNameEntry_Flags:
+		return "uint64_t Flags;";
+	case EMemberTypes::FNameEntry_Name:
 #ifdef UTF16
 		return "wchar_t Name[0x400];";
 #else
 		return "char Name[0x400];";
 #endif
-	case EMemberTypes::UOBJECT_VFTABLE:
+	case EMemberTypes::UObject_VfTable:
 		return "struct FPointer VfTableObject;";
-	case EMemberTypes::UOBJECT_INDEX:
+	case EMemberTypes::UObject_Integer:
 		return "int32_t ObjectInternalInteger;";
-	case EMemberTypes::UOBJECT_OUTER:
+	case EMemberTypes::UObject_Outer:
 		return "class UObject* Outer;";
-	case EMemberTypes::UOBJECT_NAME:
-		return "struct FName Name;";
-	case EMemberTypes::UOBJECT_CLASS:
+	case EMemberTypes::UObject_Name:
+		return "class FName Name;";
+	case EMemberTypes::UObject_Class:
 		return "class UClass* Class;";
-	case EMemberTypes::UFIELD_NEXT:
+	case EMemberTypes::UField_Next:
 		return "class UField* Next;";
-	case EMemberTypes::UFIELD_SUPERFIELD:
+	case EMemberTypes::UField_SuperField:
 		return "class UField* SuperField;";
-	case EMemberTypes::UENUM_NAMES:
-		return "TArray<struct FName> Names;";
-	case EMemberTypes::UCONST_VALUE:
+	case EMemberTypes::UEnum_Names:
+		return "class TArray<class FName> Names;";
+	case EMemberTypes::UConst_Value:
 		return "class FString Value;";
-	case EMemberTypes::UPROPERTY_DIMENSION:
-		return "uint32_t ArrayDim;";
-	case EMemberTypes::UPROPERTY_SIZE:
-		return "uint32_t ElementSize;";
-	case EMemberTypes::UPROPERTY_FLAGS:
+	case EMemberTypes::UProperty_Dim:
+		return "int32_t ArrayDim;";
+	case EMemberTypes::UProperty_Size:
+		return "int32_t ElementSize;";
+	case EMemberTypes::UProperty_Flags:
 		return "uint64_t PropertyFlags;";
-	case EMemberTypes::UPROPERTY_OFFSET:
-		return "uint32_t Offset;";
-	case EMemberTypes::USTRUCT_SUPERFIELD:
+	case EMemberTypes::UProperty_Offset:
+		return "int32_t Offset;";
+	case EMemberTypes::UStruct_SuperField:
 		return "class UField* SuperField;";
-	case EMemberTypes::USTRUCT_CHILDREN:
+	case EMemberTypes::UStruct_Children:
 		return "class UField* Children;";
-	case EMemberTypes::USTRUCT_SIZE:
-		return "uint32_t PropertySize;";
-	case EMemberTypes::UFUNCTION_FLAGS:
+	case EMemberTypes::UStruct_Size:
+		return "int32_t PropertySize;";
+	case EMemberTypes::UStruct_Alignment:
+		return "int32_t MinAlignment;";
+	case EMemberTypes::UFunction_Flags:
 		return "uint64_t FunctionFlags;";
-	case EMemberTypes::UFUNCTION_NATIVE:
+	case EMemberTypes::UFunction_Native:
 		return "uint16_t iNative;";
-	case EMemberTypes::USTRUCTPROPERTY_STRUCT:
+	case EMemberTypes::UStructProperty_Struct:
 		return "class UStruct* Struct;";
-	case EMemberTypes::UOBJECTPROPERTY_PROPERTY:
+	case EMemberTypes::UObjectProperty_Class:
 		return "class UClass* PropertyClass;";
-	case EMemberTypes::UCLASSPROPERTY_METACLASS:
+	case EMemberTypes::UClassProperty_Meta:
 		return "class UClass* MetaClass;";
-	case EMemberTypes::UMAPPROPERTY_KEY:
+	case EMemberTypes::UMapProperty_Key:
 		return "class UProperty* Key;";
-	case EMemberTypes::UMAPPROPERTY_VALUE:
+	case EMemberTypes::UMapProperty_Value:
 		return "class UProperty* Value;";
-	case EMemberTypes::UINTERFACEPROPERTY_CLASS:
+	case EMemberTypes::UInterfaceProperty_Class:
 		return "class UClass* InterfaceClass;";
-	case EMemberTypes::UDELEGATEPROPERTY_FUNCTION:
-		return "class UFuncton* DelegateFunction;";
-	case EMemberTypes::UDELEGATEPROPERTY_NAME:
-		return "struct FName DelegateName;";
-	case EMemberTypes::UBYTEPROPERTY_ENUM:
+	case EMemberTypes::UByteProperty_Enum:
 		return "class UEnum* Enum;";
-	case EMemberTypes::UBOOLPROPERTY_BITMASK:
+	case EMemberTypes::UBoolProperty_BitMask:
 		return "uint64_t BitMask;";
-	case EMemberTypes::UARRAYPROPERTY_INNTER:
+	case EMemberTypes::UArrayProperty_Inner:
 		return "class UProperty* Inner;";
 	default:
 		return "uint8_t UnknownMemberType[0x1];";
@@ -95,72 +136,76 @@ uintptr_t Member::GetOffset(EMemberTypes type)
 {
 	switch (type)
 	{
-	case EMemberTypes::FNAMEENTRY_FLAGS:
-		return offsetof(FNameEntry, Flags);
-	case EMemberTypes::FNAMEENTRY_INDEX:
+	case EMemberTypes::FNameEntry_HashNext:
+		return offsetof(FNameEntry, HashNext);
+	case EMemberTypes::FNameEntry_Index:
 		return offsetof(FNameEntry, Index);
-	case EMemberTypes::FNAMEENTRY_NAME:
+	case EMemberTypes::FNameEntry_Flags:
+		return offsetof(FNameEntry, Flags);
+	case EMemberTypes::FNameEntry_Name:
 		return offsetof(FNameEntry, Name);
-	case EMemberTypes::UOBJECT_VFTABLE:
+	case EMemberTypes::UObject_VfTable:
 		return offsetof(UObject, VfTableObject);
-	case EMemberTypes::UOBJECT_INDEX:
+	case EMemberTypes::UObject_Integer:
 		return offsetof(UObject, ObjectInternalInteger);
-	case EMemberTypes::UOBJECT_OUTER:
+	case EMemberTypes::UObject_Outer:
 		return offsetof(UObject, Outer);
-	case EMemberTypes::UOBJECT_NAME:
+	case EMemberTypes::UObject_Name:
 		return offsetof(UObject, Name);
-	case EMemberTypes::UOBJECT_CLASS:
+	case EMemberTypes::UObject_Class:
 		return offsetof(UObject, Class);
-	case EMemberTypes::UFIELD_NEXT:
+	case EMemberTypes::UField_Next:
 		return offsetof(UField, Next);
-	case EMemberTypes::UFIELD_SUPERFIELD:
-		return offsetof(UStruct, SuperField);
-	case EMemberTypes::UENUM_NAMES:
+#ifdef SUPERFIELDS_IN_UFIELD
+	case EMemberTypes::UField_SuperField:
+		return offsetof(UField, SuperField);
+#endif
+	case EMemberTypes::UEnum_Names:
 		return offsetof(UEnum, Names);
-	case EMemberTypes::UCONST_VALUE:
+	case EMemberTypes::UConst_Value:
 		return offsetof(UConst, Value);
-	case EMemberTypes::UPROPERTY_DIMENSION:
+	case EMemberTypes::UProperty_Dim:
 		return offsetof(UProperty, ArrayDim);
-	case EMemberTypes::UPROPERTY_SIZE:
+	case EMemberTypes::UProperty_Size:
 		return offsetof(UProperty, ElementSize);
-	case EMemberTypes::UPROPERTY_FLAGS:
+	case EMemberTypes::UProperty_Flags:
 		return offsetof(UProperty, PropertyFlags);
-	case EMemberTypes::UPROPERTY_OFFSET:
+	case EMemberTypes::UProperty_Offset:
 		return offsetof(UProperty, Offset);
-	case EMemberTypes::USTRUCT_SUPERFIELD:
+#ifndef SUPERFIELDS_IN_UFIELD
+	case EMemberTypes::UStruct_SuperField:
 		return offsetof(UStruct, SuperField);
-	case EMemberTypes::USTRUCT_CHILDREN:
+#endif
+	case EMemberTypes::UStruct_Children:
 		return offsetof(UStruct, Children);
-	case EMemberTypes::USTRUCT_SIZE:
+	case EMemberTypes::UStruct_Size:
 		return offsetof(UStruct, PropertySize);
-	case EMemberTypes::UFUNCTION_FLAGS:
+	case EMemberTypes::UStruct_Alignment:
+		return offsetof(UStruct, MinAlignment);
+	case EMemberTypes::UFunction_Flags:
 		return offsetof(UFunction, FunctionFlags);
-	case EMemberTypes::UFUNCTION_NATIVE:
+	case EMemberTypes::UFunction_Native:
 		return offsetof(UFunction, iNative);
-	case EMemberTypes::USTRUCTPROPERTY_STRUCT:
+	case EMemberTypes::UStructProperty_Struct:
 		return offsetof(UStructProperty, Struct);
-	case EMemberTypes::UOBJECTPROPERTY_PROPERTY:
+	case EMemberTypes::UObjectProperty_Class:
 		return offsetof(UObjectProperty, PropertyClass);
-	case EMemberTypes::UCLASSPROPERTY_METACLASS:
+	case EMemberTypes::UClassProperty_Meta:
 		return offsetof(UClassProperty, MetaClass);
-	case EMemberTypes::UMAPPROPERTY_KEY:
+	case EMemberTypes::UMapProperty_Key:
 		return offsetof(UMapProperty, Key);
-	case EMemberTypes::UMAPPROPERTY_VALUE:
+	case EMemberTypes::UMapProperty_Value:
 		return offsetof(UMapProperty, Value);
-	case EMemberTypes::UINTERFACEPROPERTY_CLASS:
+	case EMemberTypes::UInterfaceProperty_Class:
 		return offsetof(UInterfaceProperty, InterfaceClass);
-	case EMemberTypes::UDELEGATEPROPERTY_FUNCTION:
-		return offsetof(UDelegateProperty, DelegateFunction);
-	case EMemberTypes::UDELEGATEPROPERTY_NAME:
-		return offsetof(UDelegateProperty, DelegateName);
-	case EMemberTypes::UBYTEPROPERTY_ENUM:
+	case EMemberTypes::UByteProperty_Enum:
 		return offsetof(UByteProperty, Enum);
-	case EMemberTypes::UBOOLPROPERTY_BITMASK:
+	case EMemberTypes::UBoolProperty_BitMask:
 		return offsetof(UBoolProperty, BitMask);
-	case EMemberTypes::UARRAYPROPERTY_INNTER:
+	case EMemberTypes::UArrayProperty_Inner:
 		return offsetof(UArrayProperty, Inner);
 	default:
-		return 0x0;
+		return 0;
 	}
 }
 
@@ -168,39 +213,37 @@ size_t Member::GetClassSize(EClassTypes type)
 {
 	switch (type)
 	{
-	case EClassTypes::STRUCT_FNAMEENTRY:
+	case EClassTypes::FNameEntry:
 		return sizeof(FNameEntry);
-	case EClassTypes::CLASS_UOBJECT:
+	case EClassTypes::UObject:
 		return sizeof(UObject);
-	case EClassTypes::CLASS_UFIELD:
+	case EClassTypes::UField:
 		return sizeof(UField);
-	case EClassTypes::CLASS_UENUM:
+	case EClassTypes::UEnum:
 		return sizeof(UEnum);
-	case EClassTypes::CLASS_UCONST:
+	case EClassTypes::UConst:
 		return sizeof(UConst);
-	case EClassTypes::CLASS_UPROPERTY:
+	case EClassTypes::UProperty:
 		return  sizeof(UProperty);
-	case EClassTypes::CLASS_USTRUCT:
+	case EClassTypes::UStruct:
 		return sizeof(UStruct);
-	case EClassTypes::CLASS_UFUNCTION:
+	case EClassTypes::UFunction:
 		return sizeof(UFunction);
-	case EClassTypes::CLASS_USTRUCTPROPERTY:
+	case EClassTypes::UStructProperty:
 		return sizeof(UStructProperty);
-	case EClassTypes::CLASS_UOBJECTPROPERTY:
+	case EClassTypes::UObjectProperty:
 		return sizeof(UObjectProperty);
-	case EClassTypes::CLASS_UCLASSPROPERTY:
+	case EClassTypes::UClassProperty:
 		return sizeof(UClassProperty);
-	case EClassTypes::CLASS_UMAPPROPERTY:
+	case EClassTypes::UMapProperty:
 		return sizeof(UMapProperty);
-	case EClassTypes::CLASS_UINTERFACEPROPERTY:
+	case EClassTypes::UInterfaceProperty:
 		return sizeof(UInterfaceProperty);
-	case EClassTypes::CLASS_UDELEGATEPROPERTY:
-		return sizeof(UDelegateProperty);
-	case EClassTypes::CLASS_UBYTEPROPERTY:
+	case EClassTypes::UByteProperty:
 		return sizeof(UByteProperty);
-	case EClassTypes::CLASS_UBOOLPROPERTY:
+	case EClassTypes::UBoolProperty:
 		return sizeof(UBoolProperty);
-	case EClassTypes::CLASS_UARRAYPROPERTY:
+	case EClassTypes::UArrayProperty:
 		return sizeof(UArrayProperty);
 	default:
 		return 0;
@@ -211,39 +254,37 @@ size_t Member::GetClassOffset(EClassTypes type)
 {
 	switch (type)
 	{
-	case EClassTypes::STRUCT_FNAMEENTRY:
+	case EClassTypes::FNameEntry:
 		return 0;
-	case EClassTypes::CLASS_UOBJECT:
+	case EClassTypes::UObject:
 		return 0;
-	case EClassTypes::CLASS_UFIELD:
+	case EClassTypes::UField:
 		return sizeof(UObject);
-	case EClassTypes::CLASS_UENUM:
+	case EClassTypes::UEnum:
 		return sizeof(UField);
-	case EClassTypes::CLASS_UCONST:
+	case EClassTypes::UConst:
 		return sizeof(UField);
-	case EClassTypes::CLASS_UPROPERTY:
+	case EClassTypes::UProperty:
 		return sizeof(UField);
-	case EClassTypes::CLASS_USTRUCT:
+	case EClassTypes::UStruct:
 		return sizeof(UField);
-	case EClassTypes::CLASS_UFUNCTION:
+	case EClassTypes::UFunction:
 		return sizeof(UStruct);
-	case EClassTypes::CLASS_USTRUCTPROPERTY:
+	case EClassTypes::UStructProperty:
 		return sizeof(UProperty);
-	case EClassTypes::CLASS_UOBJECTPROPERTY:
+	case EClassTypes::UObjectProperty:
 		return sizeof(UProperty);
-	case EClassTypes::CLASS_UCLASSPROPERTY:
+	case EClassTypes::UClassProperty:
+		return sizeof(UObjectProperty);
+	case EClassTypes::UMapProperty:
 		return sizeof(UProperty);
-	case EClassTypes::CLASS_UMAPPROPERTY:
+	case EClassTypes::UInterfaceProperty:
 		return sizeof(UProperty);
-	case EClassTypes::CLASS_UINTERFACEPROPERTY:
+	case EClassTypes::UByteProperty:
 		return sizeof(UProperty);
-	case EClassTypes::CLASS_UDELEGATEPROPERTY:
+	case EClassTypes::UBoolProperty:
 		return sizeof(UProperty);
-	case EClassTypes::CLASS_UBYTEPROPERTY:
-		return sizeof(UProperty);
-	case EClassTypes::CLASS_UBOOLPROPERTY:
-		return sizeof(UProperty);
-	case EClassTypes::CLASS_UARRAYPROPERTY:
+	case EClassTypes::UArrayProperty:
 		return sizeof(UProperty);
 	default:
 		return 0;
@@ -252,93 +293,126 @@ size_t Member::GetClassOffset(EClassTypes type)
 
 void Member::Register(EMemberTypes type, size_t size)
 {
-	RegisteredMembers[type] = Member(type, size);
+	m_registeredMembers[type] = Member(type, size);
 }
 
-std::map<uintptr_t, Member> Member::GetRegistered(EClassTypes type)
+std::map<size_t, Member*> Member::GetRegistered(EClassTypes type)
 {
-	std::map<uintptr_t, Member> returnMembers;
+	std::map<size_t, Member*> members;
 
-	switch (type)
+	if (m_classMembers.contains(type))
 	{
-	case EClassTypes::STRUCT_FNAMEENTRY:
-		returnMembers[RegisteredMembers[EMemberTypes::FNAMEENTRY_FLAGS].Offset] = RegisteredMembers[EMemberTypes::FNAMEENTRY_FLAGS];
-		returnMembers[RegisteredMembers[EMemberTypes::FNAMEENTRY_INDEX].Offset] = RegisteredMembers[EMemberTypes::FNAMEENTRY_INDEX];
-		returnMembers[RegisteredMembers[EMemberTypes::FNAMEENTRY_NAME].Offset] = RegisteredMembers[EMemberTypes::FNAMEENTRY_NAME];
-		break;
-	case EClassTypes::CLASS_UOBJECT:
-		returnMembers[RegisteredMembers[EMemberTypes::UOBJECT_VFTABLE].Offset] = RegisteredMembers[EMemberTypes::UOBJECT_VFTABLE];
-		returnMembers[RegisteredMembers[EMemberTypes::UOBJECT_INDEX].Offset] = RegisteredMembers[EMemberTypes::UOBJECT_INDEX];
-		returnMembers[RegisteredMembers[EMemberTypes::UOBJECT_OUTER].Offset] = RegisteredMembers[EMemberTypes::UOBJECT_OUTER];
-		returnMembers[RegisteredMembers[EMemberTypes::UOBJECT_NAME].Offset] = RegisteredMembers[EMemberTypes::UOBJECT_NAME];
-		returnMembers[RegisteredMembers[EMemberTypes::UOBJECT_CLASS].Offset] = RegisteredMembers[EMemberTypes::UOBJECT_CLASS];
-		break;
-	case EClassTypes::CLASS_UFIELD:
-		returnMembers[RegisteredMembers[EMemberTypes::UFIELD_NEXT].Offset] = RegisteredMembers[EMemberTypes::UFIELD_NEXT];
-
-		if (RegisteredMembers.contains(EMemberTypes::UFIELD_SUPERFIELD))
+		for (EMemberTypes member : m_classMembers[type])
 		{
-			returnMembers[RegisteredMembers[EMemberTypes::UFIELD_SUPERFIELD].Offset] = RegisteredMembers[EMemberTypes::UFIELD_SUPERFIELD];
+			AddRegistered(members, member);
 		}
-
-		break;
-	case EClassTypes::CLASS_UENUM:
-		returnMembers[RegisteredMembers[EMemberTypes::UENUM_NAMES].Offset] = RegisteredMembers[EMemberTypes::UENUM_NAMES];
-		break;
-	case EClassTypes::CLASS_UCONST:
-		returnMembers[RegisteredMembers[EMemberTypes::UCONST_VALUE].Offset] = RegisteredMembers[EMemberTypes::UCONST_VALUE];
-		break;
-	case EClassTypes::CLASS_UPROPERTY:
-		returnMembers[RegisteredMembers[EMemberTypes::UPROPERTY_DIMENSION].Offset] = RegisteredMembers[EMemberTypes::UPROPERTY_DIMENSION];
-		returnMembers[RegisteredMembers[EMemberTypes::UPROPERTY_SIZE].Offset] = RegisteredMembers[EMemberTypes::UPROPERTY_SIZE];
-		returnMembers[RegisteredMembers[EMemberTypes::UPROPERTY_FLAGS].Offset] = RegisteredMembers[EMemberTypes::UPROPERTY_FLAGS];
-		returnMembers[RegisteredMembers[EMemberTypes::UPROPERTY_OFFSET].Offset] = RegisteredMembers[EMemberTypes::UPROPERTY_OFFSET];
-		break;
-	case EClassTypes::CLASS_USTRUCT:
-		if (RegisteredMembers.contains(EMemberTypes::USTRUCT_SUPERFIELD))
-		{
-			returnMembers[RegisteredMembers[EMemberTypes::USTRUCT_SUPERFIELD].Offset] = RegisteredMembers[EMemberTypes::USTRUCT_SUPERFIELD];
-		}
-
-		returnMembers[RegisteredMembers[EMemberTypes::USTRUCT_CHILDREN].Offset] = RegisteredMembers[EMemberTypes::USTRUCT_CHILDREN];
-		returnMembers[RegisteredMembers[EMemberTypes::USTRUCT_SIZE].Offset] = RegisteredMembers[EMemberTypes::USTRUCT_SIZE];
-		break;
-	case EClassTypes::CLASS_UFUNCTION:
-		returnMembers[RegisteredMembers[EMemberTypes::UFUNCTION_FLAGS].Offset] = RegisteredMembers[EMemberTypes::UFUNCTION_FLAGS];
-		returnMembers[RegisteredMembers[EMemberTypes::UFUNCTION_NATIVE].Offset] = RegisteredMembers[EMemberTypes::UFUNCTION_NATIVE];
-		break;
-	case EClassTypes::CLASS_USTRUCTPROPERTY:
-		returnMembers[RegisteredMembers[EMemberTypes::USTRUCTPROPERTY_STRUCT].Offset] = RegisteredMembers[EMemberTypes::USTRUCTPROPERTY_STRUCT];
-		break;
-	case EClassTypes::CLASS_UOBJECTPROPERTY:
-		returnMembers[RegisteredMembers[EMemberTypes::UOBJECTPROPERTY_PROPERTY].Offset] = RegisteredMembers[EMemberTypes::UOBJECTPROPERTY_PROPERTY];
-		break;
-	case EClassTypes::CLASS_UCLASSPROPERTY:
-		returnMembers[RegisteredMembers[EMemberTypes::UCLASSPROPERTY_METACLASS].Offset] = RegisteredMembers[EMemberTypes::UCLASSPROPERTY_METACLASS];
-		break;
-	case EClassTypes::CLASS_UMAPPROPERTY:
-		returnMembers[RegisteredMembers[EMemberTypes::UMAPPROPERTY_KEY].Offset] = RegisteredMembers[EMemberTypes::UMAPPROPERTY_KEY];
-		returnMembers[RegisteredMembers[EMemberTypes::UMAPPROPERTY_VALUE].Offset] = RegisteredMembers[EMemberTypes::UMAPPROPERTY_VALUE];
-		break;
-	case EClassTypes::CLASS_UINTERFACEPROPERTY:
-		returnMembers[RegisteredMembers[EMemberTypes::UINTERFACEPROPERTY_CLASS].Offset] = RegisteredMembers[EMemberTypes::UINTERFACEPROPERTY_CLASS];
-		break;
-	case EClassTypes::CLASS_UDELEGATEPROPERTY:
-		returnMembers[RegisteredMembers[EMemberTypes::UDELEGATEPROPERTY_FUNCTION].Offset] = RegisteredMembers[EMemberTypes::UDELEGATEPROPERTY_FUNCTION];
-		returnMembers[RegisteredMembers[EMemberTypes::UDELEGATEPROPERTY_NAME].Offset] = RegisteredMembers[EMemberTypes::UDELEGATEPROPERTY_NAME];
-		break;
-	case EClassTypes::CLASS_UBYTEPROPERTY:
-		returnMembers[RegisteredMembers[EMemberTypes::UBYTEPROPERTY_ENUM].Offset] = RegisteredMembers[EMemberTypes::UBYTEPROPERTY_ENUM];
-		break;
-	case EClassTypes::CLASS_UBOOLPROPERTY:
-		returnMembers[RegisteredMembers[EMemberTypes::UBOOLPROPERTY_BITMASK].Offset] = RegisteredMembers[EMemberTypes::UBOOLPROPERTY_BITMASK];
-		break;
-	case EClassTypes::CLASS_UARRAYPROPERTY:
-		returnMembers[RegisteredMembers[EMemberTypes::UARRAYPROPERTY_INNTER].Offset] = RegisteredMembers[EMemberTypes::UARRAYPROPERTY_INNTER];
-		break;
 	}
 
-	return returnMembers;
+	return members;
+}
+
+void Member::AddRegistered(std::map<size_t, Member*>& members, EMemberTypes type)
+{
+	if (m_registeredMembers.contains(type))
+	{
+		members[m_registeredMembers[type].Offset] = &m_registeredMembers[type];
+	}
+}
+
+std::map<EClassTypes, std::vector<EMemberTypes>> Member::m_classMembers = {
+	// Core Objects
+
+	{ EClassTypes::FNameEntry, {
+		EMemberTypes::FNameEntry_HashNext,
+		EMemberTypes::FNameEntry_Index,
+		EMemberTypes::FNameEntry_Flags,
+		EMemberTypes::FNameEntry_Name
+	} },
+
+	{ EClassTypes::UObject, {
+		EMemberTypes::UObject_VfTable,
+		EMemberTypes::UObject_Integer,
+		EMemberTypes::UObject_Outer,
+		EMemberTypes::UObject_Name,
+		EMemberTypes::UObject_Class
+	} },
+
+	{ EClassTypes::UField, {
+		EMemberTypes::UField_Next,
+		EMemberTypes::UField_Flags,
+		EMemberTypes::UField_SuperField
+	} },
+
+	{ EClassTypes::UEnum, {
+		EMemberTypes::UEnum_Names
+	} },
+
+	{ EClassTypes::UConst, {
+		EMemberTypes::UConst_Value
+	} },
+
+	{ EClassTypes::UProperty, {
+		EMemberTypes::UProperty_Dim,
+		EMemberTypes::UProperty_Size,
+		EMemberTypes::UProperty_Flags,
+		EMemberTypes::UProperty_Offset
+	} },
+
+	{ EClassTypes::UStruct, {
+		EMemberTypes::UStruct_SuperField,
+		EMemberTypes::UStruct_Children,
+		EMemberTypes::UStruct_Size,
+		EMemberTypes::UStruct_Alignment
+	} },
+
+	{ EClassTypes::UFunction, {
+		EMemberTypes::UFunction_Flags,
+		EMemberTypes::UFunction_Native
+	} },
+
+	// Property Objects
+
+	{ EClassTypes::UStructProperty, {
+		EMemberTypes::UStructProperty_Struct
+	} },
+
+	{ EClassTypes::UObjectProperty, {
+		EMemberTypes::UObjectProperty_Class
+	} },
+
+	{ EClassTypes::UClassProperty, {
+		EMemberTypes::UClassProperty_Meta
+	} },
+
+	{ EClassTypes::UMapProperty, {
+		EMemberTypes::UMapProperty_Key,
+		EMemberTypes::UMapProperty_Value,
+	} },
+
+	{ EClassTypes::UInterfaceProperty, {
+		EMemberTypes::UInterfaceProperty_Class
+	} },
+
+	{ EClassTypes::UByteProperty, {
+		EMemberTypes::UByteProperty_Enum
+	} },
+
+	{ EClassTypes::UBoolProperty, {
+		EMemberTypes::UBoolProperty_BitMask
+	} },
+
+	{ EClassTypes::UArrayProperty, {
+		EMemberTypes::UArrayProperty_Inner
+	} },
+};
+
+Member& Member::operator=(const Member& member)
+{
+	Type = member.Type;
+	Label = member.Label;
+	Offset = member.Offset;
+	Size = member.Size;
+	return *this;
 }
 
 /*

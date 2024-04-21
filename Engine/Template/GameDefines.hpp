@@ -152,34 +152,6 @@ enum EObjectFlags
 	RF_WillBeLoaded = 0x08000000,
 };
 
-// Property Types
-enum class EPropertyTypes : uint16_t
-{
-	TYPE_UNKNOWN,
-	TYPE_INT8,
-	TYPE_INT16,
-	TYPE_INT32,
-	TYPE_INT64,
-	TYPE_UINT8,
-	TYPE_UINT16,
-	TYPE_UINT32,
-	TYPE_UINT64,
-	TYPE_LONG,
-	TYPE_ULONG,
-	TYPE_DOUBLE,
-	TYPE_FLOAT,
-	TYPE_BOOL,
-	TYPE_TARRAY,
-	TYPE_TMAP,
-	TYPE_FNAMEENTRY,
-	TYPE_FNAME,
-	TYPE_FSTRING,
-	TYPE_FSCRIPTDELEGATE,
-	TYPE_FPOINTER,
-	TYPE_FSTRUCT,
-	TYPE_UPOINTER
-};
-
 /*
 # ========================================================================================= #
 # Classes
@@ -592,7 +564,7 @@ public:
 */
 
 extern TArray<class UObject*>* GObjects;
-extern TArray<struct FNameEntry*>* GNames;
+extern TArray<class FNameEntry*>* GNames;
 
 /*
 # ========================================================================================= #
@@ -602,20 +574,21 @@ extern TArray<struct FNameEntry*>* GNames;
 
 // FNameEntry
 // (0x0000 - 0x000C)
-struct FNameEntry
+class FNameEntry
 {
 public:
-	uint64_t Flags;							REGISTER_MEMBER(uint64_t, Flags, EMemberTypes::FNAMEENTRY_FLAGS)					// 0x0000 (0x08)
-	int32_t Index;							REGISTER_MEMBER(int32_t, Index, EMemberTypes::FNAMEENTRY_INDEX)						// 0x0008 (0x04)
+	uint64_t Flags;							REGISTER_MEMBER(uint64_t, Flags, EMemberTypes::FNameEntry_Flags)					// 0x0000 (0x08)
+	int32_t Index;							REGISTER_MEMBER(int32_t, Index, EMemberTypes::FNameEntry_Index)						// 0x0008 (0x04)
+	FNameEntry* HashNext;
 
 #ifdef UTF16
-	wchar_t			Name[0x400];			REGISTER_MEMBER(wchar_t, Name, EMemberTypes::FNAMEENTRY_NAME)						// 0x000C (0x00)
+	wchar_t			Name[0x400];			REGISTER_MEMBER(wchar_t, Name, EMemberTypes::FNameEntry_Name)						// 0x000C (0x00)
 #else
-	char			Name[0x400];			REGISTER_MEMBER(char, Name, EMemberTypes::FNAMEENTRY_NAME)							// 0x000C (0x00)
+	char			Name[0x400];			REGISTER_MEMBER(char, Name, EMemberTypes::FNameEntry_Name)							// 0x000C (0x00)
 #endif
 
 public:
-	FNameEntry() : Flags(0), Index(-1) {}
+	FNameEntry() : Flags(0), Index(-1), HashNext(nullptr) {}
 	~FNameEntry() {}
 
 public:
@@ -668,7 +641,7 @@ public:
 
 // FName
 // (0x0000 - 0x0008)
-struct FName
+class FName
 {
 public:
 #ifdef UTF16
@@ -962,12 +935,12 @@ public:
 	}
 };
 
-// FScriptDelegate [THIS STRUCT CAN BE GAME SPECIFIC, YOU'LL HAVE TO REVERSE IT BY HAND]
-// (0x0000 - 0x0009)
+// FScriptDelegate [THIS STRUCT CAN BE GAME SPECIFIC]
+// (0x0000 - 0x0010)
 struct FScriptDelegate
 {
-	class UObject* Object;				// 0x0000 (0x08)
-	uint8_t UnknownData[0x1];			// 0x0008 (0x01)
+	class UObject* Object;											// 0x0000 (0x08)
+	class FName FunctionName;										// 0x0008 (0x08)
 };
 
 // FPointer
@@ -991,17 +964,23 @@ struct FQWord
 # ========================================================================================= #
 */
 
+// Comment this out if "SuperField" is located in UField instead of UStruct!
+#define SUPERFIELDS_IN_UFIELD
+
+// Commenting this out will disabling using the "MinAlignment" field in UStruct, it is recommended you keep this commented.
+//#define SKIP_MIN_ALIGNMENT
+
 // Class Core.Object
 // (0x0000 - 0x0034)
 class UObject
 {
 public:
-	struct FPointer VfTableObject;			REGISTER_MEMBER(FPointer, VfTableObject, EMemberTypes::UOBJECT_VFTABLE)				// 0x0000 (0x08)
+	struct FPointer VfTableObject;			REGISTER_MEMBER(struct FPointer, VfTableObject, EMemberTypes::UObject_VfTable)		// 0x0000 (0x08)
 	uint8_t UnknownData00[0x10];			// Example of padding, you do not need to register this because offsets are all automatically calculated.
-	int32_t ObjectInternalInteger;			REGISTER_MEMBER(int32_t, ObjectInternalInteger, EMemberTypes::UOBJECT_INDEX)		// 0x0018 (0x04)
-	class UObject* Outer;					REGISTER_MEMBER(class UObject*, Outer, EMemberTypes::UOBJECT_OUTER)					// 0x001C (0x08)
-	struct FName Name;						REGISTER_MEMBER(FName, Name, EMemberTypes::UOBJECT_NAME)							// 0x0024 (0x08)
-	class UClass* Class;					REGISTER_MEMBER(class UClass*, Class, EMemberTypes::UOBJECT_CLASS)					// 0x002C (0x08)
+	int32_t ObjectInternalInteger;			REGISTER_MEMBER(int32_t, ObjectInternalInteger, EMemberTypes::UObject_Integer)		// 0x0018 (0x04)
+	class UObject* Outer;					REGISTER_MEMBER(class UObject*, Outer, EMemberTypes::UObject_Outer)					// 0x001C (0x08)
+	class FName Name;						REGISTER_MEMBER(class FName, Name, EMemberTypes::UObject_Name)						// 0x0024 (0x08)
+	class UClass* Class;					REGISTER_MEMBER(class UClass*, Class, EMemberTypes::UObject_Class)					// 0x002C (0x08)
 
 public:
 	static UClass* StaticClass()
@@ -1038,13 +1017,13 @@ public:
 
 		return nullptr;
 	}
-	template<typename T> static uint32_t CountObject(const std::string& objectName)
+	template<typename T> static int32_t CountObject(const std::string& objectName)
 	{
-		static std::map<std::string, int32_t> countCache;
+		static std::map<std::string, int32_t> objectCache;
 
-		if (countCache.find(objectName) == countCache.end())
+		if (!objectCache.contains(objectName))
 		{
-			countCache[objectName] = 0;
+			objectCache[objectName] = 0;
 
 			for (UObject* uObject : *UObject::GObjObjects())
 			{
@@ -1052,13 +1031,13 @@ public:
 				{
 					if (uObject->GetName() == objectName)
 					{
-						countCache[uObject->GetName()]++;
+						objectCache[uObject->GetName()]++;
 					}
 				}
 			}
 		}
 
-		return countCache[objectName];
+		return objectCache[objectName];
 	}
 	static class UClass* FindClass(const std::string& classFullName);
 	template<typename T> bool IsA()
@@ -1077,8 +1056,8 @@ public:
 class UField : public UObject
 {
 public:
-	class UField* Next;						REGISTER_MEMBER(class UField*, Next, EMemberTypes::UFIELD_NEXT)						// 0x0034 (0x08)
-	class UField* SuperField;				REGISTER_MEMBER(class UField*, SuperField, EMemberTypes::UFIELD_SUPERFIELD)			// 0x003C (0x08) [SUPERFIELD CAN EITHER BE HERE, OR IN USTRUCT DPENDING ON THE GAME!]
+	class UField* Next;						REGISTER_MEMBER(class UField*, Next, EMemberTypes::UField_Next)						// 0x0034 (0x08)
+	class UField* SuperField;				REGISTER_MEMBER(class UField*, SuperField, EMemberTypes::UField_SuperField)			// 0x003C (0x08) [SUPERFIELD CAN EITHER BE HERE, OR IN USTRUCT DPENDING ON THE GAME!]
 
 public:
 	static UClass* StaticClass()
@@ -1099,7 +1078,7 @@ public:
 class UEnum : public UField
 {
 public:
-	TArray<struct FName> Names;				REGISTER_MEMBER(TArray<struct FName>, Names, EMemberTypes::UENUM_NAMES)				// 0x0044 (0x10)
+	class TArray<class FName> Names;		REGISTER_MEMBER(class TArray<class FName>, Names, EMemberTypes::UEnum_Names)		// 0x0044 (0x10)
 
 public:
 	static UClass* StaticClass()
@@ -1120,7 +1099,7 @@ public:
 class UConst : public UField
 {
 public:
-	class FString Value;					REGISTER_MEMBER(FString, Value, EMemberTypes::UCONST_VALUE)							// 0x0044 (0x10)
+	class FString Value;					REGISTER_MEMBER(class FString, Value, EMemberTypes::UConst_Value)					// 0x0044 (0x10)
 
 public:
 	static UClass* StaticClass()
@@ -1141,10 +1120,10 @@ public:
 class UProperty : public UField
 {
 public:
-	uint32_t ArrayDim;						REGISTER_MEMBER(uint32_t, ArrayDim, EMemberTypes::UPROPERTY_DIMENSION)				// 0x0044 (0x04)
-	uint32_t ElementSize;					REGISTER_MEMBER(uint32_t, ElementSize, EMemberTypes::UPROPERTY_SIZE)				// 0x0048 (0x04)
-	uint64_t PropertyFlags;					REGISTER_MEMBER(uint64_t, PropertyFlags, EMemberTypes::UPROPERTY_FLAGS)				// 0x004C (0x08)
-	uint32_t Offset;						REGISTER_MEMBER(uint32_t, Offset, EMemberTypes::UPROPERTY_OFFSET)					// 0x0054 (0x04)
+	int32_t ArrayDim;						REGISTER_MEMBER(int32_t, ArrayDim, EMemberTypes::UProperty_Dim)					// 0x0044 (0x04)
+	int32_t ElementSize;					REGISTER_MEMBER(int32_t, ElementSize, EMemberTypes::UProperty_Size)				// 0x0048 (0x04)
+	uint64_t PropertyFlags;					REGISTER_MEMBER(uint64_t, PropertyFlags, EMemberTypes::UProperty_Flags)				// 0x004C (0x08)
+	int32_t Offset;							REGISTER_MEMBER(int32_t, Offset, EMemberTypes::UProperty_Offset)					// 0x0054 (0x04)
 
 public:
 	static UClass* StaticClass()
@@ -1161,13 +1140,14 @@ public:
 };
 
 // Class Core.Struct
-// 0x0014 (0x0044 - 0x0058)
+// 0x0014 (0x0044 - 0x0060)
 class UStruct : public UField
 {
 public:
-	//class UField* SuperField;				REGISTER_MEMBER(class UField*, SuperField, EMemberTypes::USTRUCT_SUPERFIELD)		// 0x0044 (0x08) [SUPERFIELD CAN EITHER BE HERE, OR IN UFIELD DPENDING ON THE GAME. COMMENT OUT ACCORDINGLY!]
-	class UField* Children;					REGISTER_MEMBER(class UField*, Children, EMemberTypes::USTRUCT_CHILDREN)			// 0x004C (0x08)
-	uint32_t PropertySize;					REGISTER_MEMBER(uint32_t, PropertySize, EMemberTypes::USTRUCT_SIZE)					// 0x0054 (0x04)
+	class UField* SuperField;				REGISTER_MEMBER(class UField*, SuperField, EMemberTypes::UStruct_SuperField)		// 0x0044 (0x08) [SUPERFIELD CAN EITHER BE HERE, OR IN UFIELD DPENDING ON THE GAME. COMMENT OUT ACCORDINGLY!]
+	class UField* Children;					REGISTER_MEMBER(class UField*, Children, EMemberTypes::UStruct_Children)			// 0x004C (0x08)
+	int32_t PropertySize;					REGISTER_MEMBER(int32_t, PropertySize, EMemberTypes::UStruct_Size)					// 0x0054 (0x04)
+	int32_t MinAlignment;					REGISTER_MEMBER(int32_t, MinAlignment, EMemberTypes::UStruct_Alignment)				// 0x0058 (0x04)
 
 public:
 	static UClass* StaticClass()
@@ -1188,8 +1168,8 @@ public:
 class UFunction : public UStruct
 {
 public:
-	uint64_t FunctionFlags;					REGISTER_MEMBER(uint64_t, FunctionFlags, EMemberTypes::UFUNCTION_FLAGS)				// 0x0058 (0x08)
-	uint16_t iNative;						REGISTER_MEMBER(uint16_t, iNative, EMemberTypes::UFUNCTION_NATIVE)					// 0x0060 (0x02)
+	uint64_t FunctionFlags;					REGISTER_MEMBER(uint64_t, FunctionFlags, EMemberTypes::UFunction_Flags)				// 0x0058 (0x08)
+	uint16_t iNative;						REGISTER_MEMBER(uint16_t, iNative, EMemberTypes::UFunction_Native)					// 0x0060 (0x02)
 
 public:
 	static UClass* StaticClass()
@@ -1272,7 +1252,7 @@ public:
 
 /*
 # ========================================================================================= #
-# Property Sub Classes
+# Property Classes
 # ========================================================================================= #
 */
 
@@ -1281,7 +1261,7 @@ public:
 class UStructProperty : public UProperty
 {
 public:
-	class UStruct* Struct;					REGISTER_MEMBER(class UStruct*, Struct, EMemberTypes::USTRUCTPROPERTY_STRUCT)			// 0x0058 (0x08)
+	class UStruct* Struct;					REGISTER_MEMBER(class UStruct*, Struct, EMemberTypes::UStructProperty_Struct)			// 0x0058 (0x08)
 
 public:
 	static UClass* StaticClass()
@@ -1338,7 +1318,7 @@ public:
 class UObjectProperty : public UProperty
 {
 public:
-	class UClass* PropertyClass;			REGISTER_MEMBER(class UClass*, PropertyClass, EMemberTypes::UOBJECTPROPERTY_PROPERTY)	// 0x0058 (0x08)
+	class UClass* PropertyClass;			REGISTER_MEMBER(class UClass*, PropertyClass, EMemberTypes::UObjectProperty_Class)		// 0x0058 (0x08)
 
 public:
 	static UClass* StaticClass()
@@ -1377,7 +1357,7 @@ public:
 class UClassProperty : public UObjectProperty
 {
 public:
-	class UClass* MetaClass;				REGISTER_MEMBER(class UClass*, MetaClass, EMemberTypes::UCLASSPROPERTY_METACLASS)		// 0x0058 (0x08)
+	class UClass* MetaClass;				REGISTER_MEMBER(class UClass*, MetaClass, EMemberTypes::UClassProperty_Meta)			// 0x0058 (0x08)
 
 public:
 	static UClass* StaticClass()
@@ -1416,8 +1396,8 @@ public:
 class UMapProperty : public UProperty
 {
 public:
-	class UProperty* Key;					REGISTER_MEMBER(class UProperty*, Key, EMemberTypes::UMAPPROPERTY_KEY)					// 0x0058 (0x08)
-	class UProperty* Value;					REGISTER_MEMBER(class UProperty*, Value, EMemberTypes::UMAPPROPERTY_VALUE)				// 0x0060 (0x08)
+	class UProperty* Key;					REGISTER_MEMBER(class UProperty*, Key, EMemberTypes::UMapProperty_Key)					// 0x0058 (0x08)
+	class UProperty* Value;					REGISTER_MEMBER(class UProperty*, Value, EMemberTypes::UMapProperty_Value)				// 0x0060 (0x08)
 
 public:
 	static UClass* StaticClass()
@@ -1438,7 +1418,6 @@ public:
 class UIntProperty : public UProperty
 {
 public:
-public:
 	static UClass* StaticClass()
 	{
 		static UClass* uClassPointer = nullptr;
@@ -1457,7 +1436,7 @@ public:
 class UInterfaceProperty : public UProperty
 {
 public:
-	class UClass* InterfaceClass;			REGISTER_MEMBER(class UClass*, InterfaceClass, EMemberTypes::UINTERFACEPROPERTY_CLASS)	// 0x0058 (0x08)
+	class UClass* InterfaceClass;			REGISTER_MEMBER(class UClass*, InterfaceClass, EMemberTypes::UInterfaceProperty_Class)	// 0x0058 (0x08)
 
 public:
 	static UClass* StaticClass()
@@ -1478,7 +1457,6 @@ public:
 class UFloatProperty : public UProperty
 {
 public:
-public:
 	static UClass* StaticClass()
 	{
 		static UClass* uClassPointer = nullptr;
@@ -1493,12 +1471,12 @@ public:
 };
 
 // Class Core.DelegateProperty
-// 0x0010 (0x0058 - 0x0068)
+// 0x0010 (0x0088 - 0x0068)
 class UDelegateProperty : public UProperty
 {
 public:
-	class UFuncton* DelegateFunction;		REGISTER_MEMBER(class UFuncton*, Function, EMemberTypes::UDELEGATEPROPERTY_FUNCTION)		// 0x0058 (0x08)
-	struct FName DelegateName;				REGISTER_MEMBER(FName, DelegateName, EMemberTypes::UDELEGATEPROPERTY_NAME)					// 0x0060 (0x08)
+	class UFunction* DelegateFunction;		// 0x0058 (0x08)
+	class FName DelegateName;				// 0x0060 (0x08)
 
 public:
 	static UClass* StaticClass()
@@ -1514,12 +1492,13 @@ public:
 	};
 };
 
+
 // Class Core.ByteProperty
 // 0x0008 (0x0058 - 0x0060)
 class UByteProperty : public UProperty
 {
 public:
-	class UEnum* Enum;						REGISTER_MEMBER(class UEnum*, Enum, EMemberTypes::UBYTEPROPERTY_ENUM)						// 0x0058 (0x08)
+	class UEnum* Enum;						REGISTER_MEMBER(class UEnum*, Enum, EMemberTypes::UByteProperty_Enum)						// 0x0058 (0x08)
 
 public:
 	static UClass* StaticClass()
@@ -1540,7 +1519,7 @@ public:
 class UBoolProperty : public UProperty
 {
 public:
-	uint64_t BitMask;						REGISTER_MEMBER(uint64_t, BitMask, EMemberTypes::UBOOLPROPERTY_BITMASK)						// 0x0058 (0x08)
+	uint64_t BitMask;						REGISTER_MEMBER(uint64_t, BitMask, EMemberTypes::UBoolProperty_BitMask)						// 0x0058 (0x08)
 
 public:
 	static UClass* StaticClass()
@@ -1561,7 +1540,7 @@ public:
 class UArrayProperty : public UProperty
 {
 public:
-	class UProperty* Inner;					REGISTER_MEMBER(class UProperty*, Inner, EMemberTypes::UARRAYPROPERTY_INNTER)				// 0x0058 (0x08)
+	class UProperty* Inner;					REGISTER_MEMBER(class UProperty*, Inner, EMemberTypes::UArrayProperty_Inner)				// 0x0058 (0x08)
 
 public:
 	static UClass* StaticClass()
