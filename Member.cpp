@@ -60,7 +60,7 @@ std::string Member::GetLabel(EMemberTypes type)
 	switch (type)
 	{
 	case EMemberTypes::FNameEntry_HashNext:
-		return "struct FNameEntry* HashNext;";
+		return "class FNameEntry* HashNext;";
 	case EMemberTypes::FNameEntry_Index:
 		return "int32_t Index;";
 	case EMemberTypes::FNameEntry_Flags:
