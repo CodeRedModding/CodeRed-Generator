@@ -1,5 +1,5 @@
 
-## CodeRed Generator 3 (v1.0.7)
+## CodeRed Generator 3 (v1.0.8)
 
 This is a C++20 Unreal Engine 3 SDK generator that was originally based off the source of [TheFeckless's UE3 SDK Generator](https://www.unknowncheats.me/forum/unreal-engine-3-a/71911-thefeckless-ue3-sdk-generator.html). It has since grown into its own project which utilizes C++20, strings, filesystem paths, and modern file streams; along with converting legacy UE3 features to more modern and user friendly ones while still being compatible with UE3.
 
@@ -46,22 +46,15 @@ Any class/struct member outside of whats in the `EMemberTypes` does NOT need to 
 
 Once all your classes are filled out and you've made the necessary changes in `Configuration.cpp`, double check you didn't forget to set an out path in `Configuration.cpp` and have the right files included in `Engine.hpp`. After that just compile as a DLL and manually inject into your game, generation will start automatically and will prompt you when it is completed.
 
-## Finalization
-
-After your SDK has been generated you might need to make a minor change to it. Depending on the game the header files in `SdkHeaders.hpp` could be placed out of order, if they are make sure to swap it out in the order of the includes to `Core` first, then `Engine`. I'm not sure why this happens in some games and not others so I am unable to automate this step without a guarantee of messing something up.
-
-Here is an example what it should look like:
-```cpp
-#include "GameDefines.hpp"
-#include "SDK_HEADERS\Core_structs.hpp"
-#include "SDK_HEADERS\Core_classes.hpp"
-#include "SDK_HEADERS\Core_parameters.hpp"
-#include "SDK_HEADERS\Engine_structs.hpp"
-#include "SDK_HEADERS\Engine_classes.hpp"
-#include "SDK_HEADERS\Engine_parameters.hpp"
-...etc...
-```
 ## Changelog
+
+### v1.0.8
+- Added a new caching system for objects, which increases generation speed by over 50%.
+- Added a new class type for the "EClassTypes" enum in "Member.hpp", this is required for the new cache system.
+- Fixed the header files in "SdkHeaders.hpp" sometimes being in the wrong order in the final sdk.
+- Fixed the "UsingConstants" setting for your config file generating improper names in the final sdk.
+- Fixed a capitalization error in the final generated sdk if you had "UsingConstants" set to true in your config file.
+- Updated some of the default "PiecesOfCode.cpp" functions slightly.
 
 ### v1.0.7
 - This update will require you to change your "GameDefines.hpp" file, as I've renamed all the enum values for the "REGISTER_MEMBER" macro, also delete the "EPropertyTypes" enum that same file as I've moved it to "Member.hpp" to prevent a multiple declarations error.

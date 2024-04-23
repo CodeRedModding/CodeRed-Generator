@@ -8,6 +8,7 @@ enum class EClassTypes : uint8_t
 	Unknown,
 	FNameEntry,
 	UObject,
+	UClass,
 	UField,
 	UEnum,
 	UConst,
@@ -24,7 +25,7 @@ enum class EClassTypes : uint8_t
 	UArrayProperty
 };
 
-// Class Member Types
+// Member Types
 enum class EMemberTypes : uint8_t
 {
 	Unknown,
@@ -52,6 +53,7 @@ enum class EMemberTypes : uint8_t
 	UStruct_Alignment,
 	UFunction_Flags,
 	UFunction_Native,
+	UFunction_Func,
 	UStructProperty_Struct,
 	UObjectProperty_Class,
 	UClassProperty_Meta,

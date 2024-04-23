@@ -15,10 +15,9 @@ TArray<struct FNameEntry*>* GNames{};
 # ========================================================================================= #
 */
 
-TArray<class UObject*>* UObject::GObjObjects()
+class TArray<class UObject*>* UObject::GObjObjects()
 {
-	TArray<UObject*>* recastedArray = reinterpret_cast<TArray<UObject*>*>(GObjects);
-	return recastedArray;
+	return reinterpret_cast<TArray<UObject*>*>(GObjects);
 }
 
 std::string UObject::GetName()

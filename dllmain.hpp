@@ -3,18 +3,88 @@
 #include "Printer.hpp"
 #include "Engine/Engine.hpp"
 
+class UnrealObject
+{
+public:
+	EClassTypes Type;
+	class UObject* Object;
+	class UObject* Package;
+	std::string FullName;
+	std::string ValidName;
+
+public:
+	UnrealObject();
+	UnrealObject(class UObject* uObject);
+	UnrealObject(const UnrealObject& unrealObj);
+	~UnrealObject();
+
+public:
+	bool IsValid() const;
+	std::string Hash() const;
+
+private:
+	bool Assign(class UObject* uObject);
+	bool AssignType();
+
+public:
+	bool operator>(const UnrealObject& unrealObj);
+	bool operator<(const UnrealObject& unrealObj);
+	bool operator==(const UnrealObject& unrealObj);
+	bool operator!=(const UnrealObject& unrealObj);
+	UnrealObject& operator=(const UnrealObject& unrealObj);
+};
+
+namespace std
+{
+	template<>
+	struct hash<UnrealObject>
+	{
+		size_t operator()(const UnrealObject& unrealObj) const
+		{
+			return hash<string>()(unrealObj.Hash());
+		}
+	};
+}
+
+class GCache
+{
+private:
+	static inline std::map<class UObject*, std::vector<UnrealObject>> m_consts;
+	static inline std::map<class UObject*, std::vector<UnrealObject>> m_enums;
+	static inline std::map<class UObject*, std::vector<UnrealObject>> m_structs;
+	static inline std::map<class UObject*, std::vector<UnrealObject>> m_classes;
+	static inline std::vector<std::pair<class UObject*, std::string>> m_includes;
+	static inline std::map<std::string, class UObject*> m_constants;
+	static inline std::vector<class UObject*> m_packages;
+
+public:
+	static void Initialize();
+	static std::vector<UnrealObject>* GetCache(class UObject* packageObj, EClassTypes type);
+	static std::vector<std::pair<class UObject*, std::string>>* GetIncludes();
+	static std::map<std::string, class UObject*>* GetConstants();
+	static std::vector<class UObject*>* GetPackages();
+
+public:
+	static std::pair<std::string, class UObject*> GetConstant(const UnrealObject& unrealObj);
+	static UnrealObject GetLargestStruct(const std::string& structFullName);
+	static UnrealObject GetClass(class UClass* staticClass);
+
+private:
+	static void CacheObject(UnrealObject& unrealObj);
+	static void CacheConstant(UnrealObject& unrealObj);
+};
+
 namespace Utils
 {
 	void MessageboxInfo(const std::string& message);
 	void MessageboxWarn(const std::string& message);
 	void MessageboxError(const std::string& message);
 
-	bool MapExists(std::multimap<std::string, std::string>& map, const std::string& key, const std::string& value);
 	bool SortProperty(class UProperty* uPropertyA, class UProperty* uPropertyB);
 	bool SortPropertyPair(const std::pair<class UProperty*, std::string>& pairA, const std::pair<class UProperty*, std::string>& pairB);
-	bool IsStructProperty(EPropertyTypes propertyType);
-	bool IsBitField(uint32_t arrayDim);
 	bool CantMemcpy(EPropertyTypes propertyType);
+	bool IsStructProperty(EPropertyTypes propertyType);
+	bool IsBitField(int32_t arrayDim);
 
 	std::string CreateValidName(std::string name);
 	std::string CreateUniqueName(class UClass* uClass);
@@ -37,55 +107,52 @@ namespace Retrievers
 
 namespace ConstGenerator
 {
-	void GenerateConst(std::ofstream& file, class UConst* constant);
-	void ProcessConsts(std::ofstream& file, class UObject* packageObj);
+	std::string GenerateConstName(class UConst* uConst);
+	void GenerateConst(std::ofstream& stream, const UnrealObject& unrealObj);
+	void ProcessConsts(std::ofstream& stream, class UObject* packageObj);
 }
 
 namespace EnumGenerator
 {
 	std::string GenerateEnumName(class UEnum* uEnum);
-	void GenerateEnum(std::ofstream& file, class UEnum* uEnum);
-	void ProcessEnums(std::ofstream& file, class UObject* packageObj);
+	void GenerateEnum(std::ofstream& stream, const UnrealObject& unrealObj);
+	void ProcessEnums(std::ofstream& stream, class UObject* packageObj);
 }
 
 namespace StructGenerator
 {
-	class UScriptStruct* FindLargestStruct(const std::string& structFullName);
-	void GenerateStructFields(std::ofstream& structStream, EClassTypes structType);
-	void GenerateStruct(std::ofstream& file, class UScriptStruct* scriptStruct);
-	void GenerateStructProperties(std::ofstream& file, class UScriptStruct* scriptStruct, class UObject* packageObj);
-	void ProcessStructs(std::ofstream& file, class UObject* packageObj);
+	void GenerateStructMembers(std::ofstream& structStream, EClassTypes type);
+	void GenerateStruct(std::ofstream& stream, const UnrealObject& unrealObj);
+	void GenerateStructPre(std::ofstream& stream, const UnrealObject& unrealObj);
+	void ProcessStructs(std::ofstream& stream, class UObject* packageObj);
 }
 
 namespace ClassGenerator
 {
-	void GenerateClassFields(std::ostringstream& classStream, class UClass* uClass, EClassTypes classType);
-	void GenerateClass(std::ofstream& file, class UClass* uClass);
-	void GenerateClassProperties(std::ofstream& file, class UClass* uClass, class UObject* packageObj);
-	void ProcessClasses(std::ofstream& file, class UObject* packageObj);
+	void GenerateClassMembers(std::ostringstream& classStream, class UClass* uClass, EClassTypes classType);
+	void GenerateClass(std::ofstream& stream, const UnrealObject& unrealObj);
+	void GenerateClassPre(std::ofstream& stream, const UnrealObject& unrealObj, class UObject* packageObj);
+	void ProcessClasses(std::ofstream& stream, class UObject* packageObj);
 }
 
 namespace ParameterGenerator
 {
-	void GenerateParameter(std::ofstream& file, class UClass* uClass);
-	void ProcessParameters(std::ofstream& file, class UObject* packageObj);
+	void GenerateParameter(std::ofstream& stream, const UnrealObject& unrealObj);
+	void ProcessParameters(std::ofstream& stream, class UObject* packageObj);
 }
 
 namespace FunctionGenerator
 {
-	void GenerateVirtualFunctions(std::ofstream& file);
-	void GenerateFunctionCode(std::ofstream& file, class UClass* uClass);
-	void GenerateFunctionDescription(std::ofstream& file, class UClass* uClass);
-	void ProcessFunctions(std::ofstream& file, class UObject* packageObj);
+	void GenerateVirtualFunctions(std::ofstream& stream);
+	void GenerateFunctionCode(std::ofstream& stream, const UnrealObject& unrealObj);
+	void GenerateFunctionDescription(std::ofstream& stream, const UnrealObject& unrealObj);
+	void ProcessFunctions(std::ofstream& stream, class UObject* packageObj);
 }
 
 namespace Generator
 {
 	extern std::ofstream LogFile;
-	extern std::vector<class UObject*> vPackages;
-	extern std::vector<class UObject*> vIncludes;
 
-	std::string GenerateIndex(class UObject* uObject, bool bPushBack = true);
 	void GenerateConstants();
 	void GenerateHeaders();
 	void GenerateDefines();

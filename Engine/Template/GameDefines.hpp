@@ -995,7 +995,7 @@ public:
 		return uClassPointer;
 	}
 
-	static TArray<class UObject*>* GObjObjects();
+	static class TArray<class UObject*>* GObjObjects();
 
 	std::string GetName();
 	std::string GetNameCPP();

@@ -943,7 +943,7 @@ namespace PiecesOfCode
 		"};\n";
 
 	const std::string UObject_FunctionDescriptions =
-		"\tstatic TArray<class UObject*>* GObjObjects();\n"
+		"\tstatic class TArray<class UObject*>* GObjObjects();\n"
 		"\n"
 		"\tstd::string GetName();\n"
 		"\tstd::string GetNameCPP();\n"
@@ -998,10 +998,9 @@ namespace PiecesOfCode
 		"\tbool IsA(int32_t objInternalInteger);\n\n";
 
 	const std::string UObject_Functions =
-		"TArray<class UObject*>* UObject::GObjObjects()\n"
+		"class TArray<class UObject*>* UObject::GObjObjects()\n"
 		"{\n"
-		"\tTArray<UObject*>* recastedArray = reinterpret_cast<TArray<UObject*>*>(GObjects);\n"
-		"\treturn recastedArray;\n"
+		"\treturn reinterpret_cast<TArray<UObject*>*>(GObjects);\n"
 		"}\n"
 		"\n"
 		"std::string UObject::GetName()\n"
