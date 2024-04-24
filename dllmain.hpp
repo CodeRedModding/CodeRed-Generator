@@ -82,6 +82,8 @@ namespace Utils
 
 	bool SortProperty(class UProperty* uPropertyA, class UProperty* uPropertyB);
 	bool SortPropertyPair(const std::pair<class UProperty*, std::string>& pairA, const std::pair<class UProperty*, std::string>& pairB);
+	bool CantConst(class UProperty* uProperty);
+	bool CantReference(class UProperty* uProperty);
 	bool CantMemcpy(EPropertyTypes propertyType);
 	bool IsStructProperty(EPropertyTypes propertyType);
 	bool IsBitField(int32_t arrayDim);

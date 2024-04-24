@@ -330,6 +330,26 @@ namespace Utils
         return (propertyA->Offset < propertyB->Offset);
     }
 
+    bool CantConst(class UProperty* uProperty)
+    {
+        if (uProperty)
+        {
+            return ((uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm) || (uProperty->PropertyFlags & EPropertyFlags::CPF_OutParm));
+        }
+
+        return false;
+    }
+
+    bool CantReference(class UProperty* uProperty)
+    {
+        if (uProperty)
+        {
+            return (uProperty->ArrayDim > 1);
+        }
+
+        return false;
+    }
+
     bool CantMemcpy(EPropertyTypes propertyType)
     {
         return (propertyType == EPropertyTypes::Bool);
@@ -570,7 +590,7 @@ namespace Retrievers
                         outPropertyType = ("struct " + Utils::CreateValidName(structProperty->Struct->GetNameCPP()));
                     }
 
-                    if (bDescription && !(uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
+                    if (bDescription && !Utils::CantReference(uProperty) && !Utils::CantConst(uProperty))
                     {
                         outPropertyType = ("const " + outPropertyType + "&");
                     }
@@ -582,7 +602,7 @@ namespace Retrievers
             {
                 outPropertyType = "class FString";
 
-                if (bDescription && !(uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
+                if (bDescription && !Utils::CantReference(uProperty) && !Utils::CantConst(uProperty))
                 {
                     outPropertyType = ("const " + outPropertyType + "&");
                 }
@@ -618,7 +638,7 @@ namespace Retrievers
             {
                 outPropertyType = "class FName";
 
-                if (bDescription && !(uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
+                if (bDescription && !Utils::CantReference(uProperty) && !Utils::CantConst(uProperty))
                 {
                     outPropertyType = ("const " + outPropertyType + "&");
                 }
@@ -636,7 +656,7 @@ namespace Retrievers
                     {
                         outPropertyType = ("class TMap<" + mapKey + ", " + mapValue + ">");
 
-                        if (bDescription && !(uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
+                        if (bDescription && !Utils::CantReference(uProperty) && !Utils::CantConst(uProperty))
                         {
                             outPropertyType = ("const " + outPropertyType + "&");
                         }
@@ -669,7 +689,7 @@ namespace Retrievers
             {
                 outPropertyType = "struct FScriptDelegate";
 
-                if (bDescription && !(uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
+                if (bDescription && !Utils::CantReference(uProperty) && !Utils::CantConst(uProperty))
                 {
                     outPropertyType = ("const " + outPropertyType + "&");
                 }
@@ -715,7 +735,7 @@ namespace Retrievers
                     {
                         outPropertyType = ("class TArray<" + innerProperty + ">");
 
-                        if (bDescription && !(uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm))
+                        if (bDescription && !Utils::CantReference(uProperty) && !Utils::CantConst(uProperty))
                         {
                             outPropertyType = ("const " + outPropertyType + "&");
                         }
@@ -1321,7 +1341,7 @@ namespace StructGenerator
                             {
                                 if (!uProperty->IsA<UInterfaceProperty>())
                                 {
-                                    propertyStream << "[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "]";
+                                    propertyStream << "[" << uProperty->ArrayDim << "]";
                                 }
 
                                 correctElementSize *= uProperty->ArrayDim;
@@ -1350,7 +1370,7 @@ namespace StructGenerator
 
                                 if (uProperty->ArrayDim > 1)
                                 {
-                                    structStream << "_Object[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "];";
+                                    structStream << "_Object[" << uProperty->ArrayDim << "];";
                                 }
                                 else
                                 {
@@ -1369,7 +1389,7 @@ namespace StructGenerator
 
                                 if (uProperty->ArrayDim > 1)
                                 {
-                                    structStream << "_Interface[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "];";
+                                    structStream << "_Interface[" << uProperty->ArrayDim << "];";
                                 }
                                 else
                                 {
@@ -1818,7 +1838,7 @@ namespace ClassGenerator
                                 {
                                     if (!uProperty->IsA<UInterfaceProperty>())
                                     {
-                                        propertyStream << "[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "]";
+                                        propertyStream << "[" << uProperty->ArrayDim << "]";
                                     }
 
                                     correctElementSize *= uProperty->ArrayDim;
@@ -1848,7 +1868,7 @@ namespace ClassGenerator
 
                                     if (uProperty->ArrayDim > 1)
                                     {
-                                        classStream << "_Object[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "];";
+                                        classStream << "_Object[" << uProperty->ArrayDim << "];";
                                     }
                                     else
                                     {
@@ -1867,7 +1887,7 @@ namespace ClassGenerator
 
                                     if (uProperty->ArrayDim > 1)
                                     {
-                                        classStream << "_Interface[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "];";
+                                        classStream << "_Interface[" << uProperty->ArrayDim << "];";
                                     }
                                     else
                                     {
@@ -1965,31 +1985,24 @@ namespace ClassGenerator
                 }
 
                 classStream << "\npublic:\n";
+                classStream << "\tstatic UClass* StaticClass()\n";
+                classStream << "\t{\n";
+                classStream << "\t\tstatic UClass* uClassPointer = nullptr;\n\n";
+                classStream << "\t\tif (!uClassPointer)\n";
+                classStream << "\t\t{\n";
 
                 if (GConfig::UsingConstants())
                 {
-                    classStream << "\tstatic UClass* StaticClass()\n";
-                    classStream << "\t{\n";
-                    classStream << "\t\tstatic UClass* uClassPointer = nullptr;\n\n";
-                    classStream << "\t\tif (!uClassPointer)\n";
-                    classStream << "\t\t{\n";
                     classStream << "\t\t\tuClassPointer = reinterpret_cast<UClass*>(UObject::GObjObjects()->at(" << GCache::GetConstant(unrealObj).first << "));\n";
-                    classStream << "\t\t}\n\n";
-                    classStream << "\t\treturn uClassPointer;\n";
-                    classStream << "\t};\n\n";;
                 }
                 else
                 {
-                    classStream << "\tstatic UClass* StaticClass()\n";
-                    classStream << "\t{\n";
-                    classStream << "\t\tstatic UClass* uClassPointer = nullptr;\n\n";
-                    classStream << "\t\tif (!uClassPointer)\n";
-                    classStream << "\t\t{\n";
                     classStream << "\t\t\tuClassPointer = UObject::FindClass(\"" << unrealObj.FullName << "\");\n";
-                    classStream << "\t\t}\n\n";
-                    classStream << "\t\treturn uClassPointer;\n";
-                    classStream << "\t};\n\n";
                 }
+
+                classStream << "\t\t}\n\n";
+                classStream << "\t\treturn uClassPointer;\n";
+                classStream << "\t};\n\n";
 
                 if (uClass == UObject::StaticClass())
                 {
@@ -2165,7 +2178,7 @@ namespace ParameterGenerator
 
                             if (uProperty->ArrayDim > 1)
                             {
-                                propertyStream << "[" << Printer::Hex(uProperty->ArrayDim, EWidthTypes::NONE) << "]";
+                                propertyStream << "[" << uProperty->ArrayDim << "]";
                             }
 
                             if (uProperty->IsA<UBoolProperty>())
@@ -2383,16 +2396,16 @@ namespace FunctionGenerator
 
                             if (uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm)
                             {
-                                propertyReturnParm = std::make_pair(uProperty, propertyNameUnique);
+                                propertyReturnParm = { uProperty, propertyNameUnique };
                             }
                             else if ((uProperty->PropertyFlags & EPropertyFlags::CPF_Parm) && (uProperty->PropertyFlags & EPropertyFlags::CPF_OutParm))
                             {
-                                propertyOutParams.push_back(std::make_pair(uProperty, propertyNameUnique));
-                                propertyBothParams.push_back(std::make_pair(uProperty, propertyNameUnique));
+                                propertyOutParams.push_back({ uProperty, propertyNameUnique });
+                                propertyBothParams.push_back({ uProperty, propertyNameUnique });
                             }
                             else if (uProperty->PropertyFlags & EPropertyFlags::CPF_Parm)
                             {
-                                propertyParams.push_back(std::make_pair(uProperty, propertyNameUnique));
+                                propertyParams.push_back({ uProperty, propertyNameUnique });
                             }
                         }
                     }
@@ -2474,6 +2487,12 @@ namespace FunctionGenerator
                             }
 
                             codeStream << propertyType << " " << propertyPair.second;
+
+                            if (!(propertyPair.first->PropertyFlags & EPropertyFlags::CPF_OutParm) && (propertyPair.first->ArrayDim > 1))
+                            {
+                                codeStream << "[" << propertyPair.first->ArrayDim << "]";
+                            }
+
                             printComma = true;
                         }
                     }
@@ -2495,28 +2514,23 @@ namespace FunctionGenerator
                         }
                     }
 
+                    codeStream << ")\n";
+                    codeStream << "{\n";
+                    codeStream << "\tstatic UFunction* uFn" << functionName << " = nullptr;\n\n";
+                    codeStream << "\tif (!uFn" << functionName << ")\n";
+                    codeStream << "\t{\n";
+
                     if (GConfig::UsingConstants())
                     {
-                        codeStream << ")\n";
-                        codeStream << "{\n";
-                        codeStream << "\tstatic UFunction* uFn" << functionName << " = nullptr;\n\n";
-                        codeStream << "\tif (!uFn" << functionName << ")\n";
-                        codeStream << "\t{\n";
                         codeStream << "\t\tuFn" << functionName << " = reinterpret_cast<UFunction*>(UObject::GObjObjects()->at(" << GCache::GetConstant(unrealObj).first << "));\n";
-                        codeStream << "\t}\n\n";
-                        codeStream << "\t" << classNameCPP << "_";
                     }
                     else
                     {
-                        codeStream << ")\n";
-                        codeStream << "{\n";
-                        codeStream << "\tstatic UFunction* uFn" << functionName << " = nullptr;\n\n";
-                        codeStream << "\tif (!uFn" << functionName << ")\n";
-                        codeStream << "\t{\n";
                         codeStream << "\t\tuFn" << functionName << " = UFunction::FindFunction(\"" << functionFullName << "\");\n";
-                        codeStream << "\t}\n\n";
-                        codeStream << "\t" << classNameCPP << "_";
                     }
+
+                    codeStream << "\t}\n\n";
+                    codeStream << "\t" << classNameCPP << "_";
 
                     if (uFunction->FunctionFlags & EFunctionFlags::FUNC_Exec) { codeStream << "exec"; }
                     else if (uFunction->FunctionFlags & EFunctionFlags::FUNC_Event) { codeStream << "event"; }
@@ -2524,7 +2538,6 @@ namespace FunctionGenerator
 
                     codeStream << functionName << "_Params " << functionName << "_Params;\n";
                     codeStream << "\tmemset(&" << functionName << "_Params, 0, sizeof(" << functionName << "_Params));\n";
-                    //codeStream << "\tZeroMemory(&" << functionName << "_Params, sizeof(" << functionName << "_Params));\n";
 
                     for (const auto& propertyPair : propertyParams)
                     {
@@ -2536,8 +2549,20 @@ namespace FunctionGenerator
                             {
                                 if ((propertyTypeResult != EPropertyTypes::Bool) && (!Utils::CantMemcpy(propertyTypeResult) || !Utils::IsBitField(propertyPair.first->ArrayDim)))
                                 {
-                                    codeStream << "\tmemcpy_s(&" << functionName << "_Params." << propertyPair.second << ", sizeof(" << functionName << "_Params." << propertyPair.second;
-                                    codeStream << "), &" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
+                                    codeStream << "\tmemcpy_s(&" << functionName << "_Params." << propertyPair.second << ", sizeof(" << functionName << "_Params." << propertyPair.second << ")";
+
+                                    if (propertyPair.first->ArrayDim > 1)
+                                    {
+                                        codeStream << " * " << Retrievers::GetPropertySize(propertyPair.first);
+                                    }
+
+                                    codeStream << ", &" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
+
+                                    if (propertyPair.first->ArrayDim > 1)
+                                    {
+                                        codeStream << " * " << Retrievers::GetPropertySize(propertyPair.first);
+                                    }
+
                                     codeStream << ");\n";
                                 }
                                 else if (!Utils::IsStructProperty(propertyTypeResult))
@@ -2560,8 +2585,20 @@ namespace FunctionGenerator
                             {
                                 if ((propertyTypeResult != EPropertyTypes::Bool) && (!Utils::CantMemcpy(propertyTypeResult) || !Utils::IsBitField(propertyPair.first->ArrayDim)))
                                 {
-                                    codeStream << "\tmemcpy_s(&" << functionName << "_Params." << propertyPair.second << ", sizeof(" << functionName << "_Params." << propertyPair.second;
-                                    codeStream << "), &" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
+                                    codeStream << "\tmemcpy_s(&" << functionName << "_Params." << propertyPair.second << ", sizeof(" << functionName << "_Params." << propertyPair.second << ")";
+
+                                    //if (propertyPair.first->ArrayDim > 1)
+                                    //{
+                                    //    codeStream << " * " << Retrievers::GetPropertySize(propertyPair.first);
+                                    //}
+
+                                    codeStream << ", &" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
+
+                                    //if (propertyPair.first->ArrayDim > 1)
+                                    //{
+                                    //    codeStream << " * " << Retrievers::GetPropertySize(propertyPair.first);
+                                    //}
+
                                     codeStream << ");\n";
                                 }
                                 else if (!Utils::IsStructProperty(propertyTypeResult))
@@ -2624,9 +2661,21 @@ namespace FunctionGenerator
                                 {
                                     if ((propertyTypeResult != EPropertyTypes::Bool) && (!Utils::CantMemcpy(propertyTypeResult) || !Utils::IsBitField(propertyPair.first->ArrayDim)))
                                     {
-                                        codeStream << "\tmemcpy_s(&" << propertyPair.second << ", sizeof(" << propertyPair.second;
-                                        codeStream << "), &" << functionName << "_Params." << propertyPair.second << ", sizeof(" << functionName << "_Params." << propertyPair.second;
-                                        codeStream << "));\n";
+                                        codeStream << "\tmemcpy_s(&" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
+
+                                        //if (propertyPair.first->ArrayDim > 1)
+                                        //{
+                                        //    codeStream << " * " << Retrievers::GetPropertySize(propertyPair.first);
+                                        //}
+
+                                        codeStream << ", &" << functionName << "_Params." << propertyPair.second << ", sizeof(" << functionName << "_Params." << propertyPair.second << ")";
+
+                                        //if (propertyPair.first->ArrayDim > 1)
+                                        //{
+                                        //    codeStream << " * " << Retrievers::GetPropertySize(propertyPair.first);
+                                        //}
+
+                                        codeStream << ");\n";
                                     }
                                     else if (!Utils::IsStructProperty(propertyTypeResult))
                                     {
@@ -2698,18 +2747,18 @@ namespace FunctionGenerator
                                 propertyNameMap[propertyNameBuffer]++;
                             }
 
-                            if (uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm) { propertyReturnParm = std::make_pair(uProperty, propertyNameUnique); }
-                            else if (uProperty->PropertyFlags & EPropertyFlags::CPF_OutParm) { propertyOutParams.push_back(std::make_pair(uProperty, propertyNameUnique)); }
+                            if (uProperty->PropertyFlags & EPropertyFlags::CPF_ReturnParm) { propertyReturnParm = { uProperty, propertyNameUnique }; }
+                            else if (uProperty->PropertyFlags & EPropertyFlags::CPF_OutParm) { propertyOutParams.push_back({ uProperty, propertyNameUnique }); }
                             else if (uProperty->PropertyFlags & EPropertyFlags::CPF_Parm)
                             {
                                 if (uProperty->PropertyFlags & EPropertyFlags::CPF_OptionalParm)
                                 {
                                     propertyNameUnique[0] = std::toupper(propertyNameUnique[0]);
-                                    propertyParams.push_back(std::make_pair(uProperty, ("optional" + propertyNameUnique)));
+                                    propertyParams.push_back({ uProperty, ("optional" + propertyNameUnique) });
                                 }
                                 else
                                 {
-                                    propertyParams.push_back(std::make_pair(uProperty, propertyNameUnique));
+                                    propertyParams.push_back({ uProperty, propertyNameUnique });
                                 }
                             }
                         }
@@ -2752,6 +2801,12 @@ namespace FunctionGenerator
                             }
 
                             functionStream << propertyType << " " << propertyPair.second;
+
+                            if (!(propertyPair.first->PropertyFlags & EPropertyFlags::CPF_OutParm) && (propertyPair.first->ArrayDim > 1))
+                            {
+                                functionStream << "[" << propertyPair.first->ArrayDim << "]";
+                            }
+
                             printComma = true;
                         }
                     }
@@ -3107,6 +3162,8 @@ namespace Generator
                 UByteProperty::Register_Enum();
                 UBoolProperty::Register_BitMask();
                 UArrayProperty::Register_Inner();
+
+                GCache::Initialize(); // Cache all object instances needed for generation.
             }
             else
             {
