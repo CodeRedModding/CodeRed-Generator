@@ -2948,11 +2948,33 @@ namespace Generator
         definesFile.close();
     }
 
+    void InitializeCache()
+    {
+#ifndef NO_LOGGING
+        LogFile << "\nInitializing cache..." << std::endl;
+        std::chrono::time_point startTime = std::chrono::system_clock::now();
+#endif
+
+        GCache::Initialize();
+
+#ifndef NO_LOGGING
+        std::chrono::time_point endTime = std::chrono::system_clock::now();
+        std::chrono::duration<float> elapsedTime = (endTime - startTime);
+        std::string formattedTime = Printer::Precision(elapsedTime.count(), 4);
+
+        LogFile << "Cache initialized in " << formattedTime << " seconds.\n" << std::endl;
+#endif
+    }
+
     void ProcessPackages(const std::filesystem::path& directory)
     {
         if (std::filesystem::exists(directory))
         {
             std::vector<class UObject*>* packages = GCache::GetPackages();
+
+#ifndef NO_LOGGING
+            LogFile << "\nPackages count: " << packages->size() << "\n" << std::endl;
+#endif
 
             for (class UObject* packageObj : *packages)
             {
@@ -3024,6 +3046,7 @@ namespace Generator
                 Utils::MessageboxInfo("SDK generation has started, do not close the game until prompted to do so!");
                 std::chrono::time_point startTime = std::chrono::system_clock::now();
 
+                InitializeCache();
                 ProcessPackages(headerDirectory);
                 GenerateHeaders();
                 GenerateDefines();

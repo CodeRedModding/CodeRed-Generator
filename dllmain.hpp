@@ -156,6 +156,7 @@ namespace Generator
 	void GenerateConstants();
 	void GenerateHeaders();
 	void GenerateDefines();
+	void InitializeCache();
 	void ProcessPackages(const std::filesystem::path& directory);
 	void GenerateSDK();
 
