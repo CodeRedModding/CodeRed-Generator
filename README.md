@@ -48,7 +48,7 @@ Once all your classes are filled out and you've made the necessary changes in `C
 
 ## Changelog
 
-## v1.0.9
+### v1.0.9
 - Fixed forgetting to call "GCache::Initialize()" in the last update.
 - Fixed array properties not showing up in the parameters of functions, they only generated in the parameter struct itself.
 - Fixed array parameters not properly accounting for their element size when copying for ProcessEvent.
