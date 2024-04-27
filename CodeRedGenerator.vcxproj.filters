@@ -14,6 +14,9 @@
     <Filter Include="Engine\Template">
       <UniqueIdentifier>{a20e86da-a02e-4059-b881-99b17e7ea477}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{b83839af-c722-41d1-8066-a179934937ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Engine.cpp">
@@ -31,14 +34,14 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Member.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Printer.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\Member.cpp">
+      <Filter>Framework</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -57,14 +60,14 @@
     <ClInclude Include="dllmain.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Member.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Printer.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\Member.hpp">
+      <Filter>Framework</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

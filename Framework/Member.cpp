@@ -1,4 +1,4 @@
-#include "Engine/Engine.hpp"
+#include "../Engine/Engine.hpp"
 
 /*
 # ========================================================================================= #
@@ -22,6 +22,8 @@ std::string Member::GetName(EClassTypes type)
 		return "FNameEntry";
 	case EClassTypes::UObject:
 		return "UObject";
+	case EClassTypes::UClass:
+		return "UClass";
 	case EClassTypes::UField:
 		return "UField";
 	case EClassTypes::UEnum:
@@ -339,7 +341,6 @@ std::map<EClassTypes, std::vector<EMemberTypes>> Member::m_classMembers = {
 
 	{ EClassTypes::UField, {
 		EMemberTypes::UField_Next,
-		EMemberTypes::UField_Flags,
 		EMemberTypes::UField_SuperField
 	} },
 

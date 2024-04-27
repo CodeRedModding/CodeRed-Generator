@@ -48,6 +48,18 @@ Once all your classes are filled out and you've made the necessary changes in `C
 
 ## Changelog
 
+### v1.1.0
+- Added a new caching system for unreal properties, which increases sdk generation speed a bit.
+- Added a couple new string helper functions in the "Printers.hpp/cpp" files related to replacing characters.
+- Return types that were enums now use their proper enum class name if "UsingEnumClasses" is set to true in "Configuration.cpp".
+- Dump instances are now a lot faster, a new line character is now used instead of "std::endl", as "std::endl" flushes stream which is why it took so long.
+- Moved some of the helper functions in the "Utils" namespace to be inside of the new "UnrealObject" and "UnrealProperty" classes.
+- Changed the include file for "Member.hpp", as its now in a different folder, in your "GameDefines.hpp" file.
+- Renamed the values in the "EWidthTypes" to be more consistent with the previous naming standard changes.
+- Modified some of the functions in "GameDefines.cpp" and updated "PiecesOfCode.cpp" to match that.
+- Fixed the name and comment spacing for "UnknownData" being too short compared to all the other names in classes and structs.
+- Fixed miscalculating the size of array parameters when copying them for process event.
+
 ### v1.0.9
 - Fixed forgetting to call "GCache::Initialize()" in the last update.
 - Fixed array properties not showing up in the parameters of functions, they only generated in the parameter struct itself.

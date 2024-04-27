@@ -1,5 +1,7 @@
 #pragma once
 #include <map>
+#include <vector>
+#include <map>
 #include <string>
 
 // Class Types
@@ -39,7 +41,6 @@ enum class EMemberTypes : uint8_t
 	UObject_Name,
 	UObject_Class,
 	UField_Next,
-	UField_Flags,
 	UField_SuperField, // Not needed if SuperField is in the UStruct class, leave "SUPERFIELDS_IN_UFIELD" in your "GameDefines.hpp" file!
 	UEnum_Names,
 	UConst_Value,
@@ -69,23 +70,22 @@ enum class EMemberTypes : uint8_t
 enum class EPropertyTypes : uint8_t
 {
 	Unknown,
-	Int8,
 	Int32,
-	Int64,
 	UInt8,
 	UInt32,
 	UInt64,
 	Double,
 	Float,
 	Bool,
-	TArray,
-	TMap,
 	FName,
 	FString,
 	FScriptDelegate,
-	FPointer,
 	FStruct,
-	UPointer
+	UObject,
+	UClass,
+	UInterface,
+	TArray,
+	TMap
 };
 
 /*

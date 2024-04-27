@@ -6,8 +6,8 @@
 # ========================================================================================= #
 */
 
-TArray<class UObject*>* GObjects{};
-TArray<struct FNameEntry*>* GNames{};
+class TArray<class UObject*>* GObjects{};
+class TArray<class FNameEntry*>* GNames{};
 
 /*
 # ========================================================================================= #
@@ -57,7 +57,6 @@ std::string UObject::GetNameCPP()
 	}
 
 	nameCPP += this->GetName();
-
 	return nameCPP;
 }
 
@@ -70,23 +69,8 @@ std::string UObject::GetFullName()
 		fullName = (uOuter->GetName() + "." + fullName);
 	}
 
-	fullName = this->Class->GetName() + " " + fullName;
-
+	fullName = (this->Class->GetName() + " " + fullName);
 	return fullName;
-}
-
-std::string UObject::GetPackageName()
-{
-	UObject* uPackageObj = this->GetPackageObj();
-
-	if (uPackageObj)
-	{
-		static std::string packageName = uPackageObj->GetName();
-
-		return packageName;
-	}
-
-	return "null";
 }
 
 UObject* UObject::GetPackageObj()
@@ -124,7 +108,7 @@ class UClass* UObject::FindClass(const std::string& classFullName)
 		initialized = true;
 	}
 
-	if (foundClasses.find(classFullName) != foundClasses.end())
+	if (foundClasses.contains(classFullName))
 	{
 		return foundClasses[classFullName];
 	}
@@ -180,12 +164,17 @@ class UFunction* UFunction::FindFunction(const std::string& functionFullName)
 		initialized = true;
 	}
 
-	if (foundFunctions.find(functionFullName) != foundFunctions.end())
+	if (foundFunctions.contains(functionFullName))
 	{
 		return foundFunctions[functionFullName];
 	}
 
 	return nullptr;
+}
+
+class TArray<class FNameEntry*>* FName::Names()
+{
+	return reinterpret_cast<TArray<FNameEntry*>*>(GNames);
 }
 
 /*

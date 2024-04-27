@@ -34,6 +34,53 @@ public:
 	UnrealObject& operator=(const UnrealObject& unrealObj);
 };
 
+class UnrealProperty
+{
+public:
+	EPropertyTypes Type;
+	class UProperty* Property;
+	std::string ValidName;
+
+public:
+	UnrealProperty();
+	UnrealProperty(class UProperty* uProperty);
+	UnrealProperty(const UnrealProperty& unrealProp);
+	~UnrealProperty();
+
+public:
+	bool IsValid() const;
+	std::string Hash() const;
+
+public:
+	bool IsContainer() const;
+	bool IsParameter() const;
+	bool IsReturnParameter() const;
+	bool IsOutParameter() const;
+	bool IsOptionalParameter() const;
+	bool IsAnArray() const;
+	bool CantConst() const;
+	bool CantReference() const;
+	bool CantMemcpy() const;
+
+public:
+	size_t GetSize() const;
+	std::string GetType(bool bIgnoreEnum, bool bFunctionParam, bool bIgnoreConst) const;
+	std::string GetTypeForClass() const;
+	std::string GetTypeForStruct() const;
+	std::string GetTypeForParameter(bool bIgnoreConst = false) const;
+
+private:
+	bool Assign(class UProperty* uProperty);
+	bool AssignType();
+
+public:
+	bool operator>(const UnrealProperty& unrealProp);
+	bool operator<(const UnrealProperty& unrealProp);
+	bool operator==(const UnrealProperty& unrealProp);
+	bool operator!=(const UnrealProperty& unrealProp);
+	UnrealProperty& operator=(const UnrealProperty& unrealProp);
+};
+
 namespace std
 {
 	template<>
@@ -42,6 +89,15 @@ namespace std
 		size_t operator()(const UnrealObject& unrealObj) const
 		{
 			return hash<string>()(unrealObj.Hash());
+		}
+	};
+
+	template<>
+	struct hash<UnrealProperty>
+	{
+		size_t operator()(const UnrealProperty& unrealProp) const
+		{
+			return hash<string>()(unrealProp.Hash());
 		}
 	};
 }
@@ -59,6 +115,7 @@ private:
 
 public:
 	static void Initialize();
+	static void ClearCache();
 	static std::vector<UnrealObject>* GetCache(class UObject* packageObj, EClassTypes type);
 	static std::vector<std::pair<class UObject*, std::string>>* GetIncludes();
 	static std::map<std::string, class UObject*>* GetConstants();
@@ -80,29 +137,19 @@ namespace Utils
 	void MessageboxWarn(const std::string& message);
 	void MessageboxError(const std::string& message);
 
-	bool SortProperty(class UProperty* uPropertyA, class UProperty* uPropertyB);
-	bool SortPropertyPair(const std::pair<class UProperty*, std::string>& pairA, const std::pair<class UProperty*, std::string>& pairB);
-	bool CantConst(class UProperty* uProperty);
-	bool CantReference(class UProperty* uProperty);
-	bool CantMemcpy(EPropertyTypes propertyType);
-	bool IsStructProperty(EPropertyTypes propertyType);
-	bool IsBitField(int32_t arrayDim);
+	bool SortProperty(const UnrealProperty& unrealPropA, const UnrealProperty& unrealPropB);
+	bool SortPropertyPair(const std::pair<UnrealProperty, std::string>& pairA, const std::pair<UnrealProperty, std::string>& pairB);
 
+	void CreateWindowsName(std::string& functionName);
 	std::string CreateValidName(std::string name);
-	std::string CreateUniqueName(class UClass* uClass);
-	std::string CreateUniqueName(class UFunction* uFunction, class UClass* uClass);
-	void MakeWinSafe(std::string& functionName);
 }
 
 namespace Retrievers
 {
 	void GetAllPropertyFlags(std::ostringstream& stream, uint64_t propertyFlags);
 	void GetAllFunctionFlags(std::ostringstream& stream, uint64_t functionFlags);
-	EPropertyTypes GetPropertyTypeInternal(class UProperty* uProperty, std::string& outPropertyType, bool bIgnoreEnum, bool bDescription, bool bIsBitField);
-	EPropertyTypes GetPropertyTypeDesc(class UProperty* uProperty, std::string& outPropertyType, bool bIsBitField = false);
-	EPropertyTypes GetPropertyType(class UProperty* uProperty, std::string& outPropertyType, bool bIsBitField = false);
-	size_t GetPropertySize(class UProperty* uProperty, bool bIsBitField = true);
-	uintptr_t GetEntryPoint();
+
+	uintptr_t GetBaseAddress();
 	uintptr_t GetOffset(void* pointer);
 	uintptr_t FindPattern(const uint8_t* pattern, const std::string& mask);
 }
@@ -154,6 +201,7 @@ namespace FunctionGenerator
 namespace Generator
 {
 	extern std::ofstream LogFile;
+	void LogInstance(const std::string& title, const UnrealObject& unrealObj);
 
 	void GenerateConstants();
 	void GenerateHeaders();

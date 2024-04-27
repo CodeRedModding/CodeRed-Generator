@@ -10,13 +10,13 @@
 // Printer Width Types
 enum class EWidthTypes : size_t
 {
-	NONE = 0,
-	BYTE = 2,
-	SIZE = 4,
-	BITMASK = 8,
-	FUNCTION_FLAGS = 8,
-	WIDTH_FIELD = 14,
-	PROPERTY_FLAGS = 16
+	None = 0,
+	Byte = 2,
+	Size = 4,
+	BitMask = 8,
+	FunctionFlags = 8,
+	FieldWidth = 14,
+	PropertyFlags = 16
 };
 
 namespace Printer
@@ -26,11 +26,13 @@ namespace Printer
 	void FillLeft(std::ostringstream& stream, char fill, size_t width);
 	void FillRight(std::ofstream& stream, char fill, size_t width);
 	void FillLeft(std::ofstream& stream, char fill, size_t width);
+	void ReplaceChars(std::string& baseStr, char oldChar, char newChar);
+	void ReplaceString(std::string& baseStr, const std::string& strToReplace, const std::string& replaceWithStr);
 	std::string Hex(uint64_t decimal, size_t width);
-	std::string Hex(uint64_t decimal, EWidthTypes width);
+	std::string Hex(uint64_t decimal, EWidthTypes width = EWidthTypes::None);
 	std::string Hex(void* pointer);
 	std::string Decimal(uint64_t hex, size_t width);
-	std::string Decimal(uint64_t hex, EWidthTypes width);
+	std::string Decimal(uint64_t hex, EWidthTypes width = EWidthTypes::None);
 	std::string Precision(float value, size_t precision);
 	std::string ToUpper(std::string str);
 	std::string ToLower(std::string str);

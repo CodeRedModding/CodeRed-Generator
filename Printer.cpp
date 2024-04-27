@@ -28,6 +28,32 @@ namespace Printer
         stream <<  std::setfill(fill) << std::setw(width) << std::left;
     }
 
+    void ReplaceChars(std::string& baseStr, char oldChar, char newChar)
+    {
+        for (char& c : baseStr)
+        {
+            if (c == oldChar)
+            {
+                c = newChar;
+            }
+        }
+    }
+
+    void ReplaceString(std::string& baseStr, const std::string& strToReplace, const std::string& replaceWithStr)
+    {
+        if (!baseStr.empty() && !strToReplace.empty())
+        {
+            size_t replaceLength = strToReplace.length();
+            size_t replacePos = baseStr.find(strToReplace);
+
+            while (replacePos != std::string::npos)
+            {
+                baseStr.replace(replacePos, strToReplace.length(), replaceWithStr);
+                replacePos = baseStr.find(strToReplace);
+            }
+        }
+    }
+
     std::string Hex(uint64_t decimal, size_t width)
     {
         std::ostringstream stream;

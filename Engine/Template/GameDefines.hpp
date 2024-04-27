@@ -10,7 +10,7 @@
 #include <map>
 #include <functional>
 #include "Configuration.hpp"
-#include "../../Member.hpp"
+#include "../../Framework/Member.hpp"
 
 /*
 # ========================================================================================= #
@@ -579,7 +579,7 @@ class FNameEntry
 public:
 	uint64_t Flags;							REGISTER_MEMBER(uint64_t, Flags, EMemberTypes::FNameEntry_Flags)					// 0x0000 (0x08)
 	int32_t Index;							REGISTER_MEMBER(int32_t, Index, EMemberTypes::FNameEntry_Index)						// 0x0008 (0x04)
-	FNameEntry* HashNext;
+	class FNameEntry* HashNext;				REGISTER_MEMBER(class FNameEntry*, HashNext, EMemberTypes::FNameEntry_HashNext)		// 0x0008 (0x04)
 
 #ifdef UTF16
 	wchar_t			Name[0x400];			REGISTER_MEMBER(wchar_t, Name, EMemberTypes::FNameEntry_Name)						// 0x000C (0x00)
@@ -726,11 +726,7 @@ public:
 	~FName() {}
 
 public:
-	static TArray<FNameEntry*>* Names()
-	{
-		TArray<FNameEntry*>* recastedArray = reinterpret_cast<TArray<FNameEntry*>*>(GNames);
-		return recastedArray;
-	}
+	static class TArray<class FNameEntry*>* Names();
 
 	int32_t GetDisplayIndex() const
 	{
@@ -996,11 +992,9 @@ public:
 	}
 
 	static class TArray<class UObject*>* GObjObjects();
-
 	std::string GetName();
 	std::string GetNameCPP();
 	std::string GetFullName();
-	std::string GetPackageName();
 	class UObject* GetPackageObj();
 	template<typename T> static T* FindObject(const std::string& objectFullName)
 	{
