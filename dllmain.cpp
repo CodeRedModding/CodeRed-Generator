@@ -2747,17 +2747,17 @@ namespace FunctionGenerator
                             {
                                 codeStream << "\tmemcpy_s(&" << functionName << "_Params." << propertyPair.second << ", sizeof(" << functionName << "_Params." << propertyPair.second << ")";
 
-                                if (propertyPair.first.IsAnArray())
-                                {
-                                    codeStream << " * " << propertyPair.first.Property->ArrayDim;
-                                }
+                                //if (propertyPair.first.IsAnArray())
+                                //{
+                                //    codeStream << " * " << propertyPair.first.Property->ArrayDim;
+                                //}
 
                                 codeStream << ", &" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
 
-                                if (propertyPair.first.IsAnArray())
-                                {
-                                    codeStream << " * " << propertyPair.first.Property->ArrayDim;
-                                }
+                                //if (propertyPair.first.IsAnArray())
+                                //{
+                                //    codeStream << " * " << propertyPair.first.Property->ArrayDim;
+                                //}
 
                                 codeStream << ");\n";
                             }
