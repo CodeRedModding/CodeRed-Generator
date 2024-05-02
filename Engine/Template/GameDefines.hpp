@@ -22,7 +22,6 @@
 // State Flags
 enum EStateFlags
 {
-	// State flags.
 	STATE_Editable = 0x00000001,	// State should be user-selectable in UnrealEd.
 	STATE_Auto = 0x00000002,	// State is automatic (the default state).
 	STATE_Simulated = 0x00000004, // State executes on client side.
