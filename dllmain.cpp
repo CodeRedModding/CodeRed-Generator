@@ -3372,7 +3372,7 @@ namespace Generator
                 UProperty::Register_PropertyFlags();
                 UProperty::Register_Offset();
 #ifndef SUPERFIELDS_IN_UFIELD
-                UStruct::Register_SuperField(); // Safe to comment out if "UField" has a "SuperField".
+                UStruct::Register_SuperField(); // Not needed if SuperField is in the UField class, comment out "SUPERFIELDS_IN_UFIELD" in your "GameDefines.hpp" file!
 #endif
                 UStruct::Register_Children();
                 UStruct::Register_PropertySize();
