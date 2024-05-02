@@ -18,10 +18,20 @@
 # ========================================================================================= #
 */
 
+// https://github.com/CodeRedModding/UnrealEngine3/blob/main/Development/Src/Core/Inc/UnObjBas.h#L48
+// State Flags
+enum EStateFlags
+{
+	// State flags.
+	STATE_Editable = 0x00000001,	// State should be user-selectable in UnrealEd.
+	STATE_Auto = 0x00000002,	// State is automatic (the default state).
+	STATE_Simulated = 0x00000004, // State executes on client side.
+	STATE_HasLocals = 0x00000008,	// State has local variables.
+};
+
+// https://github.com/CodeRedModding/UnrealEngine3/blob/main/Development/Src/Core/Inc/UnObjBas.h#L238
 // Function Flags
-// https://docs.unrealengine.com/en-US/API/Runtime/CoreUObject/UObject/EFunctionFlags/index.html
-// https://github.com/EliotVU/Unreal-Library/blob/59a9774fd7c972d55810676521e4b874d7a242e8/src/UnrealFlags.cs
-enum EFunctionFlags
+enum EFunctionFlags : uint64_t
 {
 	FUNC_None = 0x00000000,
 	FUNC_Final = 0x00000001,
@@ -51,18 +61,24 @@ enum EFunctionFlags
 	FUNC_HasDefaults = 0x00800000,
 	FUNC_NetClient = 0x01000000,
 	FUNC_DLLImport = 0x02000000,
+
 	FUNC_K2Call = 0x04000000,
 	FUNC_K2Override = 0x08000000,
 	FUNC_K2Pure = 0x10000000,
 	FUNC_EditorOnly = 0x20000000,
 	FUNC_Lambda = 0x40000000,
 	FUNC_NetValidate = 0x80000000,
+
+	FUNC_FuncInherit = (FUNC_Exec | FUNC_Event),
+	FUNC_FuncOverrideMatch = (FUNC_Exec | FUNC_Final | FUNC_Latent | FUNC_PreOperator | FUNC_Iterator | FUNC_Static | FUNC_Public | FUNC_Protected | FUNC_Const),
+	FUNC_NetFuncFlags = (FUNC_Net | FUNC_NetReliable | FUNC_NetServer | FUNC_NetClient),
+
 	FUNC_AllFlags = 0xFFFFFFFF
 };
 
+// https://github.com/CodeRedModding/UnrealEngine3/blob/main/Development/Src/Core/Inc/UnObjBas.h#L238
 // Proprerty Flags
-// https://docs.unrealengine.com/en-US/API/Runtime/CoreUObject/UObject/EPropertyFlags/index.html
-enum EPropertyFlags
+enum EPropertyFlags : uint64_t
 {
 	CPF_Edit = 0x0000000000000001,	// Property is user-settable in the editor.
 	CPF_Const = 0x0000000000000002,	// Actor's property always matches class's default actor property.
@@ -70,7 +86,7 @@ enum EPropertyFlags
 	CPF_ExportObject = 0x0000000000000008,	// Object can be exported with actor.
 	CPF_OptionalParm = 0x0000000000000010,	// Optional parameter (if CPF_Param is set).
 	CPF_Net = 0x0000000000000020,	// Property is relevant to network replication.
-	CPF_EditConstArray = 0x0000000000000040,	// Prevent adding/removing of items from dynamic a array in the editor.
+	CPF_EditFixedSize = 0x0000000000000040, // Indicates that elements of an array can be modified, but its size cannot be changed.
 	CPF_Parm = 0x0000000000000080,	// Function/When call parameter.
 	CPF_OutParm = 0x0000000000000100,	// Value is copied out after function call.
 	CPF_SkipParm = 0x0000000000000200,	// Property is a short-circuitable evaluation function parm.
@@ -84,42 +100,35 @@ enum EPropertyFlags
 	CPF_EditConst = 0x0000000000020000,	// Property is uneditable in the editor.
 	CPF_GlobalConfig = 0x0000000000040000,	// Load config from base class, not subclass.
 	CPF_Component = 0x0000000000080000,	// Property containts component references.
+	CPF_AlwaysInit = 0x0000000000100000,	// Property should never be exported as NoInit(@todo - this doesn't need to be a property flag...only used during make).
+	CPF_DuplicateTransient = 0x0000000000200000, // Property should always be reset to the default value during any type of duplication (copy/paste, binary duplication, etc.).
 	CPF_NeedCtorLink = 0x0000000000400000,	// Fields need construction/destruction.
 	CPF_NoExport = 0x0000000000800000,	// Property should not be exported to the native class header file.
 	CPF_NoClear = 0x0000000002000000,	// Hide clear (and browse) button.
-	CPF_EditInline = 0x0000000004000000,	// Edit this object reference inline.
-	CPF_EdFindable = 0x0000000008000000,	// References are set by clicking on actors in the editor viewports.
+	CPF_EditInline = 0x0000000004000000,	// Edit this object reference inline.	
 	CPF_EditInlineUse = 0x0000000010000000,	// EditInline with Use button.
-	CPF_Deprecated = 0x0000000020000000,	// Property is deprecated.  Read it from an archive, but don't save it.
-	CPF_EditInlineNotify = 0x0000000040000000,	// EditInline, notify outer object on editor change.
-	CPF_RepNotify = 0x0000000100000000,	// Notify actors when a property is replicated
-	CPF_Interp = 0x0000000200000000,	// interpolatable property for use with matinee
-	CPF_NonTransactional = 0x0000000400000000,	// Property isn't transacted
+	CPF_EditFindable = 0x0000000008000000,	// References are set by clicking on actors in the editor viewports.
+	CPF_Deprecated = 0x0000000020000000,	// Property is deprecated.  Read it from an archive, but don't save it.	
+	CPF_DataBinding = 0x0000000040000000,	// Indicates that this property should be exposed to data stores.
+	CPF_SerializeText = 0x0000000080000000,	// Native property should be serialized as text (ImportText, ExportText).
+	CPF_RepNotify = 0x0000000100000000,	// Notify actors when a property is replicated.
+	CPF_Interp = 0x0000000200000000,	// Interpolatable property for use with matinee.
+	CPF_NonTransactional = 0x0000000400000000,	// Property isn't transacted.
 	CPF_EditorOnly = 0x0000000800000000,	// Property should only be loaded in the editor.
-	CPF_NoDestructor = 0x0000001000000000,	// No destructor.
-	CPF_AutoWeak = 0x0000004000000000,	// CPF_ = 0x0000002000000000, ///<.
-	CPF_ContainsInstancedReference = 0x0000008000000000,	// Property contains component refuerences.
-	CPF_AssetRegistrySearchable = 0x0000010000000000,	// Asset instances will add properties with this flag to the asset registry automatically
-	CPF_SimpleDisplay = 0x0000020000000000,	// The property is visible by default in the editor details view.
-	CPF_AdvancedDisplay = 0x0000040000000000,	// The property is advanced and not visible by default in the editor details view.
-	CPF_Protected = 0x0000080000000000,	// Property is protected from the perspective of scrip
-	CPF_BlueprintCallable = 0x0000100000000000,	// MC Delegates only. Property should be exposed for calling in blueprint code.
-	CPF_BlueprintAuthorityOnly = 0x0000200000000000,	// MC Delegates only. This delegate accepts (only in blueprint) only events with BlueprintAuthorityOnly.
-	CPF_TextExportTransient = 0x0000400000000000,	// Property shouldn't be exported to text format (e.g. copy/paste)
-	CPF_NonPIEDuplicateTransient = 0x0000800000000000,	// Property should only be copied in PIE.
-	CPF_ExposeOnSpawn = 0x0001000000000000,	// Property is exposed on spawn.
-	CPF_PersistentInstance = 0x0002000000000000,	// A object referenced by the property is duplicated like a component. (Each actor should have an own instance.)
-	CPF_UObjectWrapper = 0x0004000000000000,	// Property was parsed as a wrapper class like TSubclassOf , FScriptInterface etc., rather than a USomething*.
-	CPF_HasGetValueTypeHash = 0x0008000000000000,	// This property can generate a meaningful hash value.
-	CPF_NativeAccessSpecifierPublic = 0x0010000000000000,	// Public native access specifier.
-	CPF_NativeAccessSpecifierProtected = 0x0020000000000000,	// Protected native access specifier.
-	CPF_NativeAccessSpecifierPrivate = 0x0040000000000000,	// Private native access specifier.
-	CPF_SkipSerialization = 0x0080000000000000	// Property shouldn't be serialized, can still be exported to text.
+	CPF_NotForConsole = 0x0000001000000000, // Property should not be loaded on console (or be a console cooker commandlet)
+	CPF_RepRetry = 0x0000002000000000, // Property replication of this property if it fails to be fully sent (e.g. object references not yet available to serialize over the network)
+	CPF_PrivateWrite = 0x0000004000000000, // Property is const outside of the class it was declared in
+	CPF_ProtectedWrite = 0x0000008000000000, // Property is const outside of the class it was declared in and subclasses
+	CPF_ArchetypeProperty = 0x0000010000000000, // Property should be ignored by archives which have ArIgnoreArchetypeRef set
+	CPF_EditHide = 0x0000020000000000, // Property should never be shown in a properties window.
+	CPF_EditTextBox = 0x0000040000000000, // Property can be edited using a text dialog box.
+	CPF_CrossLevelPassive = 0x0000100000000000, // Property can point across levels, and will be serialized properly, but assumes it's target exists in-game (non-editor)
+	CPF_CrossLevelActive = 0x0000200000000000, // Property can point across levels, and will be serialized properly, and will be updated when the target is streamed in/out
 };
 
+// https://github.com/CodeRedModding/UnrealEngine3/blob/main/Development/Src/Core/Inc/UnObjBas.h#L316
 // Object Flags
-// https://docs.unrealengine.com/4.26/en-US/API/Runtime/CoreUObject/UObject/EObjectFlags/
-enum EObjectFlags
+enum EObjectFlags : uint64_t
 {
 	RF_NoFlags = 0x00000000,
 	RF_Public = 0x00000001,
@@ -151,6 +160,122 @@ enum EObjectFlags
 	RF_Dynamic = 0x04000000,
 	RF_WillBeLoaded = 0x08000000,
 };
+
+// https://github.com/CodeRedModding/UnrealEngine3/blob/main/Development/Src/Core/Inc/UnObjBas.h#L51
+// Package Flags
+enum EPackageFlags : uint32_t
+{
+	PKG_AllowDownload = 0x00000001,	// Allow downloading package.
+	PKG_ClientOptional = 0x00000002,	// Purely optional for clients.
+	PKG_ServerSideOnly = 0x00000004, // Only needed on the server side.
+	PKG_Cooked = 0x00000008,	// Whether this package has been cooked for the target platform.
+	PKG_Unsecure = 0x00000010, // Not trusted.
+	PKG_SavedWithNewerVersion = 0x00000020,	// Package was saved with newer version.
+	PKG_Need = 0x00008000,	// Client needs to download this package.
+	PKG_Compiling = 0x00010000,	// package is currently being compiled
+	PKG_ContainsMap = 0x00020000,	// Set if the package contains a ULevel/ UWorld object
+	PKG_Trash = 0x00040000,	// Set if the package was loaded from the trashcan
+	PKG_DisallowLazyLoading = 0x00080000,	// Set if the archive serializing this package cannot use lazy loading
+	PKG_PlayInEditor = 0x00100000,	// Set if the package was created for the purpose of PIE
+	PKG_ContainsScript = 0x00200000,	// Package is allowed to contain UClasses and unrealscript
+	PKG_ContainsDebugInfo = 0x00400000,	// Package contains debug info (for UDebugger)
+	PKG_RequireImportsAlreadyLoaded = 0x00800000,	// Package requires all its imports to already have been loaded
+	PKG_StoreCompressed = 0x02000000,	// Package is being stored compressed, requires archive support for compression
+	PKG_StoreFullyCompressed = 0x04000000,	// Package is serialized normally, and then fully compressed after (must be decompressed before LoadPackage is called)
+	PKG_ContainsFaceFXData = 0x10000000,	// Package contains FaceFX assets and/or animsets
+	PKG_NoExportAllowed = 0x20000000,	// Package was NOT created by a modder.  Internal data not for export
+	PKG_StrippedSource = 0x40000000,	// Source has been removed to compress the package size
+	PKG_FilterEditorOnly = 0x80000000,	// Package has editor-only data filtered
+};
+
+// https://github.com/CodeRedModding/UnrealEngine3/blob/7bf53e29f620b0d4ca5c9bd063a2d2dbcee732fe/Development/Src/Core/Inc/UnObjBas.h#L98
+// Class Flags
+enum EClassFlags : uint32_t
+{
+	CLASS_None = 0x00000000,
+	CLASS_Abstract = 0x00000001, // Class is abstract and can't be instantiated directly.
+	CLASS_Compiled = 0x00000002, // Script has been compiled successfully.
+	CLASS_Config = 0x00000004, // Load object configuration at construction time.
+	CLASS_Transient = 0x00000008, // This object type can't be saved; null it out at save time.
+	CLASS_Parsed = 0x00000010, // Successfully parsed.
+	CLASS_Localized = 0x00000020, // Class contains localized text.
+	CLASS_SafeReplace = 0x00000040, // Objects of this class can be safely replaced with default or NULL.
+	CLASS_Native = 0x00000080, // Class is a native class - native interfaces will have CLASS_Native set, but not RF_Native.
+	CLASS_NoExport = 0x00000100, // Don't export to C++ header.
+	CLASS_Placeable = 0x00000200, // Allow users to create in the editor.
+	CLASS_PerObjectConfig = 0x00000400, // Handle object configuration on a per-object basis, rather than per-class.
+	CLASS_NativeReplication = 0x00000800, // Replication handled in C++.
+	CLASS_EditInlineNew = 0x00001000, // Class can be constructed from editinline New button..
+	CLASS_CollapseCategories = 0x00002000,	// Display properties in the editor without using categories.
+	CLASS_Interface = 0x00004000, // Class is an interface.
+	CLASS_HasInstancedProps = 0x00200000, // class contains object properties which are marked "instanced" (or editinline export).
+	CLASS_NeedsDefProps = 0x00400000, // Class needs its defaultproperties imported.
+	CLASS_HasComponents = 0x00800000, // Class has component properties.
+	CLASS_Hidden = 0x01000000, // Don't show this class in the editor class browser or edit inline new menus.
+	CLASS_Deprecated = 0x02000000, // Don't save objects of this class when serializing.
+	CLASS_HideDropDown = 0x04000000, // Class not shown in editor drop down for class selection.
+	CLASS_Exported = 0x08000000, // Class has been exported to a header file.
+	CLASS_Intrinsic = 0x10000000, // Class has no unrealscript counter-part.
+	CLASS_NativeOnly = 0x20000000, // Properties in this class can only be accessed from native code.
+	CLASS_PerObjectLocalized = 0x40000000, // Handle object localization on a per-object basis, rather than per-class. 
+	CLASS_HasCrossLevelRefs = 0x80000000, // This class has properties that are marked with CPF_CrossLevel 
+
+	// Deprecated, these values now match the values of the EClassCastFlags enum.
+	CLASS_IsAUProperty = 0x00008000,
+	CLASS_IsAUObjectProperty = 0x00010000,
+	CLASS_IsAUBoolProperty = 0x00020000,
+	CLASS_IsAUState = 0x00040000,
+	CLASS_IsAUFunction = 0x00080000,
+	CLASS_IsAUStructProperty = 0x00100000,
+
+	// Flags to inherit from base class.
+	CLASS_Inherit = (CLASS_Transient | CLASS_Config | CLASS_Localized | CLASS_SafeReplace | CLASS_PerObjectConfig | CLASS_PerObjectLocalized | CLASS_Placeable | CLASS_IsAUProperty | CLASS_IsAUObjectProperty | CLASS_IsAUBoolProperty | CLASS_IsAUStructProperty | CLASS_IsAUState | CLASS_IsAUFunction | CLASS_HasComponents | CLASS_Deprecated | CLASS_Intrinsic | CLASS_HasInstancedProps | CLASS_HasCrossLevelRefs),
+
+	// These flags will be cleared by the compiler when the class is parsed during script compilation.
+	CLASS_RecompilerClear = (CLASS_Inherit | CLASS_Abstract | CLASS_NoExport | CLASS_NativeReplication | CLASS_Native),
+
+	// These flags will be inherited from the base class only for non-intrinsic classes.
+	CLASS_ScriptInherit = (CLASS_Inherit | CLASS_EditInlineNew | CLASS_CollapseCategories),
+
+	CLASS_AllFlags = 0xFFFFFFFF,
+};
+
+// https://github.com/CodeRedModding/UnrealEngine3/blob/7bf53e29f620b0d4ca5c9bd063a2d2dbcee732fe/Development/Src/Core/Inc/UnObjBas.h#L195
+// Class Cast Flags
+enum EClassCastFlag : uint32_t
+{
+	CASTCLASS_None = 0x00000000,
+	CASTCLASS_UField = 0x00000001,
+	CASTCLASS_UConst = 0x00000002,
+	CASTCLASS_UEnum = 0x00000004,
+	CASTCLASS_UStruct = 0x00000008,
+	CASTCLASS_UScriptStruct = 0x00000010,
+	CASTCLASS_UClass = 0x00000020,
+	CASTCLASS_UByteProperty = 0x00000040,
+	CASTCLASS_UIntProperty = 0x00000080,
+	CASTCLASS_UFloatProperty = 0x00000100,
+	CASTCLASS_UComponentProperty = 0x00000200,
+	CASTCLASS_UClassProperty = 0x00000400,
+	CASTCLASS_UInterfaceProperty = 0x00001000,
+	CASTCLASS_UNameProperty = 0x00002000,
+	CASTCLASS_UStrProperty = 0x00004000,
+
+	// These match the values of the old class flags to make conversion easier.
+	CASTCLASS_UProperty = 0x00008000,
+	CASTCLASS_UObjectProperty = 0x00010000,
+	CASTCLASS_UBoolProperty = 0x00020000,
+	CASTCLASS_UState = 0x00040000,
+	CASTCLASS_UFunction = 0x00080000,
+	CASTCLASS_UStructProperty = 0x00100000,
+
+	CASTCLASS_UArrayProperty = 0x00200000,
+	CASTCLASS_UMapProperty = 0x00400000,
+	CASTCLASS_UDelegateProperty = 0x00800000,
+	CASTCLASS_UComponent = 0x01000000,
+
+	CASTCLASS_AllFlags = 0xFFFFFFFF,
+};
+
 
 /*
 # ========================================================================================= #
@@ -1010,28 +1135,6 @@ public:
 		}
 
 		return nullptr;
-	}
-	template<typename T> static int32_t CountObject(const std::string& objectName)
-	{
-		static std::map<std::string, int32_t> objectCache;
-
-		if (!objectCache.contains(objectName))
-		{
-			objectCache[objectName] = 0;
-
-			for (UObject* uObject : *UObject::GObjObjects())
-			{
-				if (uObject && uObject->IsA<T>())
-				{
-					if (uObject->GetName() == objectName)
-					{
-						objectCache[uObject->GetName()]++;
-					}
-				}
-			}
-		}
-
-		return objectCache[objectName];
 	}
 	static class UClass* FindClass(const std::string& classFullName);
 	template<typename T> bool IsA()

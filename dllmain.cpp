@@ -408,7 +408,7 @@ std::string UnrealProperty::GetType(bool bIgnoreEnum, bool bFunctionParam, bool 
 
             if (structProperty && structProperty->Struct)
             {
-                uint32_t propertyCount = UObject::CountObject<UScriptStruct>(structProperty->Struct->GetName());
+                uint32_t propertyCount = GCache::CountObject<UScriptStruct>(structProperty->Struct->GetName());
 
                 if (propertyCount > 1)
                 {
@@ -799,6 +799,7 @@ void GCache::CacheObject(UnrealObject& unrealObj)
         }
 
         CacheConstant(unrealObj);
+        CacheCount(unrealObj);
     }
 }
 
@@ -817,6 +818,21 @@ void GCache::CacheConstant(UnrealObject& unrealObj)
                 m_constants[constantName] = unrealObj.Object;
             }
         }
+    }
+}
+
+void GCache::CacheCount(UnrealObject& unrealObj)
+{
+    if (unrealObj.IsValid())
+    {
+        std::pair<std::string, class UClass*> objectPair{ unrealObj.ValidName, unrealObj.Object->Class };
+
+        if (!m_objects.contains(objectPair))
+        {
+            m_objects[objectPair] = 0;
+        }
+
+        m_objects[objectPair]++;
     }
 }
 
@@ -950,56 +966,49 @@ namespace Retrievers
     {
         bool first = true;
 
-        if (propertyFlags & EPropertyFlags::CPF_Edit) { stream << (first ? "(" : " | ") << "CPF_Edit";							                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Const) { stream << (first ? "(" : " | ") << "CPF_Const";						                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Input) { stream << (first ? "(" : " | ") << "CPF_Input";						                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_ExportObject) { stream << (first ? "(" : " | ") << "CPF_ExportObject";			                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_OptionalParm) { stream << (first ? "(" : " | ") << "CPF_OptionalParm";			                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Net) { stream << (first ? "(" : " | ") << "CPF_Net";							                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_EditConstArray) { stream << (first ? "(" : " | ") << "CPF_EditConstArray";		                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Parm) { stream << (first ? "(" : " | ") << "CPF_Parm";							                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_OutParm) { stream << (first ? "(" : " | ") << "CPF_OutParm";					                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_SkipParm) { stream << (first ? "(" : " | ") << "CPF_SkipParm";					                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_ReturnParm) { stream << (first ? "(" : " | ") << "CPF_ReturnParm";				                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_CoerceParm) { stream << (first ? "(" : " | ") << "CPF_CoerceParm";				                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Native) { stream << (first ? "(" : " | ") << "CPF_Native";						                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Transient) { stream << (first ? "(" : " | ") << "CPF_Transient";				                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Config) { stream << (first ? "(" : " | ") << "CPF_Config";						                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Localized) { stream << (first ? "(" : " | ") << "CPF_Localized";				                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Travel) { stream << (first ? "(" : " | ") << "CPF_Travel";						                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_EditConst) { stream << (first ? "(" : " | ") << "CPF_EditConst";				                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_GlobalConfig) { stream << (first ? "(" : " | ") << "CPF_GlobalConfig";			                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Component) { stream << (first ? "(" : " | ") << "CPF_Component";				                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_NeedCtorLink) { stream << (first ? "(" : " | ") << "CPF_NeedCtorLink";			                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_NoExport) { stream << (first ? "(" : " | ") << "CPF_NoExport";					                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_NoClear) { stream << (first ? "(" : " | ") << "CPF_NoClear";					                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_EditInline) { stream << (first ? "(" : " | ") << "CPF_EditInline";				                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_EdFindable) { stream << (first ? "(" : " | ") << "CPF_EdFindable";				                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_EditInlineUse) { stream << (first ? "(" : " | ") << "CPF_EditInlineUse";		                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Deprecated) { stream << (first ? " " : " | ") << "CPF_Deprecated";				                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_EditInlineNotify) { stream << (first ? "(" : " | ") << "CPF_EditInlineNotify";	                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_RepNotify) { stream << (first ? "(" : " | ") << "CPF_RepNotify";				                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Interp) { stream << (first ? "(" : " | ") << "CPF_Interp";						                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_NonTransactional) { stream << (first ? "(" : " | ") << "CPF_NonTransactional";	                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_EditorOnly) { stream << (first ? "(" : " | ") << "CPF_EditorOnly";	                                            first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_NoDestructor) { stream << (first ? "(" : " | ") << "CPF_NoDestructor";	                                        first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_AutoWeak) { stream << (first ? "(" : " | ") << "CPF_AutoWeak";	                                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_ContainsInstancedReference) { stream << (first ? "(" : " | ") << "CPF_ContainsInstancedReference";              first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_SimpleDisplay) { stream << (first ? "(" : " | ") << "CPF_SimpleDisplay";	                                    first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_AdvancedDisplay) { stream << (first ? "(" : " | ") << "CPF_AdvancedDisplay";	                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_Protected) { stream << (first ? "(" : " | ") << "CPF_Protected";	                                            first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_BlueprintCallable) { stream << (first ? "(" : " | ") << "CPF_BlueprintCallable";                                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_BlueprintAuthorityOnly) { stream << (first ? "(" : " | ") << "CPF_BlueprintAuthorityOnly";                      first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_TextExportTransient) { stream << (first ? "(" : " | ") << "CPF_TextExportTransient";                            first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_NonPIEDuplicateTransient) { stream << (first ? "(" : " | ") << "CPF_NonPIEDuplicateTransient";	                first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_ExposeOnSpawn) { stream << (first ? "(" : " | ") << "CPF_ExposeOnSpawn";                                        first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_PersistentInstance) { stream << (first ? "(" : " | ") << "CPF_PersistentInstance";                              first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_UObjectWrapper) { stream << (first ? "(" : " | ") << "CPF_UObjectWrapper";	                                    first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_HasGetValueTypeHash) { stream << (first ? "(" : " | ") << "CPF_HasGetValueTypeHash";                            first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_NativeAccessSpecifierPublic) { stream << (first ? "(" : " | ") << "CPF_NativeAccessSpecifierPublic";            first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_NativeAccessSpecifierProtected) { stream << (first ? "(" : " | ") << "CPF_NativeAccessSpecifierProtected";      first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_NativeAccessSpecifierPrivate) { stream << (first ? "(" : " | ") << "CPF_NativeAccessSpecifierPrivate";          first = false; }
-        if (propertyFlags & EPropertyFlags::CPF_SkipSerialization) { stream << (first ? "(" : " | ") << "CPF_SkipSerialization";                                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Edit) { stream << (first ? "(" : " | ") << "CPF_Edit";							                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Const) { stream << (first ? "(" : " | ") << "CPF_Const";						                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Input) { stream << (first ? "(" : " | ") << "CPF_Input";						                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_ExportObject) { stream << (first ? "(" : " | ") << "CPF_ExportObject";			                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_OptionalParm) { stream << (first ? "(" : " | ") << "CPF_OptionalParm";			                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Net) { stream << (first ? "(" : " | ") << "CPF_Net";							                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_EditFixedSize) { stream << (first ? "(" : " | ") << "CPF_EditFixedSize";		                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Parm) { stream << (first ? "(" : " | ") << "CPF_Parm";							                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_OutParm) { stream << (first ? "(" : " | ") << "CPF_OutParm";					                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_SkipParm) { stream << (first ? "(" : " | ") << "CPF_SkipParm";					                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_ReturnParm) { stream << (first ? "(" : " | ") << "CPF_ReturnParm";				                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_CoerceParm) { stream << (first ? "(" : " | ") << "CPF_CoerceParm";				                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Native) { stream << (first ? "(" : " | ") << "CPF_Native";						                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Transient) { stream << (first ? "(" : " | ") << "CPF_Transient";				                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Config) { stream << (first ? "(" : " | ") << "CPF_Config";						                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Localized) { stream << (first ? "(" : " | ") << "CPF_Localized";				                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Travel) { stream << (first ? "(" : " | ") << "CPF_Travel";						                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_EditConst) { stream << (first ? "(" : " | ") << "CPF_EditConst";				                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_GlobalConfig) { stream << (first ? "(" : " | ") << "CPF_GlobalConfig";			                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Component) { stream << (first ? "(" : " | ") << "CPF_Component";				                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_NeedCtorLink) { stream << (first ? "(" : " | ") << "CPF_NeedCtorLink";			                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_NoExport) { stream << (first ? "(" : " | ") << "CPF_NoExport";					                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_NoClear) { stream << (first ? "(" : " | ") << "CPF_NoClear";					                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_EditInline) { stream << (first ? "(" : " | ") << "CPF_EditInline";				                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_EditInlineUse) { stream << (first ? "(" : " | ") << "CPF_EditInlineUse";				        first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_EditFindable) { stream << (first ? "(" : " | ") << "CPF_EditFindable";				            first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_EditInlineUse) { stream << (first ? "(" : " | ") << "CPF_EditInlineUse";		                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Deprecated) { stream << (first ? " " : " | ") << "CPF_Deprecated";				                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_DataBinding) { stream << (first ? "(" : " | ") << "CPF_DataBinding";	                        first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_SerializeText) { stream << (first ? "(" : " | ") << "CPF_SerializeText";	                    first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_RepNotify) { stream << (first ? "(" : " | ") << "CPF_RepNotify";				                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_Interp) { stream << (first ? "(" : " | ") << "CPF_Interp";						                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_NonTransactional) { stream << (first ? "(" : " | ") << "CPF_NonTransactional";	                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_EditorOnly) { stream << (first ? "(" : " | ") << "CPF_EditorOnly";	                            first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_NotForConsole) { stream << (first ? "(" : " | ") << "CPF_NotForConsole";	                    first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_RepRetry) { stream << (first ? "(" : " | ") << "CPF_RepRetry";	                                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_PrivateWrite) { stream << (first ? "(" : " | ") << "CPF_PrivateWrite";	                        first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_ProtectedWrite) { stream << (first ? "(" : " | ") << "CPF_ProtectedWrite";	                    first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_ArchetypeProperty) { stream << (first ? "(" : " | ") << "CPF_ArchetypeProperty";	            first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_EditHide) { stream << (first ? "(" : " | ") << "CPF_EditHide";	                                first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_EditTextBox) { stream << (first ? "(" : " | ") << "CPF_EditTextBox";	                        first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_CrossLevelPassive) { stream << (first ? "(" : " | ") << "CPF_CrossLevelPassive";	            first = false; }
+        if (propertyFlags & EPropertyFlags::CPF_CrossLevelActive) { stream << (first ? "(" : " | ") << "CPF_CrossLevelActive";	                first = false; }
 
         if (!first)
         {
@@ -1428,7 +1437,7 @@ namespace StructGenerator
 
                 UScriptStruct* scriptStruct = static_cast<UScriptStruct*>(unrealObj.Object);
                 UScriptStruct* superField = static_cast<UScriptStruct*>(scriptStruct->SuperField);
-                uint32_t structCount = UObject::CountObject<UScriptStruct>(unrealObj.ValidName);
+                uint32_t structCount = GCache::CountObject<UScriptStruct>(unrealObj.ValidName);
 
                 if (superField && (superField != scriptStruct))
                 {
@@ -1438,7 +1447,7 @@ namespace StructGenerator
                     std::string fieldName = Utils::CreateValidName(superField->GetName());
                     std::string fieldNameCPP = Utils::CreateValidName(superField->GetNameCPP());
                     std::string fieldOuterNameCPP = Utils::CreateValidName(superField->Outer->GetNameCPP());
-                    uint32_t fieldStructCount = UObject::CountObject<UScriptStruct>(fieldName);
+                    uint32_t fieldStructCount = GCache::CountObject<UScriptStruct>(fieldName);
 
                     structStream << "// " << Printer::Hex(size, EWidthTypes::Size);
                     structStream << " (" << Printer::Hex(superField->PropertySize, EWidthTypes::Size);
