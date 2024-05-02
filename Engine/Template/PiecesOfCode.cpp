@@ -1161,7 +1161,6 @@ namespace PiecesOfCode
 		"// State Flags\n"
 		"enum EStateFlags\n"
 		"{\n"
-		"\t// State flags.\n"
 		"\tSTATE_Editable =\t\t\t\t\t\t0x00000001,\t// State should be user-selectable in UnrealEd.\n"
 		"\tSTATE_Auto =\t\t\t\t\t\t\t0x00000002,\t// State is automatic (the default state).\n"
 		"\tSTATE_Simulated =\t\t\t\t\t\t0x00000004, // State executes on client side.\n"
