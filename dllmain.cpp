@@ -2251,7 +2251,7 @@ namespace ClassGenerator
                     {
                         classStream << "\tvoid ProcessEvent(class UFunction* uFunction, void* uParams, void* uResult = nullptr);\n";
                     }
-                    else if (GConfig::GetProcessEventIndex() != -1)
+                    else if (GConfig::GetProcessEventPattern())
                     {
                         FunctionGenerator::GenerateVirtualFunctions(file);
                     }
