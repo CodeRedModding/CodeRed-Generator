@@ -48,6 +48,13 @@ Once all your classes are filled out and you've made the necessary changes in `C
 
 ## Changelog
 
+### v1.1.2
+
+- Added a new "GLogger" class in "dllmain.hpp/cpp" which will now handle any logging to the log file.
+- Added extra logging for the time it takes for caching every object before sdk generation starts.
+- Improved the caching system for packages, includes, and constants.
+- Fixed a bug that could cause UClassProperty's to be confused with UObjectProperty's.
+
 ### v1.1.1
 - Added a new caching system for counting objects, which increases generation speed over by over 5x.
 - Added additional enums for flags to "PiecesOfCode.cpp", including state flags and class flags.

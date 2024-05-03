@@ -2,12 +2,13 @@
 
 static constexpr uint32_t LOG_FILE_SPACING = 75;
 static constexpr uint32_t CONST_VALUE_SPACING = 175;
+static constexpr uint32_t INSTANCE_DUMP_SPACING = 50;
 
 UnrealObject::UnrealObject() : Type(EClassTypes::Unknown), Object(nullptr), Package(nullptr) {}
 
-UnrealObject::UnrealObject(class UObject* uObject) : Type(EClassTypes::Unknown), Object(nullptr), Package(nullptr)
+UnrealObject::UnrealObject(class UObject* uObject, bool bIsPackage) : Type(EClassTypes::Unknown), Object(nullptr), Package(nullptr)
 {
-    Assign(uObject);
+    Assign(uObject, bIsPackage);
 }
 
 UnrealObject::UnrealObject(const UnrealObject& unrealObj) :
@@ -37,11 +38,11 @@ std::string UnrealObject::Hash() const
     return "";
 }
 
-bool UnrealObject::Assign(class UObject* uObject)
+void UnrealObject::Assign(class UObject* uObject, bool bIsPackage)
 {
     if (uObject)
     {
-        UObject* packageObj = uObject->GetPackageObj();
+        UObject* packageObj = (bIsPackage ? uObject : uObject->GetPackageObj());
 
         if (packageObj)
         {
@@ -49,14 +50,20 @@ bool UnrealObject::Assign(class UObject* uObject)
             Package = packageObj;
             FullName = Utils::CreateValidName(Object->GetFullName());
             ValidName = Utils::CreateValidName(Object->GetName());
-            return AssignType();
+
+            if (!bIsPackage)
+            {
+                AssignType();
+            }
+            else
+            {
+                Type = EClassTypes::UObject;
+            }
         }
     }
-
-    return false;
 }
 
-bool UnrealObject::AssignType()
+void UnrealObject::AssignType()
 {
     if (Object)
     {
@@ -97,8 +104,6 @@ bool UnrealObject::AssignType()
             Type = EClassTypes::UFunction;
         }
     }
-
-    return (Type != EClassTypes::Unknown);
 }
 
 bool UnrealObject::operator>(const UnrealObject& unrealObj)
@@ -256,8 +261,8 @@ bool UnrealProperty::CantMemcpy() const
         return ((Type == EPropertyTypes::Bool)
             || (!IsAnArray()
                 && ((Type == EPropertyTypes::UObject)
-                    || (Type == EPropertyTypes::UClass)
-                    || (Type == EPropertyTypes::UInterface))));
+                || (Type == EPropertyTypes::UClass)
+                || (Type == EPropertyTypes::UInterface))));
     }
 
     return false;
@@ -311,11 +316,11 @@ size_t UnrealProperty::GetSize() const
         {
             return Property->ElementSize;
         }
-        else if (Type == EPropertyTypes::UObject)
+        else if (Type == EPropertyTypes::UClass)
         {
             return sizeof(uintptr_t);
         }
-        else if (Type == EPropertyTypes::UClass)
+        else if (Type == EPropertyTypes::UObject)
         {
             return sizeof(uintptr_t);
         }
@@ -427,15 +432,6 @@ std::string UnrealProperty::GetType(bool bIgnoreEnum, bool bFunctionParam, bool 
                 }
             }
         }
-        else if (Type == EPropertyTypes::UObject)
-        {
-            UObjectProperty* objectProperty = static_cast<UObjectProperty*>(Property);
-
-            if (objectProperty && objectProperty->PropertyClass)
-            {
-                typeStr = ("class " + Utils::CreateValidName(objectProperty->PropertyClass->GetNameCPP()) + "*");
-            }
-        }
         else if (Type == EPropertyTypes::UClass)
         {
             UClassProperty* classProperty = static_cast<UClassProperty*>(Property);
@@ -443,6 +439,15 @@ std::string UnrealProperty::GetType(bool bIgnoreEnum, bool bFunctionParam, bool 
             if (classProperty && classProperty->MetaClass)
             {
                 typeStr = ("class " + Utils::CreateValidName(classProperty->MetaClass->GetNameCPP()) + "*");
+            }
+        }
+        else if (Type == EPropertyTypes::UObject)
+        {
+            UObjectProperty* objectProperty = static_cast<UObjectProperty*>(Property);
+
+            if (objectProperty && objectProperty->PropertyClass)
+            {
+                typeStr = ("class " + Utils::CreateValidName(objectProperty->PropertyClass->GetNameCPP()) + "*");
             }
         }
         else if (Type == EPropertyTypes::UInterface)
@@ -541,15 +546,6 @@ bool UnrealProperty::AssignType()
         {
             Type = EPropertyTypes::UInt64;
         }
-        else if (Property->IsA<UObjectProperty>())
-        {
-            UObjectProperty* objectProperty = static_cast<UObjectProperty*>(Property);
-
-            if (objectProperty && objectProperty->PropertyClass)
-            {
-                Type = EPropertyTypes::UObject;
-            }
-        }
         else if (Property->IsA<UClassProperty>())
         {
             UClassProperty* classProperty = static_cast<UClassProperty*>(Property);
@@ -557,6 +553,15 @@ bool UnrealProperty::AssignType()
             if (classProperty && classProperty->MetaClass)
             {
                 Type = EPropertyTypes::UClass;
+            }
+        }
+        else if (Property->IsA<UObjectProperty>())
+        {
+            UObjectProperty* objectProperty = static_cast<UObjectProperty*>(Property);
+
+            if (objectProperty && objectProperty->PropertyClass)
+            {
+                Type = EPropertyTypes::UObject;
             }
         }
         else if (Property->IsA<UInterfaceProperty>())
@@ -675,11 +680,11 @@ void GCache::Initialize()
 
 void GCache::ClearCache()
 {
+    m_objects.clear();
     m_consts.clear();
     m_enums.clear();
     m_structs.clear();
     m_classes.clear();
-    m_includes.clear();
     m_constants.clear();
     m_packages.clear();
 }
@@ -706,17 +711,12 @@ std::vector<UnrealObject>* GCache::GetCache(class UObject* packageObj, EClassTyp
     return nullptr;
 }
 
-std::vector <std::pair<class UObject*, std::string>>* GCache::GetIncludes()
-{
-    return &m_includes;
-}
-
 std::map<std::string, class UObject*>* GCache::GetConstants()
 {
     return &m_constants;
 }
 
-std::vector<class UObject*>* GCache::GetPackages()
+std::vector<UnrealObject>* GCache::GetPackages()
 {
     return &m_packages;
 }
@@ -791,10 +791,11 @@ void GCache::CacheObject(UnrealObject& unrealObj)
                 cache->push_back(unrealObj);
             }
 
-            if (std::find(m_packages.begin(), m_packages.end(), unrealObj.Package) == m_packages.end())
+            UnrealObject packageObj(unrealObj.Package, true);
+
+            if (std::find(m_packages.begin(), m_packages.end(), packageObj) == m_packages.end())
             {
-                m_packages.push_back(unrealObj.Package);
-                m_includes.push_back({ unrealObj.Package, Utils::CreateValidName(unrealObj.Package->GetName()) });
+                m_packages.push_back(packageObj);
             }
         }
 
@@ -834,6 +835,104 @@ void GCache::CacheCount(UnrealObject& unrealObj)
 
         m_objects[objectPair]++;
     }
+}
+
+bool GLogger::Open()
+{
+#ifndef NO_LOGGING
+    if (!m_file.is_open() && GConfig::HasOutputPath())
+    {
+        std::filesystem::path fullDirectory = (GConfig::GetOutputPath() / GConfig::GetGameNameShort());
+        std::filesystem::create_directory(GConfig::GetOutputPath());
+        std::filesystem::create_directory(fullDirectory);
+
+        if (std::filesystem::exists(fullDirectory))
+        {
+            m_file.open(fullDirectory / (GEngine::GetName() + ".log"));
+            return true;
+        }
+        else
+        {
+            Utils::MessageboxError("Error: Failed to create the log file, might not have the right permissions or your directory is invalid!");
+        }
+    }
+#endif
+
+    return false;
+}
+
+void GLogger::Close()
+{
+#ifndef NO_LOGGING
+    if (m_file.is_open())
+    {
+        m_file.close();
+    }
+#endif
+}
+
+void GLogger::Flush()
+{
+#ifndef NO_LOGGING
+    if (m_file.is_open())
+    {
+        m_file.flush();
+    }
+#endif
+}
+
+void GLogger::Log(const std::string& str, bool bFlush)
+{
+#ifndef NO_LOGGING
+    if (m_file.is_open() && !str.empty())
+    {
+        m_file << str << "\n";
+
+        if (bFlush)
+        {
+            Flush();
+        }
+    }
+#endif
+}
+
+void GLogger::LogObject(const std::string& title, const UnrealObject& unrealObj)
+{
+#ifndef NO_LOGGING
+    if (m_file.is_open() && !title.empty() && unrealObj.IsValid())
+    {
+        m_file << title;
+        Printer::FillRight(m_file, ' ', unrealObj.ValidName.size());
+        m_file << unrealObj.ValidName;
+        Printer::FillRight(m_file, ' ', (LOG_FILE_SPACING - (unrealObj.ValidName.size() + title.size())));
+        m_file << " - Instance: " << Printer::Hex(unrealObj.Object) << std::endl;
+    }
+#endif
+}
+
+void GLogger::LogClassSize(class UClass* uClass, size_t localSize)
+{
+#ifndef NO_LOGGING
+    if (m_file.is_open() && uClass)
+    {
+        m_file << "Error: Incorrect class size detected for \"" << uClass->GetFullName() << "\"!\n";
+        m_file << "Error: Reported size " << localSize << "\n";
+        m_file << "Error: Actual size " << uClass->PropertySize << std::endl;
+    }
+#endif
+}
+
+void GLogger::LogStructPadding(class UScriptStruct* uScriptStruct, size_t padding)
+{
+#ifndef NO_LOGGING
+    if (m_file.is_open() && uScriptStruct)
+    {
+        m_file << "Info: Extra padding detected!";
+        m_file << "Info: Property size " << Printer::Hex(uScriptStruct->PropertySize, 1) << "\n";
+        m_file << "Info: Min alignment " << Printer::Hex(uScriptStruct->MinAlignment, 1) << "\n";
+        m_file << "Info: Extra padding " << Printer::Hex(padding, 1) << std::endl;
+    }
+#endif
 }
 
 namespace Utils
@@ -1170,7 +1269,7 @@ namespace ConstGenerator
         if (unrealObj.IsValid())
         {
 #ifndef NO_LOGGING
-            Generator::LogInstance("Const: ", unrealObj);
+            GLogger::LogObject("Const: ", unrealObj);
 #endif
 
             if (!unrealObj.ValidName.empty())
@@ -1250,7 +1349,7 @@ namespace EnumGenerator
         if (unrealObj.IsValid())
         {
 #ifndef NO_LOGGING
-            Generator::LogInstance("Enum: ", unrealObj);
+            GLogger::LogObject("Enum: ", unrealObj);
 #endif
 
             std::ostringstream enumStream;
@@ -1400,7 +1499,7 @@ namespace StructGenerator
             else
             {
 #ifndef NO_LOGGING
-                Generator::LogFile << "Error: No registered members found for struct type \"" << Member::GetName(structType) << "\"\n";
+                GLogger::Log("Error: No registered members found for struct type \"" + Member::GetName(structType) + "\"!");
 #endif
                 Utils::MessageboxError("Error: No registered members found for struct type \"" + Member::GetName(structType) + "\"!");
             }
@@ -1420,7 +1519,7 @@ namespace StructGenerator
             }
 
 #ifndef NO_LOGGING
-            Generator::LogInstance("ScriptStruct: ", unrealObj);
+            GLogger::LogObject("ScriptStruct: ", unrealObj);
 #endif
 
             std::ostringstream structStream;
@@ -1718,16 +1817,6 @@ namespace StructGenerator
                     if ((lastOffset < actualSize) && (actualSize > scriptStruct->PropertySize))
                     {
                         int32_t padding = (actualSize - lastOffset);
-#ifndef NO_LOGGING
-                        if (Generator::LogFile.is_open())
-                        {
-                            Generator::LogFile << "Info: EXTRA PADDING DETECTED!\n";
-                            Generator::LogFile << "Info: STRUCT SIZE " << Printer::Hex(scriptStruct->PropertySize, 1) << "\n";
-                            Generator::LogFile << "Info: MIN ALIGNMENT " << Printer::Hex(scriptStruct->MinAlignment, 1) << "\n";
-                            Generator::LogFile << "Info: ADDED PADDING " << Printer::Hex(padding, 1) << std::endl;
-                        }
-#endif
-
                         std::string paddingStr = Printer::Hex(padding);
                         propertyStream << "MinStructAlignment" << "[" << paddingStr << "];";
 
@@ -1736,7 +1825,11 @@ namespace StructGenerator
                         Printer::FillLeft(structStream, ' ', (GConfig::GetStructSpacing() - paddingStr.size()));
 
                         structStream << propertyStream.str() << "// " << Printer::Hex(lastOffset, EWidthTypes::Size);
-                        structStream << " (" << Printer::Hex(missedOffset, EWidthTypes::Size) << ") ADDED PADDING\n";
+                        structStream << " (" << Printer::Hex(padding, EWidthTypes::Size) << ") ADDED PADDING\n";
+
+#ifndef NO_LOGGING
+                        GLogger::LogStructPadding(scriptStruct, padding);
+#endif
                     }
                 }
 #endif
@@ -1901,12 +1994,7 @@ namespace ClassGenerator
                 else
                 {
 #ifndef NO_LOGGING
-                    if (Generator::LogFile.is_open())
-                    {
-                        Generator::LogFile << "Error: INCORRECT CLASS SIZE DETECTED FOR CLASS " << uClass->GetName() << "\n";
-                        Generator::LogFile << "Error: REGISTERED CLASS SIZE " << localSize << "\n";
-                        Generator::LogFile << "Error: ACTUAL CLASS SIZE " << uClass->PropertySize << std::endl;
-                    }
+                    GLogger::LogClassSize(uClass, localSize);
 #endif
                     Utils::MessageboxError("Error: Incorrect class size detected for \"" + Member::GetName(classType) + "\", check the log file for more details!");
                 }
@@ -1914,7 +2002,7 @@ namespace ClassGenerator
             else
             {
 #ifndef NO_LOGGING
-                Generator::LogFile << "Error: No registered members found for class \"" << uClass->GetName() << "\"\n";
+                GLogger::Log("Error: No registered members found for class \"" + uClass->GetName() + "\"!");
 #endif
                 Utils::MessageboxError("Error: No registered members found for \"" + Member::GetName(classType) + "\"!");
             }
@@ -1935,7 +2023,7 @@ namespace ClassGenerator
             }
 
 #ifndef NO_LOGGING
-            Generator::LogInstance("Class: ", unrealObj);
+            GLogger::LogObject("Class: ", unrealObj);
 #endif
 
             std::ostringstream classStream;
@@ -2000,8 +2088,8 @@ namespace ClassGenerator
                 else if (uClass == UStruct::StaticClass()) { GenerateClassMembers(classStream, uClass, EClassTypes::UStruct); }
                 else if (uClass == UFunction::StaticClass()) { GenerateClassMembers(classStream, uClass, EClassTypes::UFunction); }
                 else if (uClass == UStructProperty::StaticClass()) { GenerateClassMembers(classStream, uClass, EClassTypes::UStructProperty); }
-                else if (uClass == UObjectProperty::StaticClass()) { GenerateClassMembers(classStream, uClass, EClassTypes::UObjectProperty); }
                 else if (uClass == UClassProperty::StaticClass()) { GenerateClassMembers(classStream, uClass, EClassTypes::UClassProperty); }
+                else if (uClass == UObjectProperty::StaticClass()) { GenerateClassMembers(classStream, uClass, EClassTypes::UObjectProperty); }
                 else if (uClass == UMapProperty::StaticClass()) { GenerateClassMembers(classStream, uClass, EClassTypes::UMapProperty); }
                 else if (uClass == UInterfaceProperty::StaticClass()) { GenerateClassMembers(classStream, uClass, EClassTypes::UInterfaceProperty); }
                 else if (uClass == UByteProperty::StaticClass()) { GenerateClassMembers(classStream, uClass, EClassTypes::UByteProperty); }
@@ -2251,7 +2339,7 @@ namespace ClassGenerator
                     {
                         classStream << "\tvoid ProcessEvent(class UFunction* uFunction, void* uParams, void* uResult = nullptr);\n";
                     }
-                    else if (GConfig::GetProcessEventPattern())
+                    else if (GConfig::GetProcessEventIndex() != -1)
                     {
                         FunctionGenerator::GenerateVirtualFunctions(file);
                     }
@@ -3066,22 +3154,6 @@ namespace FunctionGenerator
 
 namespace Generator
 {
-    std::ofstream LogFile;
-
-    void LogInstance(const std::string& title, const UnrealObject& unrealObj)
-    {
-#ifndef NO_LOGGING
-        if (Generator::LogFile.is_open() && !title.empty() && unrealObj.IsValid())
-        {
-            Generator::LogFile << title;
-            Printer::FillRight(Generator::LogFile, ' ', unrealObj.ValidName.size());
-            Generator::LogFile << unrealObj.ValidName;
-            Printer::FillRight(Generator::LogFile, ' ', (LOG_FILE_SPACING - (unrealObj.ValidName.size() + title.size())));
-            Generator::LogFile << " - Instance: " << Printer::Hex(unrealObj.Object) << std::endl;
-        }
-#endif
-    }
-
     void GenerateConstants()
     {
         if (GConfig::UsingConstants())
@@ -3114,15 +3186,15 @@ namespace Generator
         Printer::Section(headersFile, "Includes");
 
         headersFile << "#include \"GameDefines.hpp\"\n";
-        std::vector<std::pair<class UObject*, std::string>>* includes = GCache::GetIncludes();
+        std::vector<UnrealObject>* packages = GCache::GetPackages();
 
-        for (auto& includePair : *includes)
+        for (const UnrealObject& packageObj : *packages)
         {
-            if (!includePair.second.empty())
+            if (packageObj.IsValid())
             {
-                headersFile << "#include \"SDK_HEADERS\\" << includePair.second << "_structs.hpp\"\n";
-                headersFile << "#include \"SDK_HEADERS\\" << includePair.second << "_classes.hpp\"\n";
-                headersFile << "#include \"SDK_HEADERS\\" << includePair.second << "_parameters.hpp\"\n";
+                headersFile << "#include \"SDK_HEADERS\\" << packageObj.ValidName << "_structs.hpp\"\n";
+                headersFile << "#include \"SDK_HEADERS\\" << packageObj.ValidName << "_classes.hpp\"\n";
+                headersFile << "#include \"SDK_HEADERS\\" << packageObj.ValidName << "_parameters.hpp\"\n";
             }
         }
 
@@ -3230,51 +3302,51 @@ namespace Generator
     {
         if (std::filesystem::exists(directory))
         {
-            std::vector<class UObject*>* packages = GCache::GetPackages();
+            std::vector<UnrealObject>* packages = GCache::GetPackages();
 
-            for (class UObject* packageObj : *packages)
+            for (const UnrealObject& packageObj : *packages)
             {
-                if (packageObj)
+                if (packageObj.IsValid())
                 {
-                    std::string packageName = Utils::CreateValidName(packageObj->GetName());
 #ifndef NO_LOGGING
-                    LogFile << "\nProcessing Package: " << packageName << "\n" << std::endl;
+                    GLogger::Log("\nProcessing Package: " + packageObj.ValidName + "\n");
 #endif
+
                     std::ofstream file;
 
                     // Structs
-                    file.open(directory / (packageName + "_structs.hpp"));
-                    Printer::Header(file, (packageName + "_structs"), "hpp", true);
+                    file.open(directory / (packageObj.ValidName + "_structs.hpp"));
+                    Printer::Header(file, (packageObj.ValidName + "_structs"), "hpp", true);
                     Printer::Section(file, "Structs");
-                    StructGenerator::ProcessStructs(file, packageObj);
+                    StructGenerator::ProcessStructs(file, packageObj.Object);
                     Printer::Footer(file, true);
                     file.close();
 
                     // Classes
-                    file.open(directory / (packageName + "_classes.hpp"));
-                    Printer::Header(file, (packageName + "_classes"), "hpp", true);
+                    file.open(directory / (packageObj.ValidName + "_classes.hpp"));
+                    Printer::Header(file, (packageObj.ValidName + "_classes"), "hpp", true);
                     Printer::Section(file, "Constants");
-                    ConstGenerator::ProcessConsts(file, packageObj);
+                    ConstGenerator::ProcessConsts(file, packageObj.Object);
                     Printer::Section(file, "Enums");
-                    EnumGenerator::ProcessEnums(file, packageObj);
+                    EnumGenerator::ProcessEnums(file, packageObj.Object);
                     Printer::Section(file, "Classes");
-                    ClassGenerator::ProcessClasses(file, packageObj);
+                    ClassGenerator::ProcessClasses(file, packageObj.Object);
                     Printer::Footer(file, true);
                     file.close();
 
                     // Parameters
-                    file.open(directory / (packageName + "_parameters.hpp"));
-                    Printer::Header(file, (packageName + "_parameters"), "hpp", true);
+                    file.open(directory / (packageObj.ValidName + "_parameters.hpp"));
+                    Printer::Header(file, (packageObj.ValidName + "_parameters"), "hpp", true);
                     Printer::Section(file, "Parameters");
-                    ParameterGenerator::ProcessParameters(file, packageObj);
+                    ParameterGenerator::ProcessParameters(file, packageObj.Object);
                     Printer::Footer(file, true);
                     file.close();
 
                     // Functions
-                    file.open(directory / (packageName + "_classes.cpp"));
-                    Printer::Header(file, (packageName + "_classes"), "cpp", true);
+                    file.open(directory / (packageObj.ValidName + "_classes.cpp"));
+                    Printer::Header(file, (packageObj.ValidName + "_classes"), "cpp", true);
                     Printer::Section(file, "Functions");
-                    FunctionGenerator::ProcessFunctions(file, packageObj);
+                    FunctionGenerator::ProcessFunctions(file, packageObj.Object);
                     Printer::Footer(file, true);
                     file.close();
                 }
@@ -3309,15 +3381,11 @@ namespace Generator
                 GCache::ClearCache();
 
                 std::chrono::time_point endTime = std::chrono::system_clock::now();
-                std::chrono::duration<float> elapsedTime = (endTime - startTime);
-                std::string formattedTime = Printer::Precision(elapsedTime.count(), 4);
+                std::string formattedTime = Printer::Precision(std::chrono::duration<float>(endTime - startTime).count(), 4);
 
 #ifndef NO_LOGGING
-                if (LogFile.is_open())
-                {
-                    LogFile << "\n" << GConfig::GetGameNameShort() << " generated in " << formattedTime << " seconds.";
-                    LogFile.close();
-                }
+                GLogger::Log("\n" + GConfig::GetGameNameShort() + " generated in " + formattedTime + " seconds.");
+                GLogger::Close();
 #endif
 
                 Utils::MessageboxInfo("SDK generation complete, finished in " + formattedTime + " seconds!");
@@ -3331,6 +3399,12 @@ namespace Generator
 
     bool Initialize(bool bCreateLog)
     {
+        if (!GConfig::HasOutputPath())
+        {
+            Utils::MessageboxError("Looks like you forgot to set an output path for the generator! Please edit the output path in \"Configuration.cpp\" and recompile.");
+            return false;
+        }
+
         if (!AreGlobalsValid())
         {
             if (GConfig::UsingOffsets())
@@ -3388,7 +3462,24 @@ namespace Generator
                 UBoolProperty::Register_BitMask();
                 UArrayProperty::Register_Inner();
 
+#ifndef NO_LOGGING
+                std::chrono::time_point startTime = std::chrono::system_clock::now();
+#endif
+
                 GCache::Initialize(); // Cache all object instances needed for generation.
+
+#ifndef NO_LOGGING
+                std::chrono::time_point endTime = std::chrono::system_clock::now();
+                std::string formattedTime = Printer::Precision(std::chrono::duration<float>(endTime - startTime).count(), 4);
+
+                if (bCreateLog && GLogger::Open())
+                {
+                    GLogger::Log("Base: " + Printer::Hex(Retrievers::GetBaseAddress(), sizeof(uintptr_t)));
+                    GLogger::Log("GObjects: " + Printer::Hex(GObjects));
+                    GLogger::Log("GNames: " + Printer::Hex(GNames));
+                    GLogger::Log("\n" + GConfig::GetGameNameShort() + " objects cached in " + formattedTime + " seconds.");
+                }
+#endif
             }
             else
             {
@@ -3399,37 +3490,15 @@ namespace Generator
 
         if (AreGlobalsValid())
         {
-            if (GConfig::HasOutputPath())
-            {
 #ifndef NO_LOGGING
-                if (bCreateLog)
-                {
-                    std::filesystem::path fullDirectory = (GConfig::GetOutputPath() / GConfig::GetGameNameShort());
-                    std::filesystem::create_directory(GConfig::GetOutputPath());
-                    std::filesystem::create_directory(fullDirectory);
-
-                    if (std::filesystem::exists(fullDirectory))
-                    {
-                        LogFile.open(fullDirectory / (GEngine::GetName() + ".log"));
-                        LogFile << "Base: " << Printer::Hex(Retrievers::GetBaseAddress(), sizeof(uintptr_t)) << "\n";
-                        LogFile << "GObjects: " << Printer::Hex(GObjects) << "\n";
-                        LogFile << "GNames: " << Printer::Hex(GNames) << "\n";
-                        LogFile.flush();
-                    }
-                    else
-                    {
-                        Utils::MessageboxError("Error: Failed to create the log file, might not have the right permissions or your directory is invalid!");
-                        return false;
-                    }
-                }
-#endif
-                return true;
-            }
-            else
+            if (bCreateLog && GLogger::Open()) // Will return false if the file is already open.
             {
-                Utils::MessageboxError("Looks like you forgot to set an output path for the generator! Please edit the output path in \"Configuration.cpp\" and recompile.");
-                return false;
+                GLogger::Log("Base: " + Printer::Hex(Retrievers::GetBaseAddress(), sizeof(uintptr_t)));
+                GLogger::Log("GObjects: " + Printer::Hex(GObjects));
+                GLogger::Log("GNames: " + Printer::Hex(GNames));
             }
+#endif
+            return true;
         }
 
         return false;
@@ -3478,7 +3547,7 @@ namespace Generator
                         file << "Name[";
                         Printer::FillRight(file, '0', 6);
                         file << nameEntry->GetIndex() << "] " << name << " ";
-                        Printer::FillRight(file, ' ', (50 - name.length()));
+                        Printer::FillRight(file, ' ', (INSTANCE_DUMP_SPACING - name.length()));
                         file << Printer::Hex(nameEntry) << "\n";
                     }
                 }
@@ -3515,7 +3584,7 @@ namespace Generator
                         file << "UObject[";
                         Printer::FillRight(file, '0', 6);
                         file << uObject->ObjectInternalInteger << "] " << objectName << " ";
-                        Printer::FillRight(file, ' ', (50 - objectName.length()));
+                        Printer::FillRight(file, ' ', (INSTANCE_DUMP_SPACING - objectName.length()));
                         file << Printer::Hex(uObject) << "\n";
                     }
                 }

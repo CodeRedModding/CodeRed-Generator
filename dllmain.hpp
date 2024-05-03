@@ -14,7 +14,7 @@ public:
 
 public:
 	UnrealObject();
-	UnrealObject(class UObject* uObject);
+	UnrealObject(class UObject* uObject, bool bIsPackage = false);
 	UnrealObject(const UnrealObject& unrealObj);
 	~UnrealObject();
 
@@ -23,8 +23,8 @@ public:
 	std::string Hash() const;
 
 private:
-	bool Assign(class UObject* uObject);
-	bool AssignType();
+	void Assign(class UObject* uObject, bool bIsPackage);
+	void AssignType();
 
 public:
 	bool operator>(const UnrealObject& unrealObj);
@@ -102,6 +102,7 @@ namespace std
 	};
 }
 
+// Caches all need objects and strings for sdk generation, caching is only needed to be done one time on initialization.
 class GCache
 {
 private:
@@ -110,17 +111,15 @@ private:
 	static inline std::map<class UObject*, std::vector<UnrealObject>> m_enums;
 	static inline std::map<class UObject*, std::vector<UnrealObject>> m_structs;
 	static inline std::map<class UObject*, std::vector<UnrealObject>> m_classes;
-	static inline std::vector<std::pair<class UObject*, std::string>> m_includes;
 	static inline std::map<std::string, class UObject*> m_constants;
-	static inline std::vector<class UObject*> m_packages;
+	static inline std::vector<UnrealObject> m_packages;
 
 public:
 	static void Initialize();
 	static void ClearCache();
 	static std::vector<UnrealObject>* GetCache(class UObject* packageObj, EClassTypes type);
-	static std::vector<std::pair<class UObject*, std::string>>* GetIncludes();
 	static std::map<std::string, class UObject*>* GetConstants();
-	static std::vector<class UObject*>* GetPackages();
+	static std::vector<UnrealObject>* GetPackages();
 
 public:
 	static std::pair<std::string, class UObject*> GetConstant(const UnrealObject& unrealObj);
@@ -142,6 +141,30 @@ private:
 	static void CacheObject(UnrealObject& unrealObj);
 	static void CacheConstant(UnrealObject& unrealObj);
 	static void CacheCount(UnrealObject& unrealObj);
+
+public:
+	GCache() = delete;
+};
+
+// This is only used for the log file if you have "NO_LOGGING" comment out in your config.
+class GLogger
+{
+private:
+	static inline std::ofstream m_file;
+
+public:
+	static bool Open();
+	static void Close();
+	static void Flush();
+
+public:
+	static void Log(const std::string& str, bool bFlush = true);
+	static void LogObject(const std::string& title, const UnrealObject& unrealObj);
+	static void LogClassSize(class UClass* uClass, size_t localSize);
+	static void LogStructPadding(class UScriptStruct* uScriptStruct, size_t padding);
+
+public:
+	GLogger() = delete;
 };
 
 namespace Utils
@@ -213,9 +236,6 @@ namespace FunctionGenerator
 
 namespace Generator
 {
-	extern std::ofstream LogFile;
-	void LogInstance(const std::string& title, const UnrealObject& unrealObj);
-
 	void GenerateConstants();
 	void GenerateHeaders();
 	void GenerateDefines();
