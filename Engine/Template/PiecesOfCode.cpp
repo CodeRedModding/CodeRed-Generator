@@ -456,7 +456,7 @@ namespace PiecesOfCode
 
 	const std::string FNameEntry_Struct_UTF8 =
 		"\npublic:\n"
-		"\tFNameEntry() : FNameEntry() : Flags(0), Index(-1), HashNext(nullptr) {}\n"
+		"\tFNameEntry() : Flags(0), Index(-1), HashNext(nullptr) {}\n"
 		"\t~FNameEntry() {}\n"
 		"\n"
 		"public:\n"
