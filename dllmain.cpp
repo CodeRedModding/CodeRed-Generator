@@ -3235,9 +3235,9 @@ namespace Generator
         {
             if (packageObj.IsValid())
             {
-                headersFile << "#include \"SDK_HEADERS\\" << packageObj.ValidName << "_structs.hpp\"\n";
-                headersFile << "#include \"SDK_HEADERS\\" << packageObj.ValidName << "_classes.hpp\"\n";
-                headersFile << "#include \"SDK_HEADERS\\" << packageObj.ValidName << "_parameters.hpp\"\n";
+                headersFile << "#include \"SDK_HEADERS/" << packageObj.ValidName << "_structs.hpp\"\n";
+                headersFile << "#include \"SDK_HEADERS/" << packageObj.ValidName << "_classes.hpp\"\n";
+                headersFile << "#include \"SDK_HEADERS/" << packageObj.ValidName << "_parameters.hpp\"\n";
             }
         }
 
