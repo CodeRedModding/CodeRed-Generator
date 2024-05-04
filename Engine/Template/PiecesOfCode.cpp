@@ -925,7 +925,8 @@ namespace PiecesOfCode
 	const std::string FScriptDelegate_Struct =
 		"struct FScriptDelegate\n"
 		"{\n"
-		"\tclass UObject* Object;\t\t\t\t\t\t\t\t\t\t// 0x0000 (0x08)\n"
+		"\tclass UObject* Object; // 0x0000 (0x04)\n"
+		"\tclass FName FunctionName; // 0x0000 (0x08)\n"
 		"};\n";
 
 	const std::string FPointer_Struct =
