@@ -87,14 +87,14 @@ void UnrealObject::AssignType()
         }
         else if (Object->IsA<UScriptStruct>())
         {
-            if (ValidName.find("Default__") == std::string::npos)
+            if ((ValidName.find("Default__") == std::string::npos) && (ValidName.find("<uninitialized>") == std::string::npos))
             {
                 Type = EClassTypes::UStruct;
             }
         }
         else if (Object->IsA<UClass>())
         {
-            if (ValidName.find("Default__") == std::string::npos)
+            if ((ValidName.find("Default__") == std::string::npos) && (ValidName.find("<uninitialized>") == std::string::npos))
             {
                 Type = EClassTypes::UClass;
             }
@@ -260,8 +260,8 @@ bool UnrealProperty::CantMemcpy() const
     {
         return ((Type == EPropertyTypes::Bool)
             || (!IsAnArray()
-                && ((Type == EPropertyTypes::UObject)
-                || (Type == EPropertyTypes::UClass)
+                && ((Type == EPropertyTypes::UClass)
+                || (Type == EPropertyTypes::UObject)
                 || (Type == EPropertyTypes::UInterface))));
     }
 
@@ -902,9 +902,14 @@ void GLogger::LogObject(const std::string& title, const UnrealObject& unrealObj)
     if (m_file.is_open() && !title.empty() && unrealObj.IsValid())
     {
         m_file << title;
-        Printer::FillRight(m_file, ' ', unrealObj.ValidName.size());
+        Printer::FillRight(m_file, ' ', unrealObj.ValidName.length());
         m_file << unrealObj.ValidName;
-        Printer::FillRight(m_file, ' ', (LOG_FILE_SPACING - (unrealObj.ValidName.size() + title.size())));
+
+        if (unrealObj.ValidName.length() < LOG_FILE_SPACING)
+        {
+            Printer::FillRight(m_file, ' ', (LOG_FILE_SPACING - (unrealObj.ValidName.length() + title.length())));
+        }
+
         m_file << " - Instance: " << Printer::Hex(unrealObj.Object) << std::endl;
     }
 #endif
@@ -1275,7 +1280,12 @@ namespace ConstGenerator
             if (!unrealObj.ValidName.empty())
             {
                 stream << "#define " << unrealObj.ValidName;
-                Printer::FillLeft(stream, ' ', (GConfig::GetConstSpacing() - unrealObj.ValidName.length()));
+
+                if (unrealObj.ValidName.length() < GConfig::GetConstSpacing())
+                {
+                    Printer::FillLeft(stream, ' ', (GConfig::GetConstSpacing() - unrealObj.ValidName.length()));
+                }
+
                 stream << " " << static_cast<UConst*>(unrealObj.Object)->Value.ToString() << "\n";
             }
         }
@@ -1545,7 +1555,6 @@ namespace StructGenerator
 
                     std::string fieldName = Utils::CreateValidName(superField->GetName());
                     std::string fieldNameCPP = Utils::CreateValidName(superField->GetNameCPP());
-                    std::string fieldOuterNameCPP = Utils::CreateValidName(superField->Outer->GetNameCPP());
                     uint32_t fieldStructCount = GCache::CountObject<UScriptStruct>(fieldName);
 
                     structStream << "// " << Printer::Hex(size, EWidthTypes::Size);
@@ -1562,9 +1571,9 @@ namespace StructGenerator
                         structStream << "struct " << structNameCPP << " : ";
                     }
 
-                    if (fieldStructCount > 1)
+                    if ((fieldStructCount > 1) && superField->Outer)
                     {
-                        structStream << fieldOuterNameCPP << "_" << fieldNameCPP << "\n";
+                        structStream << Utils::CreateValidName(superField->Outer->GetNameCPP()) << "_" << fieldNameCPP << "\n";
                     }
                     else
                     {
@@ -1681,14 +1690,19 @@ namespace StructGenerator
                             if (unrealProp.IsAnArray())
                             {
                                 structStream << "_Object[" << unrealProp.Property->ArrayDim << "];";
-                                correctElementSize *= unrealProp.Property->ArrayDim;
                             }
                             else
                             {
                                 structStream << "_Object;";
                             }
 
-                            Printer::FillRight(structStream, ' ', GConfig::GetStructSpacing() - (propertyStream.str().size() + 8));
+                            uint32_t propSpacing = (propertyStream.str().size() + 8);
+
+                            if (propSpacing < GConfig::GetStructSpacing())
+                            {
+                                Printer::FillRight(structStream, ' ', (GConfig::GetStructSpacing() - propSpacing));
+                            }
+
                             structStream << "// " << Printer::Hex(unrealProp.Property->Offset, EWidthTypes::Size);
                             structStream << " (" << Printer::Hex((unrealProp.Property->ElementSize * unrealProp.Property->ArrayDim), EWidthTypes::Size) << ")";
                             structStream << " [" << Printer::Hex(unrealProp.Property->PropertyFlags, EWidthTypes::PropertyFlags) << "] ";
@@ -1701,14 +1715,19 @@ namespace StructGenerator
                             if (unrealProp.IsAnArray())
                             {
                                 structStream << "_Interface[" << unrealProp.Property->ArrayDim << "];";
-                                correctElementSize *= unrealProp.Property->ArrayDim;
                             }
                             else
                             {
                                 structStream << "_Interface;";
                             }
 
-                            Printer::FillRight(structStream, ' ', GConfig::GetStructSpacing() - (propertyStream.str().size() + 11));
+                            uint32_t interfaceSpacing = (propertyStream.str().size() + 11);
+
+                            if (interfaceSpacing < GConfig::GetStructSpacing())
+                            {
+                                Printer::FillRight(structStream, ' ', (GConfig::GetStructSpacing() - interfaceSpacing));
+                            }
+
                             structStream << "// " << Printer::Hex(unrealProp.Property->Offset, EWidthTypes::Size);
                             structStream << " (" << Printer::Hex((unrealProp.Property->ElementSize * unrealProp.Property->ArrayDim), EWidthTypes::Size) << ")";
                             structStream << " [" << Printer::Hex(unrealProp.Property->PropertyFlags, EWidthTypes::PropertyFlags) << "] ";
@@ -1720,7 +1739,13 @@ namespace StructGenerator
                             Printer::FillLeft(structStream, ' ', GConfig::GetStructSpacing());
                             structStream << unrealProp.GetTypeForStruct() << " " << propertyStream.str() << ";";
 
-                            Printer::FillRight(structStream, ' ', GConfig::GetStructSpacing() - (propertyStream.str().size() + 1));
+                            uint32_t propSpacing = (propertyStream.str().size() + 1);
+
+                            if (propSpacing < GConfig::GetStructSpacing())
+                            {
+                                Printer::FillRight(structStream, ' ', (GConfig::GetStructSpacing() - propSpacing));
+                            }
+
                             structStream << "// " << Printer::Hex(unrealProp.Property->Offset, EWidthTypes::Size);
                             structStream << " (" << Printer::Hex((unrealProp.Property->ElementSize * unrealProp.Property->ArrayDim), EWidthTypes::Size) << ")";
                             structStream << " [" << Printer::Hex(unrealProp.Property->PropertyFlags, EWidthTypes::PropertyFlags) << "] ";
@@ -2189,7 +2214,13 @@ namespace ClassGenerator
                                     classStream << "_Object;";
                                 }
 
-                                Printer::FillRight(classStream, ' ', GConfig::GetClassSpacing() - (propertyStream.str().size() + 8));
+                                uint32_t propSpacing = (propertyStream.str().size() + 8);
+
+                                if (propSpacing < GConfig::GetStructSpacing())
+                                {
+                                    Printer::FillRight(classStream, ' ', (GConfig::GetStructSpacing() - propSpacing));
+                                }
+
                                 classStream << "// " << Printer::Hex(unrealProp.Property->Offset, EWidthTypes::Size);
                                 classStream << " (" << Printer::Hex(((unrealProp.Property->ElementSize * unrealProp.Property->ArrayDim) - interfaceSize), EWidthTypes::Size) << ")";
                                 classStream << " [" << Printer::Hex(unrealProp.Property->PropertyFlags, EWidthTypes::PropertyFlags) << "] ";
@@ -2209,7 +2240,13 @@ namespace ClassGenerator
                                     classStream << "_Interface;";
                                 }
 
-                                Printer::FillRight(classStream, ' ', GConfig::GetClassSpacing() - (propertyStream.str().size() + 11));
+                                uint32_t interfaceSpacing = (propertyStream.str().size() + 11);
+
+                                if (interfaceSpacing < GConfig::GetStructSpacing())
+                                {
+                                    Printer::FillRight(classStream, ' ', (GConfig::GetStructSpacing() - interfaceSpacing));
+                                }
+
                                 classStream << "// " << Printer::Hex(unrealProp.Property->Offset + interfaceSize, EWidthTypes::Size);
                                 classStream << " (" << Printer::Hex(((unrealProp.Property->ElementSize * unrealProp.Property->ArrayDim) - interfaceSize), EWidthTypes::Size) << ")";
                                 classStream << " [" << Printer::Hex(unrealProp.Property->PropertyFlags, EWidthTypes::PropertyFlags) << "] ";
@@ -2221,7 +2258,13 @@ namespace ClassGenerator
                                 Printer::FillLeft(classStream, ' ', GConfig::GetClassSpacing());
                                 classStream << unrealProp.GetTypeForClass() << " " << propertyStream.str() << ";";
 
-                                Printer::FillRight(classStream, ' ', GConfig::GetClassSpacing() - (propertyStream.str().size() + 1));
+                                uint32_t propSpacing = (propertyStream.str().size() + 1);
+
+                                if (propSpacing < GConfig::GetStructSpacing())
+                                {
+                                    Printer::FillRight(classStream, ' ', (GConfig::GetStructSpacing() - propSpacing));
+                                }
+
                                 classStream << "// " << Printer::Hex(unrealProp.Property->Offset, EWidthTypes::Size);
                                 classStream << " (" << Printer::Hex((unrealProp.Property->ElementSize * unrealProp.Property->ArrayDim), EWidthTypes::Size) << ")";
                                 classStream << " [" << Printer::Hex(unrealProp.Property->PropertyFlags, EWidthTypes::PropertyFlags) << "] ";
@@ -3273,12 +3316,17 @@ namespace Generator
 #ifdef UTF16
         definesFile << PiecesOfCode::FNameEntry_Struct_UTF16 << "\n";
         definesFile << PiecesOfCode::FName_Struct_UTF16 << "\n";
-        definesFile << PiecesOfCode::FString_Class_UTF16 << "\n";
 #else
         definesFile << PiecesOfCode::FNameEntry_Struct_UTF8 << "\n";
         definesFile << PiecesOfCode::FName_Struct_UTF8 << "\n";
+#endif
+
+#ifdef UTF16_FSTRING
+        definesFile << PiecesOfCode::FString_Class_UTF16 << "\n";
+#else
         definesFile << PiecesOfCode::FString_Class_UTF8 << "\n";
 #endif
+
         definesFile << PiecesOfCode::FScriptDelegate_Struct << "\n";
         definesFile << PiecesOfCode::FPointer_Struct << "\n";
         definesFile << PiecesOfCode::FQWord_Struct << "\n";
@@ -3527,28 +3575,37 @@ namespace Generator
         if (Initialize(false) && AreGlobalsValid())
         {
             std::filesystem::path fullDirectory = (GConfig::GetOutputPath() / GConfig::GetGameNameShort());
-            std::filesystem::create_directory(GConfig::GetOutputPath());
+            std::filesystem::create_directory(GConfig::GetOutputPath());            
             std::filesystem::create_directory(fullDirectory);
 
             if (std::filesystem::exists(fullDirectory))
             {
                 std::ofstream file(fullDirectory / "NameDump.txt");
-
                 file << "Base: " << Printer::Hex(Retrievers::GetBaseAddress(), sizeof(uintptr_t)) << std::endl;
                 file << "GNames: " << Printer::Hex(GNames) << std::endl;
                 file << "Offset: " << Printer::Hex(Retrievers::GetOffset(GNames), sizeof(uintptr_t)) << "\n" << std::endl;
 
-                for (FNameEntry* nameEntry : *FName::Names())
+                for (int32_t i = 0; i < FName::Names()->size(); i++)
                 {
+                    FNameEntry* nameEntry = FName::Names()->at(i);
+
                     if (nameEntry)
                     {
                         std::string name = nameEntry->ToString();
 
-                        file << "Name[";
-                        Printer::FillRight(file, '0', 6);
-                        file << nameEntry->GetIndex() << "] " << name << " ";
-                        Printer::FillRight(file, ' ', (INSTANCE_DUMP_SPACING - name.length()));
-                        file << Printer::Hex(nameEntry) << "\n";
+                        if (!name.empty())
+                        {
+                            file << "Name[";
+                            Printer::FillRight(file, '0', 6);
+                            file << nameEntry->GetIndex() << "] " << name << " ";
+
+                            if (name.length() < INSTANCE_DUMP_SPACING)
+                            {
+                                Printer::FillRight(file, ' ', (INSTANCE_DUMP_SPACING - name.length()));
+                            }
+
+                            file << Printer::Hex(nameEntry) << "\n";
+                        }
                     }
                 }
 
@@ -3568,7 +3625,6 @@ namespace Generator
             if (std::filesystem::exists(fullDirectory))
             {
                 std::ofstream file(fullDirectory / "ObjectDump.txt");
-
                 file << "Base: " << Printer::Hex(Retrievers::GetBaseAddress(), sizeof(uintptr_t)) << std::endl;
                 file << "GObjects: " << Printer::Hex(GObjects) << std::endl;
                 file << "Offset: " << Printer::Hex(Retrievers::GetOffset(GObjects), sizeof(uintptr_t)) << "\n" << std::endl;
@@ -3579,13 +3635,21 @@ namespace Generator
 
                     if (uObject)
                     {
-                        std::string objectName = uObject->GetFullName();
+                        std::string name = uObject->GetFullName();
 
-                        file << "UObject[";
-                        Printer::FillRight(file, '0', 6);
-                        file << uObject->ObjectInternalInteger << "] " << objectName << " ";
-                        Printer::FillRight(file, ' ', (INSTANCE_DUMP_SPACING - objectName.length()));
-                        file << Printer::Hex(uObject) << "\n";
+                        if (!name.empty())
+                        {
+                            file << "UObject[";
+                            Printer::FillRight(file, '0', 6);
+                            file << uObject->ObjectInternalInteger << "] " << name << " ";
+
+                            if (name.length() < INSTANCE_DUMP_SPACING)
+                            {
+                                Printer::FillRight(file, ' ', (INSTANCE_DUMP_SPACING - name.length()));
+                            }
+
+                            file << Printer::Hex(uObject) << "\n";
+                        }
                     }
                 }
 

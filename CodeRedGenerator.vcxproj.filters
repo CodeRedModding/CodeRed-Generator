@@ -17,6 +17,9 @@
     <Filter Include="Framework">
       <UniqueIdentifier>{b83839af-c722-41d1-8066-a179934937ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Dishonered">
+      <UniqueIdentifier>{3beb0f8b-1c3e-44fb-9ab8-bc9c7aa9dd90}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Engine.cpp">
@@ -43,6 +46,15 @@
     <ClCompile Include="Framework\Member.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Dishonered\GameDefines.cpp">
+      <Filter>Engine\Dishonered</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Dishonered\PiecesOfCode.cpp">
+      <Filter>Engine\Dishonered</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Dishonered\Configuration.cpp">
+      <Filter>Engine\Dishonered</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.hpp">
@@ -68,6 +80,15 @@
     </ClInclude>
     <ClInclude Include="Framework\Member.hpp">
       <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Dishonered\Configuration.hpp">
+      <Filter>Engine\Dishonered</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Dishonered\GameDefines.hpp">
+      <Filter>Engine\Dishonered</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Dishonered\PiecesOfCode.hpp">
+      <Filter>Engine\Dishonered</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
