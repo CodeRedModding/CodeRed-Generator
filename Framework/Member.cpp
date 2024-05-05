@@ -126,7 +126,7 @@ std::string Member::GetLabel(EMemberTypes type)
 	case EMemberTypes::UByteProperty_Enum:
 		return "class UEnum* Enum;";
 	case EMemberTypes::UBoolProperty_BitMask:
-		return "uint64_t BitMask;";
+		return "uint32_t BitMask;";
 	case EMemberTypes::UArrayProperty_Inner:
 		return "class UProperty* Inner;";
 	default:

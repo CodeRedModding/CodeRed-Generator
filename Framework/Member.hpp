@@ -1,7 +1,6 @@
 #pragma once
 #include <map>
 #include <vector>
-#include <map>
 #include <string>
 
 // Class Types

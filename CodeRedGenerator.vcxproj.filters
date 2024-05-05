@@ -40,9 +40,6 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Printer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Framework\Member.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
@@ -54,6 +51,9 @@
     </ClCompile>
     <ClCompile Include="Engine\Dishonered\Configuration.cpp">
       <Filter>Engine\Dishonered</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\Printer.cpp">
+      <Filter>Framework</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -75,9 +75,6 @@
     <ClInclude Include="pch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Printer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Framework\Member.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
@@ -89,6 +86,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Dishonered\PiecesOfCode.hpp">
       <Filter>Engine\Dishonered</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\Printer.hpp">
+      <Filter>Framework</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <vector>
+#include <map>
 
 #include <Psapi.h>
 #pragma comment(lib, "Psapi.lib")
