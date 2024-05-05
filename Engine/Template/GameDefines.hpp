@@ -18,17 +18,17 @@
 # ========================================================================================= #
 */
 
-// https://github.com/CodeRedModding/UnrealEngine3/blob/main/Development/Src/Core/Inc/UnObjBas.h#L48
+// https://github.com/CodeRedModding/UnrealEngine3/blob/main/Development/Src/Core/Inc/UnStack.h#L48
 // State Flags
 enum EStateFlags
 {
 	STATE_Editable = 0x00000001,	// State should be user-selectable in UnrealEd.
-	STATE_Auto = 0x00000002,		// State is automatic (the default state).
-	STATE_Simulated = 0x00000004,	// State executes on client side.
+	STATE_Auto = 0x00000002,	// State is automatic (the default state).
+	STATE_Simulated = 0x00000004, // State executes on client side.
 	STATE_HasLocals = 0x00000008,	// State has local variables.
 };
 
-// https://github.com/CodeRedModding/UnrealEngine3/blob/main/Development/Src/Core/Inc/UnObjBas.h#L238
+// https://github.com/CodeRedModding/UnrealEngine3/blob/main/Development/Src/Core/Inc/UnStack.h#L60
 // Function Flags
 enum EFunctionFlags : uint64_t
 {
@@ -114,11 +114,11 @@ enum EPropertyFlags : uint64_t
 	CPF_Interp = 0x0000000200000000,	// Interpolatable property for use with matinee.
 	CPF_NonTransactional = 0x0000000400000000,	// Property isn't transacted.
 	CPF_EditorOnly = 0x0000000800000000,	// Property should only be loaded in the editor.
-	CPF_NotForConsole = 0x0000001000000000, // Property should not be loaded on console (or be a console cooker commandlet)
-	CPF_RepRetry = 0x0000002000000000, // Property replication of this property if it fails to be fully sent (e.g. object references not yet available to serialize over the network)
-	CPF_PrivateWrite = 0x0000004000000000, // Property is const outside of the class it was declared in
-	CPF_ProtectedWrite = 0x0000008000000000, // Property is const outside of the class it was declared in and subclasses
-	CPF_ArchetypeProperty = 0x0000010000000000, // Property should be ignored by archives which have ArIgnoreArchetypeRef set
+	CPF_NotForConsole = 0x0000001000000000, // Property should not be loaded on console (or be a console cooker commandlet).
+	CPF_RepRetry = 0x0000002000000000, // Property replication of this property if it fails to be fully sent (e.g. object references not yet available to serialize over the network).
+	CPF_PrivateWrite = 0x0000004000000000, // Property is const outside of the class it was declared in.
+	CPF_ProtectedWrite = 0x0000008000000000, // Property is const outside of the class it was declared in and subclasses.
+	CPF_ArchetypeProperty = 0x0000010000000000, // Property should be ignored by archives which have ArIgnoreArchetypeRef set.
 	CPF_EditHide = 0x0000020000000000, // Property should never be shown in a properties window.
 	CPF_EditTextBox = 0x0000040000000000, // Property can be edited using a text dialog box.
 	CPF_CrossLevelPassive = 0x0000100000000000, // Property can point across levels, and will be serialized properly, but assumes it's target exists in-game (non-editor)
@@ -129,35 +129,71 @@ enum EPropertyFlags : uint64_t
 // Object Flags
 enum EObjectFlags : uint64_t
 {
-	RF_NoFlags = 0x00000000,
-	RF_Public = 0x00000001,
-	RF_Standalone = 0x00000002,
-	RF_MarkAsNative = 0x00000004,
-	RF_Transactional = 0x00000008,
-	RF_ClassDefaultObject = 0x00000010,
-	RF_ArchetypeObject = 0x00000020,
-	RF_Transient = 0x00000040,
-	RF_MarkAsRootSet = 0x00000080,
-	RF_TagGarbageTemp = 0x00000100,
-	RF_NeedInitialization = 0x00000200,
-	RF_NeedLoad = 0x00000400,
-	RF_KeepForCooker = 0x00000800,
-	RF_NeedPostLoad = 0x00001000,
-	RF_NeedPostLoadSubobjects = 0x00002000,
-	RF_NewerVersionExists = 0x00004000,
-	RF_BeginDestroyed = 0x00008000,
-	RF_FinishDestroyed = 0x00010000,
-	RF_BeingRegenerated = 0x00020000,
-	RF_DefaultSubObject = 0x00040000,
-	RF_WasLoaded = 0x00080000,
-	RF_TextExportTransient = 0x00100000,
-	RF_LoadCompleted = 0x00200000,
-	RF_InheritableComponentTemplate = 0x00400000,
-	RF_DuplicateTransient = 0x00800000,
-	RF_StrongRefOnFrame = 0x01000000,
-	RF_NonPIEDuplicateTransient = 0x02000000,
-	RF_Dynamic = 0x04000000,
-	RF_WillBeLoaded = 0x08000000,
+	RF_NoFlags = 0x000000000000000,	// Object has no flags.
+	RF_InSingularFunc = 0x0000000000000002,	// In a singular function.
+	RF_StateChanged = 0x0000000000000004,	// Object did a state change.
+	RF_DebugPostLoad = 0x0000000000000008,	// For debugging PostLoad calls.
+	RF_DebugSerialize = 0x0000000000000010,	// For debugging Serialize calls.
+	RF_DebugFinishDestroyed = 0x0000000000000020,	// For debugging FinishDestroy calls.
+	RF_EdSelected = 0x0000000000000040,	// Object is selected in one of the editors browser windows.
+	RF_ZombieComponent = 0x0000000000000080,	// This component's template was deleted, so should not be used.
+	RF_Protected = 0x0000000000000100, // Property is protected (may only be accessed from its owner class or subclasses).
+	RF_ClassDefaultObject = 0x0000000000000200,	// this object is its class's default object.
+	RF_ArchetypeObject = 0x0000000000000400, // this object is a template for another object (treat like a class default object).
+	RF_ForceTagExp = 0x0000000000000800, // Forces this object to be put into the export table when saving a package regardless of outer.
+	RF_TokenStreamAssembled = 0x0000000000001000, // Set if reference token stream has already been assembled.
+	RF_MisalignedObject = 0x0000000000002000, // Object's size no longer matches the size of its C++ class (only used during make, for native classes whose properties have changed).
+	RF_RootSet = 0x0000000000004000, // Object will not be garbage collected, even if unreferenced.
+	RF_BeginDestroyed = 0x0000000000008000,	// BeginDestroy has been called on the object.
+	RF_FinishDestroyed = 0x0000000000010000, // FinishDestroy has been called on the object.
+	RF_DebugBeginDestroyed = 0x0000000000020000, // Whether object is rooted as being part of the root set (garbage collection).
+	RF_MarkedByCooker = 0x0000000000040000,	// Marked by content cooker.
+	RF_LocalizedResource = 0x0000000000080000, // Whether resource object is localized.
+	RF_InitializedProps = 0x0000000000100000, // whether InitProperties has been called on this object
+	RF_PendingFieldPatches = 0x0000000000200000, // @script patcher: indicates that this struct will receive additional member properties from the script patcher.
+	RF_IsCrossLevelReferenced = 0x0000000000400000,	// This object has been pointed to by a cross-level reference, and therefore requires additional cleanup upon deletion.
+	RF_Saved = 0x0000000080000000, // Object has been saved via SavePackage (temporary).
+	RF_Transactional = 0x0000000100000000, // Object is transactional.
+	RF_Unreachable = 0x0000000200000000, // Object is not reachable on the object graph.
+	RF_Public = 0x0000000400000000, // Object is visible outside its package.
+	RF_TagImp = 0x0000000800000000,	// Temporary import tag in load/save.
+	RF_TagExp = 0x0000001000000000,	// Temporary export tag in load/save.
+	RF_Obsolete = 0x0000002000000000, // Object marked as obsolete and should be replaced.
+	RF_TagGarbage = 0x0000004000000000,	// Check during garbage collection.
+	RF_DisregardForGC = 0x0000008000000000,	// Object is being disregard for GC as its static and itself and all references are always loaded.
+	RF_PerObjectLocalized = 0x0000010000000000,	// Object is localized by instance name, not by class.
+	RF_NeedLoad = 0x0000020000000000, // During load, indicates object needs loading.
+	RF_AsyncLoading = 0x0000040000000000, // Object is being asynchronously loaded.
+	RF_NeedPostLoadSubobjects = 0x0000080000000000, // During load, indicates that the object still needs to instance subobjects and fixup serialized component references.
+	RF_Suppress = 0x0000100000000000, // @warning: Mirrored in UnName.h. Suppressed log name.
+	RF_InEndState = 0x0000200000000000, // Within an EndState call.
+	RF_Transient = 0x0000400000000000, // Don't save object.
+	RF_Cooked = 0x0000800000000000, // Whether the object has already been cooked
+	RF_LoadForClient = 0x0001000000000000, // In-file load for client.
+	RF_LoadForServer = 0x0002000000000000, // In-file load for client.
+	RF_LoadForEdit = 0x0004000000000000, // In-file load for client.
+	RF_Standalone = 0x0008000000000000,	// Keep object around for editing even if unreferenced.
+	RF_NotForClient = 0x0010000000000000, // Don't load this object for the game client.
+	RF_NotForServer = 0x0020000000000000, // Don't load this object for the game server.
+	RF_NotForEdit = 0x0040000000000000,	// Don't load this object for the editor.
+	RF_NeedPostLoad = 0x0100000000000000, // Object needs to be postloaded.
+	RF_HasStack = 0x0200000000000000, // Has execution stack.
+	RF_Native = 0x0400000000000000, // Native (UClass only)
+	RF_Marked = 0x0800000000000000,	// Marked (for debugging).
+	RF_ErrorShutdown = 0x1000000000000000, // ShutdownAfterError called.
+	RF_PendingKill = 0x2000000000000000, // Objects that are pending destruction (invalid for gameplay but valid objects).
+	RF_MarkedByCookerTemp = 0x4000000000000000,	// Temporarily marked by content cooker (should be cleared).
+	RF_CookedStartupObject = 0x8000000000000000, // This object was cooked into a startup package.
+
+	RF_ContextFlags = (RF_NotForClient | RF_NotForServer | RF_NotForEdit), // All context flags.
+	RF_LoadContextFlags = (RF_LoadForClient | RF_LoadForServer | RF_LoadForEdit), // Flags affecting loading.
+	RF_Load = (RF_ContextFlags | RF_LoadContextFlags | RF_Public | RF_Standalone | RF_Native | RF_Obsolete | RF_Protected | RF_Transactional | RF_HasStack | RF_PerObjectLocalized | RF_ClassDefaultObject | RF_ArchetypeObject | RF_LocalizedResource), // Flags to load from Unrealfiles.
+	RF_Keep = (RF_Native | RF_Marked | RF_PerObjectLocalized | RF_MisalignedObject | RF_DisregardForGC | RF_RootSet | RF_LocalizedResource), // Flags to persist across loads.
+	RF_ScriptMask = (RF_Transactional | RF_Public | RF_Transient | RF_NotForClient | RF_NotForServer | RF_NotForEdit | RF_Standalone), // Script-accessible flags.
+	RF_UndoRedoMask = (RF_PendingKill), // Undo/ redo will store/ restore these
+	RF_PropagateToSubObjects = (RF_Public | RF_ArchetypeObject | RF_Transactional), // Sub-objects will inherit these flags from their SuperObject.
+
+	RF_AllFlags = 0xFFFFFFFFFFFFFFFF,
 };
 
 // https://github.com/CodeRedModding/UnrealEngine3/blob/main/Development/Src/Core/Inc/UnObjBas.h#L51
