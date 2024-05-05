@@ -31,7 +31,7 @@ std::string UObject::GetNameCPP()
 
 	if (this->IsA<UClass>())
 	{
-		UClass* uClass = static_cast<UClass*>(this);
+		UClass* uClass = reinterpret_cast<UClass*>(this);
 
 		while (uClass)
 		{
@@ -48,7 +48,7 @@ std::string UObject::GetNameCPP()
 				break;
 			}
 
-			uClass = static_cast<UClass*>(uClass->SuperField);
+			uClass = reinterpret_cast<UClass*>(uClass->SuperField);
 		}
 	}
 	else
@@ -73,7 +73,7 @@ std::string UObject::GetFullName()
 	return fullName;
 }
 
-UObject* UObject::GetPackageObj()
+class UObject* UObject::GetPackageObj()
 {
 	UObject* uPackage = nullptr;
 
@@ -100,7 +100,7 @@ class UClass* UObject::FindClass(const std::string& classFullName)
 
 				if (objectFullName.find("Class") == 0)
 				{
-					foundClasses[objectFullName] = static_cast<UClass*>(uObject);
+					foundClasses[objectFullName] = reinterpret_cast<UClass*>(uObject);
 				}
 			}
 		}
@@ -118,11 +118,14 @@ class UClass* UObject::FindClass(const std::string& classFullName)
 
 bool UObject::IsA(class UClass* uClass)
 {
-	for (UClass* uSuperClass = this->Class; uSuperClass; uSuperClass = static_cast<UClass*>(uSuperClass->SuperField))
+	if (uClass)
 	{
-		if (uSuperClass == uClass)
+		for (UClass* uSuperClass = reinterpret_cast<UClass*>(this->Class); uSuperClass; uSuperClass = reinterpret_cast<UClass*>(uSuperClass->SuperField))
 		{
-			return true;
+			if (uSuperClass == uClass)
+			{
+				return true;
+			}
 		}
 	}
 
@@ -131,7 +134,7 @@ bool UObject::IsA(class UClass* uClass)
 
 bool UObject::IsA(int32_t objInternalInteger)
 {
-	UClass* uClass = UObject::GObjObjects()->at(objInternalInteger)->Class;
+	UClass* uClass = reinterpret_cast<UClass*>(UObject::GObjObjects()->at(objInternalInteger)->Class);
 
 	if (uClass)
 	{
@@ -156,7 +159,7 @@ class UFunction* UFunction::FindFunction(const std::string& functionFullName)
 
 				if (objectFullName.find("Function") == 0)
 				{
-					foundFunctions[objectFullName] = static_cast<UFunction*>(uObject);
+					foundFunctions[objectFullName] = reinterpret_cast<UFunction*>(uObject);
 				}
 			}
 		}

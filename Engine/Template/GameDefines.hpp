@@ -82,38 +82,38 @@ enum EPropertyFlags : uint64_t
 	CPF_Edit = 0x0000000000000001,	// Property is user-settable in the editor.
 	CPF_Const = 0x0000000000000002,	// Actor's property always matches class's default actor property.
 	CPF_Input = 0x0000000000000004,	// Variable is writable by the input system.
-	CPF_ExportObject = 0x0000000000000008,	// Object can be exported with actor.
-	CPF_OptionalParm = 0x0000000000000010,	// Optional parameter (if CPF_Param is set).
-	CPF_Net = 0x0000000000000020,	// Property is relevant to network replication.
+	CPF_ExportObject = 0x0000000000000008, // Object can be exported with actor.
+	CPF_OptionalParm = 0x0000000000000010, // Optional parameter (if CPF_Param is set).
+	CPF_Net = 0x0000000000000020, // Property is relevant to network replication.
 	CPF_EditFixedSize = 0x0000000000000040, // Indicates that elements of an array can be modified, but its size cannot be changed.
 	CPF_Parm = 0x0000000000000080,	// Function/When call parameter.
-	CPF_OutParm = 0x0000000000000100,	// Value is copied out after function call.
-	CPF_SkipParm = 0x0000000000000200,	// Property is a short-circuitable evaluation function parm.
-	CPF_ReturnParm = 0x0000000000000400,	// Return value.
-	CPF_CoerceParm = 0x0000000000000800,	// Coerce args into this function parameter.
-	CPF_Native = 0x0000000000001000,	// Property is native: C++ code is responsible for serializing it.
+	CPF_OutParm = 0x0000000000000100, // Value is copied out after function call.
+	CPF_SkipParm = 0x0000000000000200, // Property is a short-circuitable evaluation function parm.
+	CPF_ReturnParm = 0x0000000000000400, // Return value.
+	CPF_CoerceParm = 0x0000000000000800, // Coerce args into this function parameter.
+	CPF_Native = 0x0000000000001000, // Property is native: C++ code is responsible for serializing it.
 	CPF_Transient = 0x0000000000002000,	// Property is transient: shouldn't be saved, zero-filled at load time.
-	CPF_Config = 0x0000000000004000,	// Property should be loaded/saved as permanent profile.
+	CPF_Config = 0x0000000000004000, // Property should be loaded/saved as permanent profile.
 	CPF_Localized = 0x0000000000008000,	// Property should be loaded as localizable text.
-	CPF_Travel = 0x0000000000010000,	// Property travels across levels/servers.
+	CPF_Travel = 0x0000000000010000, // Property travels across levels/servers.
 	CPF_EditConst = 0x0000000000020000,	// Property is uneditable in the editor.
-	CPF_GlobalConfig = 0x0000000000040000,	// Load config from base class, not subclass.
+	CPF_GlobalConfig = 0x0000000000040000, // Load config from base class, not subclass.
 	CPF_Component = 0x0000000000080000,	// Property containts component references.
-	CPF_AlwaysInit = 0x0000000000100000,	// Property should never be exported as NoInit(@todo - this doesn't need to be a property flag...only used during make).
+	CPF_AlwaysInit = 0x0000000000100000, // Property should never be exported as NoInit(@todo - this doesn't need to be a property flag...only used during make).
 	CPF_DuplicateTransient = 0x0000000000200000, // Property should always be reset to the default value during any type of duplication (copy/paste, binary duplication, etc.).
-	CPF_NeedCtorLink = 0x0000000000400000,	// Fields need construction/destruction.
-	CPF_NoExport = 0x0000000000800000,	// Property should not be exported to the native class header file.
-	CPF_NoClear = 0x0000000002000000,	// Hide clear (and browse) button.
-	CPF_EditInline = 0x0000000004000000,	// Edit this object reference inline.	
+	CPF_NeedCtorLink = 0x0000000000400000, // Fields need construction/destruction.
+	CPF_NoExport = 0x0000000000800000, // Property should not be exported to the native class header file.
+	CPF_NoClear = 0x0000000002000000, // Hide clear (and browse) button.
+	CPF_EditInline = 0x0000000004000000, // Edit this object reference inline.	
 	CPF_EditInlineUse = 0x0000000010000000,	// EditInline with Use button.
-	CPF_EditFindable = 0x0000000008000000,	// References are set by clicking on actors in the editor viewports.
-	CPF_Deprecated = 0x0000000020000000,	// Property is deprecated.  Read it from an archive, but don't save it.	
-	CPF_DataBinding = 0x0000000040000000,	// Indicates that this property should be exposed to data stores.
+	CPF_EditFindable = 0x0000000008000000, // References are set by clicking on actors in the editor viewports.
+	CPF_Deprecated = 0x0000000020000000, // Property is deprecated.  Read it from an archive, but don't save it.	
+	CPF_DataBinding = 0x0000000040000000, // Indicates that this property should be exposed to data stores.
 	CPF_SerializeText = 0x0000000080000000,	// Native property should be serialized as text (ImportText, ExportText).
 	CPF_RepNotify = 0x0000000100000000,	// Notify actors when a property is replicated.
-	CPF_Interp = 0x0000000200000000,	// Interpolatable property for use with matinee.
-	CPF_NonTransactional = 0x0000000400000000,	// Property isn't transacted.
-	CPF_EditorOnly = 0x0000000800000000,	// Property should only be loaded in the editor.
+	CPF_Interp = 0x0000000200000000, // Interpolatable property for use with matinee.
+	CPF_NonTransactional = 0x0000000400000000, // Property isn't transacted.
+	CPF_EditorOnly = 0x0000000800000000, // Property should only be loaded in the editor.
 	CPF_NotForConsole = 0x0000001000000000, // Property should not be loaded on console (or be a console cooker commandlet).
 	CPF_RepRetry = 0x0000002000000000, // Property replication of this property if it fails to be fully sent (e.g. object references not yet available to serialize over the network).
 	CPF_PrivateWrite = 0x0000004000000000, // Property is const outside of the class it was declared in.
@@ -131,12 +131,12 @@ enum EObjectFlags : uint64_t
 {
 	RF_NoFlags = 0x000000000000000,	// Object has no flags.
 	RF_InSingularFunc = 0x0000000000000002,	// In a singular function.
-	RF_StateChanged = 0x0000000000000004,	// Object did a state change.
-	RF_DebugPostLoad = 0x0000000000000008,	// For debugging PostLoad calls.
+	RF_StateChanged = 0x0000000000000004, // Object did a state change.
+	RF_DebugPostLoad = 0x0000000000000008, // For debugging PostLoad calls.
 	RF_DebugSerialize = 0x0000000000000010,	// For debugging Serialize calls.
-	RF_DebugFinishDestroyed = 0x0000000000000020,	// For debugging FinishDestroy calls.
+	RF_DebugFinishDestroyed = 0x0000000000000020, // For debugging FinishDestroy calls.
 	RF_EdSelected = 0x0000000000000040,	// Object is selected in one of the editors browser windows.
-	RF_ZombieComponent = 0x0000000000000080,	// This component's template was deleted, so should not be used.
+	RF_ZombieComponent = 0x0000000000000080, // This component's template was deleted, so should not be used.
 	RF_Protected = 0x0000000000000100, // Property is protected (may only be accessed from its owner class or subclasses).
 	RF_ClassDefaultObject = 0x0000000000000200,	// this object is its class's default object.
 	RF_ArchetypeObject = 0x0000000000000400, // this object is a template for another object (treat like a class default object).
@@ -201,26 +201,26 @@ enum EObjectFlags : uint64_t
 enum EPackageFlags : uint32_t
 {
 	PKG_AllowDownload = 0x00000001,	// Allow downloading package.
-	PKG_ClientOptional = 0x00000002,	// Purely optional for clients.
+	PKG_ClientOptional = 0x00000002, // Purely optional for clients.
 	PKG_ServerSideOnly = 0x00000004, // Only needed on the server side.
-	PKG_Cooked = 0x00000008,	// Whether this package has been cooked for the target platform.
+	PKG_Cooked = 0x00000008, // Whether this package has been cooked for the target platform.
 	PKG_Unsecure = 0x00000010, // Not trusted.
 	PKG_SavedWithNewerVersion = 0x00000020,	// Package was saved with newer version.
 	PKG_Need = 0x00008000,	// Client needs to download this package.
 	PKG_Compiling = 0x00010000,	// package is currently being compiled
-	PKG_ContainsMap = 0x00020000,	// Set if the package contains a ULevel/ UWorld object
+	PKG_ContainsMap = 0x00020000, // Set if the package contains a ULevel/ UWorld object
 	PKG_Trash = 0x00040000,	// Set if the package was loaded from the trashcan
-	PKG_DisallowLazyLoading = 0x00080000,	// Set if the archive serializing this package cannot use lazy loading
+	PKG_DisallowLazyLoading = 0x00080000, // Set if the archive serializing this package cannot use lazy loading
 	PKG_PlayInEditor = 0x00100000,	// Set if the package was created for the purpose of PIE
-	PKG_ContainsScript = 0x00200000,	// Package is allowed to contain UClasses and unrealscript
+	PKG_ContainsScript = 0x00200000, // Package is allowed to contain UClasses and unrealscript
 	PKG_ContainsDebugInfo = 0x00400000,	// Package contains debug info (for UDebugger)
-	PKG_RequireImportsAlreadyLoaded = 0x00800000,	// Package requires all its imports to already have been loaded
-	PKG_StoreCompressed = 0x02000000,	// Package is being stored compressed, requires archive support for compression
-	PKG_StoreFullyCompressed = 0x04000000,	// Package is serialized normally, and then fully compressed after (must be decompressed before LoadPackage is called)
-	PKG_ContainsFaceFXData = 0x10000000,	// Package contains FaceFX assets and/or animsets
-	PKG_NoExportAllowed = 0x20000000,	// Package was NOT created by a modder.  Internal data not for export
-	PKG_StrippedSource = 0x40000000,	// Source has been removed to compress the package size
-	PKG_FilterEditorOnly = 0x80000000,	// Package has editor-only data filtered
+	PKG_RequireImportsAlreadyLoaded = 0x00800000, // Package requires all its imports to already have been loaded
+	PKG_StoreCompressed = 0x02000000, // Package is being stored compressed, requires archive support for compression
+	PKG_StoreFullyCompressed = 0x04000000, // Package is serialized normally, and then fully compressed after (must be decompressed before LoadPackage is called)
+	PKG_ContainsFaceFXData = 0x10000000, // Package contains FaceFX assets and/or animsets
+	PKG_NoExportAllowed = 0x20000000, // Package was NOT created by a modder.  Internal data not for export
+	PKG_StrippedSource = 0x40000000, // Source has been removed to compress the package size
+	PKG_FilterEditorOnly = 0x80000000, // Package has editor-only data filtered
 };
 
 // https://github.com/CodeRedModding/UnrealEngine3/blob/7bf53e29f620b0d4ca5c9bd063a2d2dbcee732fe/Development/Src/Core/Inc/UnObjBas.h#L98
@@ -1141,9 +1141,9 @@ public:
 	class UClass* Class;					REGISTER_MEMBER(class UClass*, Class, EMemberTypes::UObject_Class)					// 0x002C (0x08)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1166,7 +1166,7 @@ public:
 			{
 				if (uObject->GetFullName() == objectFullName)
 				{
-					return static_cast<T*>(uObject);
+					return reinterpret_cast<T*>(uObject);
 				}
 			}
 		}
@@ -1174,15 +1174,12 @@ public:
 		return nullptr;
 	}
 	static class UClass* FindClass(const std::string& classFullName);
-	template<typename T> bool IsA()
-	{
-		if (std::is_base_of<UObject, T>::value)
-		{
-			return IsA(T::StaticClass());
-		}
-	}
 	bool IsA(class UClass* uClass);
 	bool IsA(int32_t objInternalInteger);
+	template<typename T> bool IsA()
+	{
+		return IsA(T::StaticClass());
+	}
 };
 
  //Class Core.Field
@@ -1194,9 +1191,9 @@ public:
 	class UField* SuperField;				REGISTER_MEMBER(class UField*, SuperField, EMemberTypes::UField_SuperField)			// 0x0038 (0x04) [SUPERFIELD CAN EITHER BE HERE, OR IN USTRUCT DPENDING ON THE GAME!]
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1215,9 +1212,9 @@ public:
 	class TArray<class FName> Names;		REGISTER_MEMBER(class TArray<class FName>, Names, EMemberTypes::UEnum_Names)		// 0x0044 (0x0C)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1236,9 +1233,9 @@ public:
 	class FString Value;					REGISTER_MEMBER(class FString, Value, EMemberTypes::UConst_Value)					// 0x0044 (0x0C)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1260,9 +1257,9 @@ public:
 	int32_t Offset;							REGISTER_MEMBER(int32_t, Offset, EMemberTypes::UProperty_Offset)					// 0x0054 (0x04)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1284,9 +1281,9 @@ public:
 	int32_t MinAlignment;					REGISTER_MEMBER(int32_t, MinAlignment, EMemberTypes::UStruct_Alignment)				// 0x0054 (0x04)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1306,9 +1303,9 @@ public:
 	uint16_t iNative;						REGISTER_MEMBER(uint16_t, iNative, EMemberTypes::UFunction_Native)					// 0x0060 (0x02)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1329,9 +1326,9 @@ public:
 	uint8_t UnknownData00[0x01]; // 0x0058 (0x01) [USE THIS CLASSES PROPERTYSIZE IN RECLASS TO DETERMINE THE SIZE OF THE UNKNOWNDATA]
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1350,9 +1347,9 @@ public:
 	uint8_t UnknownData00[0x01]; // 0x0058 (0x01) [USE THIS CLASSES PROPERTYSIZE IN RECLASS TO DETERMINE THE SIZE OF THE UNKNOWNDATA]
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1371,9 +1368,9 @@ public:
 	uint8_t UnknownData00[0x01]; // 0x0058 (0x00) [USE THIS CLASSES PROPERTYSIZE IN RECLASS TO DETERMINE THE SIZE OF THE UNKNOWNDATA]
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1398,9 +1395,9 @@ public:
 	class UStruct* Struct;					REGISTER_MEMBER(class UStruct*, Struct, EMemberTypes::UStructProperty_Struct)			// 0x0058 (0x04)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1416,9 +1413,9 @@ public:
 class UStrProperty : public UProperty
 {
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1434,9 +1431,9 @@ public:
 class UQWordProperty : public UProperty
 {
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1455,9 +1452,9 @@ public:
 	class UClass* PropertyClass;			REGISTER_MEMBER(class UClass*, PropertyClass, EMemberTypes::UObjectProperty_Class)		// 0x0058 (0x04)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1476,9 +1473,9 @@ public:
 	class UClass* MetaClass;				REGISTER_MEMBER(class UClass*, MetaClass, EMemberTypes::UClassProperty_Meta)			// 0x0060 (0x04)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1494,9 +1491,9 @@ public:
 class UComponentProperty : public UObjectProperty
 {
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1512,9 +1509,9 @@ public:
 class UNameProperty : public UProperty
 {
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1534,9 +1531,9 @@ public:
 	class UProperty* Value;					REGISTER_MEMBER(class UProperty*, Value, EMemberTypes::UMapProperty_Value)				// 0x0060 (0x04)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1552,9 +1549,9 @@ public:
 class UIntProperty : public UProperty
 {
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1573,9 +1570,9 @@ public:
 	class UClass* InterfaceClass;			REGISTER_MEMBER(class UClass*, InterfaceClass, EMemberTypes::UInterfaceProperty_Class)		// 0x0058 (0x04)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1591,9 +1588,9 @@ public:
 class UFloatProperty : public UProperty
 {
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1613,9 +1610,9 @@ public:
 	class UFunction* SourceDelegate;		// 0x0060 (0x04)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1635,9 +1632,9 @@ public:
 	class UEnum* Enum;						REGISTER_MEMBER(class UEnum*, Enum, EMemberTypes::UByteProperty_Enum)						// 0x0058 (0x04)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1656,9 +1653,9 @@ public:
 	uint64_t BitMask;						REGISTER_MEMBER(uint64_t, BitMask, EMemberTypes::UBoolProperty_BitMask)						// 0x0058 (0x08) [THIS IS A UINT32_T FOR 32 BIT AND UINT64_T FOR 64 BIT, UPDATE THIS FIELD IN MEMBER.CPP ACORDINGLY]
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{
@@ -1677,9 +1674,9 @@ public:
 	class UProperty* Inner;					REGISTER_MEMBER(class UProperty*, Inner, EMemberTypes::UArrayProperty_Inner)				// 0x0058 (0x04)
 
 public:
-	static UClass* StaticClass()
+	static class UClass* StaticClass()
 	{
-		static UClass* uClassPointer = nullptr;
+		static class UClass* uClassPointer = nullptr;
 
 		if (!uClassPointer)
 		{

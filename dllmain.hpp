@@ -230,7 +230,7 @@ namespace FunctionGenerator
 {
 	void GenerateVirtualFunctions(std::ofstream& stream);
 	void GenerateFunctionCode(std::ofstream& stream, const UnrealObject& unrealObj);
-	void GenerateFunctionDescription(std::ofstream& stream, const UnrealObject& unrealObj);
+	void GenerateFunctionParameters(std::ofstream& stream, const UnrealObject& unrealObj);
 	void ProcessFunctions(std::ofstream& stream, class UObject* packageObj);
 }
 

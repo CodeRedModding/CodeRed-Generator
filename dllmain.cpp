@@ -546,15 +546,6 @@ bool UnrealProperty::AssignType()
         {
             Type = EPropertyTypes::UInt64;
         }
-        else if (Property->IsA<UClassProperty>())
-        {
-            UClassProperty* classProperty = static_cast<UClassProperty*>(Property);
-
-            if (classProperty && classProperty->MetaClass)
-            {
-                Type = EPropertyTypes::UClass;
-            }
-        }
         else if (Property->IsA<UObjectProperty>())
         {
             UObjectProperty* objectProperty = static_cast<UObjectProperty*>(Property);
@@ -562,6 +553,15 @@ bool UnrealProperty::AssignType()
             if (objectProperty && objectProperty->PropertyClass)
             {
                 Type = EPropertyTypes::UObject;
+            }
+        }
+        else if (Property->IsA<UClassProperty>())
+        {
+            UClassProperty* classProperty = static_cast<UClassProperty*>(Property);
+
+            if (classProperty && classProperty->MetaClass)
+            {
+                Type = EPropertyTypes::UClass;
             }
         }
         else if (Property->IsA<UInterfaceProperty>())
@@ -932,7 +932,7 @@ void GLogger::LogStructPadding(class UScriptStruct* uScriptStruct, size_t paddin
 #ifndef NO_LOGGING
     if (m_file.is_open() && uScriptStruct)
     {
-        m_file << "Info: Extra padding detected!";
+        m_file << "Info: Extra padding detected!\n";
         m_file << "Info: Property size " << Printer::Hex(uScriptStruct->PropertySize, 1) << "\n";
         m_file << "Info: Min alignment " << Printer::Hex(uScriptStruct->MinAlignment, 1) << "\n";
         m_file << "Info: Extra padding " << Printer::Hex(padding, 1) << std::endl;
@@ -1600,9 +1600,7 @@ namespace StructGenerator
 
                 for (UProperty* uProperty = static_cast<UProperty*>(scriptStruct->Children); uProperty; uProperty = static_cast<UProperty*>(uProperty->Next))
                 {
-                    if (uProperty
-                        && (uProperty->ElementSize > 0)
-                        && !uProperty->IsA<UScriptStruct>())
+                    if (uProperty && (uProperty->ElementSize > 0) && !uProperty->IsA<UScriptStruct>())
                     {
                         UnrealProperty unrealProp(uProperty);
 
@@ -1903,9 +1901,7 @@ namespace StructGenerator
                     {
                         UScriptStruct* propertyStruct = static_cast<UScriptStruct*>(static_cast<UStructProperty*>(structProp.Property)->Struct);
 
-                        if (propertyStruct
-                            && (propertyStruct != scriptStruct)
-                            && !m_generatedStructs.contains(propertyStruct->GetFullName()))
+                        if (propertyStruct && (propertyStruct != scriptStruct) && !m_generatedStructs.contains(propertyStruct->GetFullName()))
                         {
                             GenerateStructPre(stream, propertyStruct);
                         }
@@ -1918,9 +1914,7 @@ namespace StructGenerator
                         {
                             UnrealProperty innerProp(static_cast<UArrayProperty*>(structProp.Property)->Inner);
 
-                            if (innerProp.IsValid()
-                                && (innerProp.Type == EPropertyTypes::FStruct)
-                                && !m_generatedStructs.contains(innerProp.Property->GetFullName()))
+                            if (innerProp.IsValid() && (innerProp.Type == EPropertyTypes::FStruct) && !m_generatedStructs.contains(innerProp.Property->GetFullName()))
                             {
                                 GenerateStructPre(stream, propertyStruct);
                             }
@@ -2374,7 +2368,7 @@ namespace ClassGenerator
                 file << classStream.str();
                 Printer::Empty(classStream);
 
-                FunctionGenerator::GenerateFunctionDescription(file, unrealObj);
+                FunctionGenerator::GenerateFunctionParameters(file, unrealObj);
 
                 if (uClass == UObject::StaticClass())
                 {
@@ -3034,7 +3028,7 @@ namespace FunctionGenerator
         }
     }
 
-    void GenerateFunctionDescription(std::ofstream& stream, const UnrealObject& unrealObj)
+    void GenerateFunctionParameters(std::ofstream& stream, const UnrealObject& unrealObj)
     {
         if (unrealObj.IsValid())
         {

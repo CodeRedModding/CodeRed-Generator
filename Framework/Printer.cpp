@@ -3,29 +3,51 @@
 
 namespace Printer
 {
+    static constexpr uint32_t MAX_FILL_LENGTH = 1024;
+
     void Empty(std::ostringstream& stream)
     {
         stream.str(std::string());
     }
 
-    void FillRight(std::ostringstream& stream, char fill, size_t width)
+    void FillRight(std::ostringstream& stream, char fill, uint32_t width)
     {
-        stream <<  std::setfill(fill) << std::setw(width) << std::right;
+        if (width > MAX_FILL_LENGTH)
+        {
+            width = MAX_FILL_LENGTH;
+        }
+
+        stream << std::setfill(fill) << std::setw(width) << std::right;
     }
 
-    void FillLeft(std::ostringstream& stream, char fill, size_t width)
+    void FillLeft(std::ostringstream& stream, char fill, uint32_t width)
     {
-        stream <<  std::setfill(fill) << std::setw(width) << std::left;
+        if (width > MAX_FILL_LENGTH)
+        {
+            width = MAX_FILL_LENGTH;
+        }
+
+        stream << std::setfill(fill) << std::setw(width) << std::left;
     }
 
-    void FillRight(std::ofstream& stream, char fill, size_t width)
+    void FillRight(std::ofstream& stream, char fill, uint32_t width)
     {
-        stream <<  std::setfill(fill) << std::setw(width) << std::right;
+        if (width > MAX_FILL_LENGTH)
+        {
+            width = MAX_FILL_LENGTH;
+        }
+
+        stream << std::setfill(fill) << std::setw(width) << std::right;
     }
 
-    void FillLeft(std::ofstream& stream, char fill, size_t width)
+    void FillLeft(std::ofstream& stream, char fill, uint32_t width)
     {
-        stream <<  std::setfill(fill) << std::setw(width) << std::left;
+        if (width > MAX_FILL_LENGTH)
+        {
+            width = MAX_FILL_LENGTH;
+        }
+
+        stream << std::setfill(fill) << std::setw(width) << std::left;
     }
 
     void ReplaceChars(std::string& baseStr, char oldChar, char newChar)
@@ -54,16 +76,16 @@ namespace Printer
         }
     }
 
-    std::string Hex(uint64_t decimal, size_t width)
+    std::string Hex(uintptr_t decimal, uint32_t width)
     {
         std::ostringstream stream;
         stream << "0x" << std::setfill('0') << std::setw(width) << std::right << std::uppercase << std::hex << decimal;
         return stream.str();
     }
 
-    std::string Hex(uint64_t decimal, EWidthTypes width)
+    std::string Hex(uintptr_t decimal, EWidthTypes width)
     {
-        return Hex(decimal, static_cast<size_t>(width));
+        return Hex(decimal, static_cast<uint32_t>(width));
     }
 
     std::string Hex(void* pointer)
@@ -71,19 +93,19 @@ namespace Printer
         return Hex(reinterpret_cast<uintptr_t>(pointer), sizeof(uintptr_t));
     }
 
-    std::string Decimal(uint64_t hex, size_t width)
+    std::string Decimal(uintptr_t hex, uint32_t width)
     {
         std::ostringstream stream;
         stream << std::setfill('0') << std::setw(width) << std::right << std::uppercase << std::dec << hex;
         return stream.str();
     }
 
-    std::string Decimal(uint64_t hex, EWidthTypes width)
+    std::string Decimal(uintptr_t hex, EWidthTypes width)
     {
-        return Decimal(hex, static_cast<size_t>(width));
+        return Decimal(hex, static_cast<uint32_t>(width));
     }
 
-    std::string Precision(float value, size_t precision)
+    std::string Precision(float value, uint32_t precision)
     {
         std::ostringstream stream;
         stream << std::setprecision(precision) << value;
@@ -92,13 +114,21 @@ namespace Printer
 
     std::string ToUpper(std::string str)
     {
-        std::transform(str.begin(), str.end(), str.begin(), toupper);
+        if (!str.empty())
+        {
+            std::transform(str.begin(), str.end(), str.begin(), toupper);
+        }
+
         return str;
     }
 
     std::string ToLower(std::string str)
     {
-        std::transform(str.begin(), str.end(), str.begin(), tolower);
+        if (!str.empty())
+        {
+            std::transform(str.begin(), str.end(), str.begin(), tolower);
+        }
+
         return str;
     }
 
@@ -116,7 +146,7 @@ namespace Printer
         stream << "#############################################################################################\n";
         stream << "*/\n";
 
-        if ((fileName != "SdkHeaders") && (fileName != "GameDefines"))
+        if ((fileName != "SdkHeaders") && (fileName != "SdkConstants") && (fileName != "GameDefines"))
         {
             if (fileExtension == "hpp")
             {
