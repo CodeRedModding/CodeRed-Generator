@@ -124,7 +124,7 @@ public:
 public:
 	static std::pair<std::string, class UObject*> GetConstant(const UnrealObject& unrealObj);
 	static UnrealObject GetLargestStruct(const std::string& structFullName);
-	static UnrealObject GetClass(class UClass* staticClass);
+	static UnrealObject GetClass(const std::string& classFullName);
 	template<typename T> static uint32_t CountObject(const std::string& objectName)
 	{
 		std::pair<std::string, class UClass*> objectPair{ objectName, T::StaticClass() };

@@ -762,13 +762,13 @@ UnrealObject GCache::GetLargestStruct(const std::string& structFullName)
     return largestStruct;
 }
 
-UnrealObject GCache::GetClass(class UClass* staticClass)
+UnrealObject GCache::GetClass(const std::string& classFullName)
 {
     for (auto& classPair : m_classes)
     {
         for (UnrealObject& unrealObj : classPair.second)
         {
-            if (unrealObj.Object == staticClass)
+            if (unrealObj.FullName == classFullName)
             {
                 return unrealObj.Object;
             }

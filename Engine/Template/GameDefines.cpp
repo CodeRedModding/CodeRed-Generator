@@ -87,30 +87,29 @@ class UObject* UObject::GetPackageObj()
 
 class UClass* UObject::FindClass(const std::string& classFullName)
 {
-	static bool initialized = false;
-	static std::map<std::string, UClass*> foundClasses{};
+	static std::map<std::string, UClass*> classCache;
 
-	if (!initialized)
+	if (classCache.empty())
 	{
-		for (UObject* uObject : *UObject::GObjObjects())
+		for (int32_t i = 0; i < (UObject::GObjObjects()->size() - 1); i++)
 		{
+			UObject* uObject = UObject::GObjObjects()->at(i);
+
 			if (uObject)
 			{
 				std::string objectFullName = uObject->GetFullName();
 
 				if (objectFullName.find("Class") == 0)
 				{
-					foundClasses[objectFullName] = reinterpret_cast<UClass*>(uObject);
+					classCache[objectFullName] = reinterpret_cast<UClass*>(uObject);
 				}
 			}
 		}
-
-		initialized = true;
 	}
 
-	if (foundClasses.contains(classFullName))
+	if (classCache.contains(classFullName))
 	{
-		return foundClasses[classFullName];
+		return classCache[classFullName];
 	}
 
 	return nullptr;
@@ -146,30 +145,29 @@ bool UObject::IsA(int32_t objInternalInteger)
 
 class UFunction* UFunction::FindFunction(const std::string& functionFullName)
 {
-	static bool initialized = false;
-	static std::map<std::string, UFunction*> foundFunctions{};
+	static std::map<std::string, UFunction*> functionCache;
 
-	if (!initialized)
+	if (functionCache.empty())
 	{
-		for (UObject* uObject : *UObject::GObjObjects())
+		for (int32_t i = 0; i < (UObject::GObjObjects()->size() - 1); i++)
 		{
+			UObject* uObject = UObject::GObjObjects()->at(i);
+
 			if (uObject)
 			{
 				std::string objectFullName = uObject->GetFullName();
 
 				if (objectFullName.find("Function") == 0)
 				{
-					foundFunctions[objectFullName] = reinterpret_cast<UFunction*>(uObject);
+					functionCache[objectFullName] = reinterpret_cast<UFunction*>(uObject);
 				}
 			}
 		}
-
-		initialized = true;
 	}
 
-	if (foundFunctions.contains(functionFullName))
+	if (functionCache.contains(functionFullName))
 	{
-		return foundFunctions[functionFullName];
+		return functionCache[functionFullName];
 	}
 
 	return nullptr;
