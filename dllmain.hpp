@@ -182,8 +182,9 @@ namespace Utils
 
 namespace Retrievers
 {
-	void GetAllPropertyFlags(std::ostringstream& stream, uint64_t propertyFlags);
 	void GetAllFunctionFlags(std::ostringstream& stream, uint64_t functionFlags);
+	void GetAllPropertyFlags(std::ostringstream& stream, uint64_t propertyFlags);
+	void GetAllObjectFlags(std::ostringstream& stream, uint64_t objectFlags); // Not currently used by anything, but could be useful in the future.
 
 	uintptr_t GetBaseAddress();
 	uintptr_t GetOffset(void* pointer);

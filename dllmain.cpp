@@ -1066,6 +1066,52 @@ namespace Utils
 
 namespace Retrievers
 {
+    void GetAllFunctionFlags(std::ostringstream& stream, uint64_t functionFlags)
+    {
+        bool first = true;
+
+        if (functionFlags & EFunctionFlags::FUNC_None) { stream << (first ? "(" : " | ") << "FUNC_None";						                first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Final) { stream << (first ? "(" : " | ") << "FUNC_Final";						                first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Defined) { stream << (first ? "(" : " | ") << "FUNC_Defined";						            first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Iterator) { stream << (first ? "(" : " | ") << "FUNC_Iterator";						        first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Latent) { stream << (first ? "(" : " | ") << "FUNC_Latent";						            first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_PreOperator) { stream << (first ? "(" : " | ") << "FUNC_PreOperator";						    first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Singular) { stream << (first ? "(" : " | ") << "FUNC_Singular";						        first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Net) { stream << (first ? "(" : " | ") << "FUNC_Net";						                    first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_NetReliable) { stream << (first ? "(" : " | ") << "FUNC_NetReliable";						    first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Simulated) { stream << (first ? "(" : " | ") << "FUNC_Simulated";						        first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Exec) { stream << (first ? "(" : " | ") << "FUNC_Exec";						                first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Native) { stream << (first ? "(" : " | ") << "FUNC_Native";						            first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Event) { stream << (first ? "(" : " | ") << "FUNC_Event";						                first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Operator) { stream << (first ? "(" : " | ") << "FUNC_Operator";						        first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Static) { stream << (first ? "(" : " | ") << "FUNC_Static";						            first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_NoExport) { stream << (first ? "(" : " | ") << "FUNC_NoExport";						        first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_OptionalParm) { stream << (first ? "(" : " | ") << "FUNC_OptionalParm";						first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Const) { stream << (first ? "(" : " | ") << "FUNC_Const";						                first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Invariant) { stream << (first ? "(" : " | ") << "FUNC_Invariant";						        first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Public) { stream << (first ? "(" : " | ") << "FUNC_Public";						            first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Private) { stream << (first ? "(" : " | ") << "FUNC_Private";						            first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Protected) { stream << (first ? "(" : " | ") << "FUNC_Protected";						        first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Delegate) { stream << (first ? "(" : " | ") << "FUNC_Delegate";						        first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_NetServer) { stream << (first ? "(" : " | ") << "FUNC_NetServer";						        first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_HasOutParms) { stream << (first ? "(" : " | ") << "FUNC_HasOutParms";						    first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_HasDefaults) { stream << (first ? "(" : " | ") << "FUNC_HasDefaults";						    first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_NetClient) { stream << (first ? "(" : " | ") << "FUNC_NetClient";						        first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_DLLImport) { stream << (first ? "(" : " | ") << "FUNC_DLLImport";						        first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_K2Call) { stream << (first ? "(" : " | ") << "FUNC_K2Call";						            first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_K2Override) { stream << (first ? "(" : " | ") << "FUNC_K2Override";						    first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_K2Pure) { stream << (first ? "(" : " | ") << "FUNC_K2Pure";						            first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_EditorOnly) { stream << (first ? "(" : " | ") << "FUNC_EditorOnly";						    first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_Lambda) { stream << (first ? "(" : " | ") << "FUNC_Lambda";						            first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_NetValidate) { stream << (first ? "(" : " | ") << "FUNC_NetValidate";						    first = false; }
+        if (functionFlags & EFunctionFlags::FUNC_AllFlags) { stream << (first ? "(" : " | ") << "FUNC_AllFlags";						        first = false; }
+
+        if (!first)
+        {
+            stream << ")";
+        }
+    }
+
     void GetAllPropertyFlags(std::ostringstream& stream, uint64_t propertyFlags)
     {
         bool first = true;
@@ -1120,45 +1166,66 @@ namespace Retrievers
         }
     }
 
-    void GetAllFunctionFlags(std::ostringstream& stream, uint64_t functionFlags)
+    void GetAllObjectFlags(std::ostringstream& stream, uint64_t objectFlags)
     {
         bool first = true;
 
-        if (functionFlags & EFunctionFlags::FUNC_None) { stream << (first ? "(" : " | ") << "FUNC_None";						                first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Final) { stream << (first ? "(" : " | ") << "FUNC_Final";						                first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Defined) { stream << (first ? "(" : " | ") << "FUNC_Defined";						            first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Iterator) { stream << (first ? "(" : " | ") << "FUNC_Iterator";						        first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Latent) { stream << (first ? "(" : " | ") << "FUNC_Latent";						            first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_PreOperator) { stream << (first ? "(" : " | ") << "FUNC_PreOperator";						    first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Singular) { stream << (first ? "(" : " | ") << "FUNC_Singular";						        first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Net) { stream << (first ? "(" : " | ") << "FUNC_Net";						                    first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_NetReliable) { stream << (first ? "(" : " | ") << "FUNC_NetReliable";						    first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Simulated) { stream << (first ? "(" : " | ") << "FUNC_Simulated";						        first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Exec) { stream << (first ? "(" : " | ") << "FUNC_Exec";						                first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Native) { stream << (first ? "(" : " | ") << "FUNC_Native";						            first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Event) { stream << (first ? "(" : " | ") << "FUNC_Event";						                first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Operator) { stream << (first ? "(" : " | ") << "FUNC_Operator";						        first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Static) { stream << (first ? "(" : " | ") << "FUNC_Static";						            first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_NoExport) { stream << (first ? "(" : " | ") << "FUNC_NoExport";						        first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_OptionalParm) { stream << (first ? "(" : " | ") << "FUNC_OptionalParm";						first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Const) { stream << (first ? "(" : " | ") << "FUNC_Const";						                first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Invariant) { stream << (first ? "(" : " | ") << "FUNC_Invariant";						        first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Public) { stream << (first ? "(" : " | ") << "FUNC_Public";						            first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Private) { stream << (first ? "(" : " | ") << "FUNC_Private";						            first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Protected) { stream << (first ? "(" : " | ") << "FUNC_Protected";						        first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Delegate) { stream << (first ? "(" : " | ") << "FUNC_Delegate";						        first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_NetServer) { stream << (first ? "(" : " | ") << "FUNC_NetServer";						        first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_HasOutParms) { stream << (first ? "(" : " | ") << "FUNC_HasOutParms";						    first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_HasDefaults) { stream << (first ? "(" : " | ") << "FUNC_HasDefaults";						    first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_NetClient) { stream << (first ? "(" : " | ") << "FUNC_NetClient";						        first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_DLLImport) { stream << (first ? "(" : " | ") << "FUNC_DLLImport";						        first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_K2Call) { stream << (first ? "(" : " | ") << "FUNC_K2Call";						            first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_K2Override) { stream << (first ? "(" : " | ") << "FUNC_K2Override";						    first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_K2Pure) { stream << (first ? "(" : " | ") << "FUNC_K2Pure";						            first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_EditorOnly) { stream << (first ? "(" : " | ") << "FUNC_EditorOnly";						    first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_Lambda) { stream << (first ? "(" : " | ") << "FUNC_Lambda";						            first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_NetValidate) { stream << (first ? "(" : " | ") << "FUNC_NetValidate";						    first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_AllFlags) { stream << (first ? "(" : " | ") << "FUNC_AllFlags";						        first = false; }
+        if (objectFlags & EObjectFlags::RF_NoFlags) { stream << (first ? "(" : " | ") << "RF_NoFlags";							                first = false; }
+        if (objectFlags & EObjectFlags::RF_InSingularFunc) { stream << (first ? "(" : " | ") << "RF_InSingularFunc";						    first = false; }
+        if (objectFlags & EObjectFlags::RF_StateChanged) { stream << (first ? "(" : " | ") << "RF_StateChanged";						        first = false; }
+        if (objectFlags & EObjectFlags::RF_DebugPostLoad) { stream << (first ? "(" : " | ") << "RF_DebugPostLoad";						        first = false; }
+        if (objectFlags & EObjectFlags::RF_DebugSerialize) { stream << (first ? "(" : " | ") << "RF_DebugSerialize";						    first = false; }
+        if (objectFlags & EObjectFlags::RF_DebugFinishDestroyed) { stream << (first ? "(" : " | ") << "RF_DebugFinishDestroyed";				first = false; }
+        if (objectFlags & EObjectFlags::RF_EdSelected) { stream << (first ? "(" : " | ") << "RF_EdSelected";						            first = false; }
+        if (objectFlags & EObjectFlags::RF_ZombieComponent) { stream << (first ? "(" : " | ") << "RF_ZombieComponent";						    first = false; }
+        if (objectFlags & EObjectFlags::RF_Protected) { stream << (first ? "(" : " | ") << "RF_Protected";						                first = false; }
+        if (objectFlags & EObjectFlags::RF_ClassDefaultObject) { stream << (first ? "(" : " | ") << "RF_ClassDefaultObject";				    first = false; }
+        if (objectFlags & EObjectFlags::RF_ArchetypeObject) { stream << (first ? "(" : " | ") << "RF_ArchetypeObject";						    first = false; }
+        if (objectFlags & EObjectFlags::RF_ForceTagExp) { stream << (first ? "(" : " | ") << "RF_ForceTagExp";						            first = false; }
+        if (objectFlags & EObjectFlags::RF_TokenStreamAssembled) { stream << (first ? "(" : " | ") << "RF_TokenStreamAssembled";				first = false; }
+        if (objectFlags & EObjectFlags::RF_MisalignedObject) { stream << (first ? "(" : " | ") << "RF_MisalignedObject";						first = false; }
+        if (objectFlags & EObjectFlags::RF_RootSet) { stream << (first ? "(" : " | ") << "RF_RootSet";						                    first = false; }
+        if (objectFlags & EObjectFlags::RF_BeginDestroyed) { stream << (first ? "(" : " | ") << "RF_BeginDestroyed";						    first = false; }
+        if (objectFlags & EObjectFlags::RF_FinishDestroyed) { stream << (first ? "(" : " | ") << "RF_FinishDestroyed";						    first = false; }
+        if (objectFlags & EObjectFlags::RF_DebugBeginDestroyed) { stream << (first ? "(" : " | ") << "RF_DebugBeginDestroyed";					first = false; }
+        if (objectFlags & EObjectFlags::RF_MarkedByCooker) { stream << (first ? "(" : " | ") << "RF_MarkedByCooker";						    first = false; }
+        if (objectFlags & EObjectFlags::RF_LocalizedResource) { stream << (first ? "(" : " | ") << "RF_LocalizedResource";						first = false; }
+        if (objectFlags & EObjectFlags::RF_InitializedProps) { stream << (first ? "(" : " | ") << "RF_InitializedProps";						first = false; }
+        if (objectFlags & EObjectFlags::RF_PendingFieldPatches) { stream << (first ? "(" : " | ") << "RF_PendingFieldPatches";					first = false; }
+        if (objectFlags & EObjectFlags::RF_IsCrossLevelReferenced) { stream << (first ? "(" : " | ") << "RF_IsCrossLevelReferenced";			first = false; }
+        if (objectFlags & EObjectFlags::RF_Saved) { stream << (first ? "(" : " | ") << "RF_Saved";						                        first = false; }
+        if (objectFlags & EObjectFlags::RF_Transactional) { stream << (first ? "(" : " | ") << "RF_Transactional";						        first = false; }
+        if (objectFlags & EObjectFlags::RF_Unreachable) { stream << (first ? "(" : " | ") << "RF_Unreachable";						            first = false; }
+        if (objectFlags & EObjectFlags::RF_Public) { stream << (first ? "(" : " | ") << "RF_Public";						                    first = false; }
+        if (objectFlags & EObjectFlags::RF_TagImp) { stream << (first ? "(" : " | ") << "RF_TagImp";						                    first = false; }
+        if (objectFlags & EObjectFlags::RF_TagExp) { stream << (first ? "(" : " | ") << "RF_TagExp";						                    first = false; }
+        if (objectFlags & EObjectFlags::RF_Obsolete) { stream << (first ? "(" : " | ") << "RF_Obsolete";						                first = false; }
+        if (objectFlags & EObjectFlags::RF_TagGarbage) { stream << (first ? "(" : " | ") << "RF_TagGarbage";						            first = false; }
+        if (objectFlags & EObjectFlags::RF_DisregardForGC) { stream << (first ? "(" : " | ") << "RF_DisregardForGC";						    first = false; }
+        if (objectFlags & EObjectFlags::RF_PerObjectLocalized) { stream << (first ? "(" : " | ") << "RF_PerObjectLocalized";					first = false; }
+        if (objectFlags & EObjectFlags::RF_NeedLoad) { stream << (first ? "(" : " | ") << "RF_NeedLoad";						                first = false; }
+        if (objectFlags & EObjectFlags::RF_AsyncLoading) { stream << (first ? "(" : " | ") << "RF_AsyncLoading";						        first = false; }
+        if (objectFlags & EObjectFlags::RF_NeedPostLoadSubobjects) { stream << (first ? "(" : " | ") << "RF_NeedPostLoadSubobjects";			first = false; }
+        if (objectFlags & EObjectFlags::RF_Suppress) { stream << (first ? "(" : " | ") << "RF_Suppress";						                first = false; }
+        if (objectFlags & EObjectFlags::RF_InEndState) { stream << (first ? "(" : " | ") << "RF_InEndState";						            first = false; }
+        if (objectFlags & EObjectFlags::RF_Transient) { stream << (first ? "(" : " | ") << "RF_Transient";						                first = false; }
+        if (objectFlags & EObjectFlags::RF_Cooked) { stream << (first ? "(" : " | ") << "RF_Cooked";						                    first = false; }
+        if (objectFlags & EObjectFlags::RF_LoadForClient) { stream << (first ? "(" : " | ") << "RF_LoadForClient";						        first = false; }
+        if (objectFlags & EObjectFlags::RF_LoadForServer) { stream << (first ? "(" : " | ") << "RF_LoadForServer";						        first = false; }
+        if (objectFlags & EObjectFlags::RF_LoadForEdit) { stream << (first ? "(" : " | ") << "RF_LoadForEdit";						            first = false; }
+        if (objectFlags & EObjectFlags::RF_Standalone) { stream << (first ? "(" : " | ") << "RF_Standalone";						            first = false; }
+        if (objectFlags & EObjectFlags::RF_NotForClient) { stream << (first ? "(" : " | ") << "RF_NotForClient";						        first = false; }
+        if (objectFlags & EObjectFlags::RF_NotForServer) { stream << (first ? "(" : " | ") << "RF_NotForServer";						        first = false; }
+        if (objectFlags & EObjectFlags::RF_NotForEdit) { stream << (first ? "(" : " | ") << "RF_NotForEdit";						            first = false; }
+        if (objectFlags & EObjectFlags::RF_NeedPostLoad) { stream << (first ? "(" : " | ") << "RF_NeedPostLoad";						        first = false; }
+        if (objectFlags & EObjectFlags::RF_HasStack) { stream << (first ? "(" : " | ") << "RF_HasStack";						                first = false; }
+        if (objectFlags & EObjectFlags::RF_Native) { stream << (first ? "(" : " | ") << "RF_Native";						                    first = false; }
+        if (objectFlags & EObjectFlags::RF_Marked) { stream << (first ? "(" : " | ") << "RF_Marked";						                    first = false; }
+        if (objectFlags & EObjectFlags::RF_ErrorShutdown) { stream << (first ? "(" : " | ") << "RF_ErrorShutdown";						        first = false; }
+        if (objectFlags & EObjectFlags::RF_PendingKill) { stream << (first ? "(" : " | ") << "RF_PendingKill";						            first = false; }
+        if (objectFlags & EObjectFlags::RF_MarkedByCookerTemp) { stream << (first ? "(" : " | ") << "RF_MarkedByCookerTemp";					first = false; }
+        if (objectFlags & EObjectFlags::RF_CookedStartupObject) { stream << (first ? "(" : " | ") << "RF_CookedStartupObject";					first = false; }
+        if (objectFlags & EObjectFlags::RF_AllFlags) { stream << (first ? "(" : " | ") << "RF_AllFlags";						                first = false; }
 
         if (!first)
         {
