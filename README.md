@@ -52,7 +52,7 @@ Once all your classes are filled out and you've made the necessary changes in `C
 - Added a new engine folder for Dishonered, which contains all needed fields to generate an sdk for that game.
 - Added extra safety checks for the string helper functions in "Printer.hpp/cpp".
 - Fixed the object flag values in "GameDefines.hpp" and also "PiecesOfCodes.cpp".
-- Updated the FindClass and FindFunction functions slightly.
+- Updated the "FindClass" and "FindFunction" functions slightly.
 - Moved the "Printer.cpp/hpp" files to the "Framework" folder.
 
 ### v1.1.3
