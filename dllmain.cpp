@@ -1,6 +1,6 @@
 #include "dllmain.hpp"
 
-static constexpr uint32_t UNKNOWN_DATA_SPACING = 3;
+static constexpr uint32_t UNKNOWN_DATA_SPACING = 2;
 static constexpr uint32_t LOG_FILE_SPACING = 75;
 static constexpr uint32_t CONST_VALUE_SPACING = 175;
 static constexpr uint32_t INSTANCE_DUMP_SPACING = 50;
