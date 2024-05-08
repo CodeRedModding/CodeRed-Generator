@@ -22,10 +22,10 @@
 // State Flags
 enum EStateFlags
 {
-	STATE_Editable = 0x00000001,	// State should be user-selectable in UnrealEd.
-	STATE_Auto = 0x00000002,	// State is automatic (the default state).
+	STATE_Editable = 0x00000001, // State should be user-selectable in UnrealEd.
+	STATE_Auto = 0x00000002, // State is automatic (the default state).
 	STATE_Simulated = 0x00000004, // State executes on client side.
-	STATE_HasLocals = 0x00000008,	// State has local variables.
+	STATE_HasLocals = 0x00000008, // State has local variables.
 };
 
 // https://github.com/CodeRedModding/UnrealEngine3/blob/main/Development/Src/Core/Inc/UnStack.h#L60
@@ -79,7 +79,7 @@ enum EFunctionFlags : uint64_t
 // Proprerty Flags
 enum EPropertyFlags : uint64_t
 {
-	CPF_Edit = 0x0000000000000001,	// Property is user-settable in the editor.
+	CPF_Edit = 0x0000000000000001, // Property is user-settable in the editor.
 	CPF_Const = 0x0000000000000002,	// Actor's property always matches class's default actor property.
 	CPF_Input = 0x0000000000000004,	// Variable is writable by the input system.
 	CPF_ExportObject = 0x0000000000000008, // Object can be exported with actor.

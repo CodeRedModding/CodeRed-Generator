@@ -22,10 +22,10 @@
 // State Flags
 enum EStateFlags
 {
-	STATE_Editable = 0x00000001,	// State should be user-selectable in UnrealEd.
-	STATE_Auto = 0x00000002,	// State is automatic (the default state).
+	STATE_Editable = 0x00000001, // State should be user-selectable in UnrealEd.
+	STATE_Auto = 0x00000002, // State is automatic (the default state).
 	STATE_Simulated = 0x00000004, // State executes on client side.
-	STATE_HasLocals = 0x00000008,	// State has local variables.
+	STATE_HasLocals = 0x00000008, // State has local variables.
 };
 
 // https://github.com/CodeRedModding/UnrealEngine3/blob/main/Development/Src/Core/Inc/UnStack.h#L60
@@ -79,7 +79,7 @@ enum EFunctionFlags : uint64_t
 // Proprerty Flags
 enum EPropertyFlags : uint64_t
 {
-	CPF_Edit = 0x0000000000000001,	// Property is user-settable in the editor.
+	CPF_Edit = 0x0000000000000001, // Property is user-settable in the editor.
 	CPF_Const = 0x0000000000000002,	// Actor's property always matches class's default actor property.
 	CPF_Input = 0x0000000000000004,	// Variable is writable by the input system.
 	CPF_ExportObject = 0x0000000000000008, // Object can be exported with actor.
@@ -94,7 +94,7 @@ enum EPropertyFlags : uint64_t
 	CPF_Native = 0x0000000000001000, // Property is native: C++ code is responsible for serializing it.
 	CPF_Transient = 0x0000000000002000,	// Property is transient: shouldn't be saved, zero-filled at load time.
 	CPF_Config = 0x0000000000004000, // Property should be loaded/saved as permanent profile.
-	CPF_Localized = 0x0000000000008000,	// Property should be loaded as localizable text.
+	CPF_Localized = 0x0000000000008000, // Property should be loaded as localizable text.
 	CPF_Travel = 0x0000000000010000, // Property travels across levels/servers.
 	CPF_EditConst = 0x0000000000020000,	// Property is uneditable in the editor.
 	CPF_GlobalConfig = 0x0000000000040000, // Load config from base class, not subclass.

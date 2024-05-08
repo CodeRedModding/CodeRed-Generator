@@ -5,6 +5,10 @@
 
 class UnrealObject
 {
+protected:
+	static std::vector<char> m_unsafeChars;
+	static std::vector<std::string> m_unsafeNames;
+
 public:
 	EClassTypes Type;
 	class UObject* Object;
@@ -21,10 +25,13 @@ public:
 public:
 	bool IsValid() const;
 	std::string Hash() const;
+	static void ValidateName(std::string& name);
+	static std::string CreateValidName(std::string name);
 
 private:
 	void Assign(class UObject* uObject, bool bIsPackage);
 	void AssignType();
+	void AssignName();
 
 public:
 	bool operator>(const UnrealObject& unrealObj);
@@ -70,8 +77,9 @@ public:
 	std::string GetTypeForParameter(bool bIgnoreConst = false) const;
 
 private:
-	bool Assign(class UProperty* uProperty);
-	bool AssignType();
+	void Assign(class UProperty* uProperty);
+	void AssignType();
+	void AssignName();
 
 public:
 	bool operator>(const UnrealProperty& unrealProp);
@@ -175,9 +183,6 @@ namespace Utils
 
 	bool SortProperty(const UnrealProperty& unrealPropA, const UnrealProperty& unrealPropB);
 	bool SortPropertyPair(const std::pair<UnrealProperty, std::string>& pairA, const std::pair<UnrealProperty, std::string>& pairB);
-
-	void CreateWindowsName(std::string& functionName);
-	std::string CreateValidName(std::string name);
 }
 
 namespace Retrievers
@@ -193,14 +198,14 @@ namespace Retrievers
 
 namespace ConstGenerator
 {
-	std::string GenerateConstName(class UConst* uConst);
+	void GenerateConstName(UnrealObject* unrealObj);
 	void GenerateConst(std::ofstream& stream, const UnrealObject& unrealObj);
 	void ProcessConsts(std::ofstream& stream, class UObject* packageObj);
 }
 
 namespace EnumGenerator
 {
-	std::string GenerateEnumName(class UEnum* uEnum);
+	void GenerateEnumName(UnrealObject* unrealObj);
 	void GenerateEnum(std::ofstream& stream, const UnrealObject& unrealObj);
 	void ProcessEnums(std::ofstream& stream, class UObject* packageObj);
 }
