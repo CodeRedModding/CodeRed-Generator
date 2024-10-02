@@ -563,16 +563,16 @@ public:
 	using Iterator = TIterator<class TArray<ElementType>>;
 
 public:
-	class TArray<ElementType> Elements;								// 0x0000 (0x0010)
-	struct FPointer IndirectData;									// 0x0010 (0x0008)
-	int32_t InlineData[0x4];										// 0x0018 (0x0010)
-	int32_t NumBits;												// 0x0028 (0x0004)
-	int32_t MaxBits;												// 0x002C (0x0004)
-	int32_t FirstFreeIndex;											// 0x0030 (0x0004)
-	int32_t NumFreeIndices;											// 0x0034 (0x0004)
-	int64_t InlineHash;												// 0x0038 (0x0008)
-	int32_t* Hash;													// 0x0040 (0x0008)
-	int32_t HashCount;												// 0x0048 (0x0004)
+	class TArray<ElementType> Elements;								// 0x0000 (0x000C)
+	struct FPointer IndirectData;									// 0x000C (0x0004)
+	int32_t InlineData[0x4];										// 0x0010 (0x0010)
+	int32_t NumBits;												// 0x0020 (0x0004)
+	int32_t MaxBits;												// 0x0024 (0x0004)
+	int32_t FirstFreeIndex;											// 0x0028 (0x0004)
+	int32_t NumFreeIndices;											// 0x002C (0x0004)
+	int64_t InlineHash;												// 0x0030 (0x0008)
+	int32_t* Hash;													// 0x0038 (0x0004)
+	int32_t HashCount;												// 0x003C (0x0004)
 
 public:
 	TMap() :
@@ -966,7 +966,7 @@ public:
 };
 
 // FString
-// (0x0000 - 0x0010)
+// (0x0000 - 0x000C)
 class FString
 {
 public:
@@ -978,9 +978,9 @@ public:
 	using ElementPointer = ElementType*;
 
 private:
-	ElementPointer	ArrayData;										// 0x0000 (0x08)
-	int32_t			ArrayCount;										// 0x0008 (0x04)
-	int32_t			ArrayMax;										// 0x000C (0x04)
+	ElementPointer	ArrayData;										// 0x0000 (0x04)
+	int32_t			ArrayCount;										// 0x0004 (0x04)
+	int32_t			ArrayMax;										// 0x0008 (0x04)
 
 public:
 	FString() : ArrayData(nullptr), ArrayCount(0), ArrayMax(0) {}
