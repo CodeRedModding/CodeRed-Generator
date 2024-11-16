@@ -1271,7 +1271,7 @@ public:
 };
 
 // Class Core.Struct
-// 0x0010 (0x0030 - // 0x0001 (0x0040 - 0x0041))
+// 0x0010 (0x0030 - 0x0040)
 class UStruct : public UField
 {
 public:
@@ -1388,7 +1388,7 @@ public:
 */
 
  //Class Core.StructProperty
-// 0x0004 (0x0044 - 0x0060)
+// 0x0004 (0x0044 - 0x0048)
 class UStructProperty : public UProperty
 {
 public:
