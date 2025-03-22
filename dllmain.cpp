@@ -37,12 +37,14 @@ std::vector<char> UnrealObject::m_unsafeChars = {
 
 // These are functions that share the same names as macros, which will result in errors in the final sdk due to conflicting names.
 std::vector<std::string> UnrealObject::m_unsafeNames = {
+    "GetComputerName",
     "GetCurrentTime",
     "GetObject",
     "DeleteFile",
     "DrawText",
     "SendMessage",
-    "GetMessage"
+    "GetMessage",
+    "PlaySound"
 };
 
 UnrealObject::UnrealObject() : Type(EClassTypes::Unknown), Object(nullptr), Package(nullptr) {}
