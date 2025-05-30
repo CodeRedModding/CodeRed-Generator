@@ -48,6 +48,10 @@ Once all your classes are filled out and you've made the necessary changes in `C
 
 ## Changelog
 
+### v1.1.6
+- Added comments explaining the use of all the function flags in "GameDefines.hpp", as well as "PiecesOfCode.cpp".
+- Removed the duplicate flag "FUNC_NoExport".
+
 ### v1.1.5
 - Changed how function parameters and code are generated to be more memory efficient.
 - Changed how the "GenerateConstName" and "GenerateEnumName" functions work in "dllmain.cpp".
