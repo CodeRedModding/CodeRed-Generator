@@ -33,7 +33,6 @@ enum EStateFlags
 // Function Flags
 enum EFunctionFlags : uint64_t
 {
-	FUNC_None = 0x00000000,
 	FUNC_Final = 0x00000001, // Function is final (prebindable, non-overridable function).
 	FUNC_Defined = 0x00000002, // Function has been defined (not just declared).
 	FUNC_Iterator = 0x00000004, // Function is an iterator.
@@ -129,7 +128,6 @@ enum EPropertyFlags : uint64_t
 // Object Flags
 enum EObjectFlags : uint64_t
 {
-	RF_NoFlags = 0x000000000000000,	// Object has no flags.
 	RF_InSingularFunc = 0x0000000000000002,	// In a singular function.
 	RF_StateChanged = 0x0000000000000004, // Object did a state change.
 	RF_DebugPostLoad = 0x0000000000000008, // For debugging PostLoad calls.

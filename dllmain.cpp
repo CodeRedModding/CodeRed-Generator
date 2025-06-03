@@ -1105,7 +1105,6 @@ namespace Retrievers
     {
         bool first = true;
 
-        if (functionFlags & EFunctionFlags::FUNC_None) { stream << (first ? "(" : " | ") << "FUNC_None";						                first = false; }
         if (functionFlags & EFunctionFlags::FUNC_Final) { stream << (first ? "(" : " | ") << "FUNC_Final";						                first = false; }
         if (functionFlags & EFunctionFlags::FUNC_Defined) { stream << (first ? "(" : " | ") << "FUNC_Defined";						            first = false; }
         if (functionFlags & EFunctionFlags::FUNC_Iterator) { stream << (first ? "(" : " | ") << "FUNC_Iterator";						        first = false; }
@@ -1120,7 +1119,6 @@ namespace Retrievers
         if (functionFlags & EFunctionFlags::FUNC_Event) { stream << (first ? "(" : " | ") << "FUNC_Event";						                first = false; }
         if (functionFlags & EFunctionFlags::FUNC_Operator) { stream << (first ? "(" : " | ") << "FUNC_Operator";						        first = false; }
         if (functionFlags & EFunctionFlags::FUNC_Static) { stream << (first ? "(" : " | ") << "FUNC_Static";						            first = false; }
-        if (functionFlags & EFunctionFlags::FUNC_NoExport) { stream << (first ? "(" : " | ") << "FUNC_NoExport";						        first = false; }
         if (functionFlags & EFunctionFlags::FUNC_OptionalParm) { stream << (first ? "(" : " | ") << "FUNC_OptionalParm";						first = false; }
         if (functionFlags & EFunctionFlags::FUNC_Const) { stream << (first ? "(" : " | ") << "FUNC_Const";						                first = false; }
         if (functionFlags & EFunctionFlags::FUNC_Invariant) { stream << (first ? "(" : " | ") << "FUNC_Invariant";						        first = false; }
@@ -1205,7 +1203,6 @@ namespace Retrievers
     {
         bool first = true;
 
-        if (objectFlags & EObjectFlags::RF_NoFlags) { stream << (first ? "(" : " | ") << "RF_NoFlags";							                first = false; }
         if (objectFlags & EObjectFlags::RF_InSingularFunc) { stream << (first ? "(" : " | ") << "RF_InSingularFunc";						    first = false; }
         if (objectFlags & EObjectFlags::RF_StateChanged) { stream << (first ? "(" : " | ") << "RF_StateChanged";						        first = false; }
         if (objectFlags & EObjectFlags::RF_DebugPostLoad) { stream << (first ? "(" : " | ") << "RF_DebugPostLoad";						        first = false; }
