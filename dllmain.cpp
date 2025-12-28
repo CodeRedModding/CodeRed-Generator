@@ -347,21 +347,23 @@ bool UnrealProperty::CantReference() const
 {
     if (IsValid())
     {
-        return IsAnArray();
+        return IsAnArray(); // Temp disabled.
     }
 
     return false;
 }
 
-bool UnrealProperty::CantMemcpy() const
+bool UnrealProperty::ShouldMemcpy() const
 {
     if (IsValid())
     {
-        return ((Type == EPropertyTypes::Bool)
-            || (!IsAnArray()
-                && ((Type == EPropertyTypes::UClass)
-                || (Type == EPropertyTypes::UObject)
-                || (Type == EPropertyTypes::UInterface))));
+        return (IsAnArray()
+            || (Type == EPropertyTypes::FName)
+            || (Type == EPropertyTypes::FString)
+            || (Type == EPropertyTypes::FScriptDelegate)
+            || (Type == EPropertyTypes::FStruct)
+            || (Type == EPropertyTypes::TArray)
+            || (Type == EPropertyTypes::TMap));
     }
 
     return false;
@@ -2971,7 +2973,7 @@ namespace FunctionGenerator
                     {
                         if (propertyPair.first.IsValid())
                         {
-                            if (!propertyPair.first.CantMemcpy())
+                            if (propertyPair.first.ShouldMemcpy())
                             {
                                 codeStream << "\tmemcpy_s(&" << functionObj.ValidName << "_Params." << propertyPair.second << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << ")";
 
@@ -2989,7 +2991,11 @@ namespace FunctionGenerator
 
                                 codeStream << ");\n";
                             }
-                            else if (!propertyPair.first.IsContainer())
+                            else if ((propertyPair.first.Type == EPropertyTypes::UInt8) && GConfig::UsingEnumClasses())
+                            {
+                                codeStream << "\t" << functionObj.ValidName << "_Params." << propertyPair.second << " = static_cast<" << propertyPair.first.GetTypeForStruct() << ">(" << propertyPair.second << ");\n";
+                            }
+                            else
                             {
                                 codeStream << "\t" << functionObj.ValidName << "_Params." << propertyPair.second << " = " << propertyPair.second << ";\n";
                             }
@@ -3000,7 +3006,7 @@ namespace FunctionGenerator
                     {
                         if (propertyPair.first.IsValid())
                         {
-                            if (!propertyPair.first.CantMemcpy())
+                            if (propertyPair.first.ShouldMemcpy())
                             {
                                 codeStream << "\tmemcpy_s(&" << functionObj.ValidName << "_Params." << propertyPair.second << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << ")";
 
@@ -3018,7 +3024,11 @@ namespace FunctionGenerator
 
                                 codeStream << ");\n";
                             }
-                            else if (!propertyPair.first.IsContainer())
+                            else if ((propertyPair.first.Type == EPropertyTypes::UInt8) && GConfig::UsingEnumClasses())
+                            {
+                                codeStream << "\t" << functionObj.ValidName << "_Params." << propertyPair.second << " = static_cast<" << propertyPair.first.GetTypeForStruct() << ">(" << propertyPair.second << ");\n";
+                            }
+                            else
                             {
                                 codeStream << "\t" << functionObj.ValidName << "_Params." << propertyPair.second << " = " << propertyPair.second << ";\n";
                             }
@@ -3065,7 +3075,7 @@ namespace FunctionGenerator
                         {
                             if (propertyPair.first.IsValid())
                             {
-                                if (!propertyPair.first.CantMemcpy())
+                                if (propertyPair.first.ShouldMemcpy())
                                 {
                                     codeStream << "\tmemcpy_s(&" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
 
@@ -3083,7 +3093,11 @@ namespace FunctionGenerator
 
                                     codeStream << ");\n";
                                 }
-                                else if (!propertyPair.first.IsContainer())
+                                else if ((propertyPair.first.Type == EPropertyTypes::UInt8) && GConfig::UsingEnumClasses())
+                                {
+                                    codeStream << "\t" << propertyPair.second << " = static_cast<" << propertyPair.first.GetTypeForClass() << ">(" << propertyPair.second << ");\n";
+                                }
+                                else
                                 {
                                     codeStream << "\t" << propertyPair.second << " = " << functionObj.ValidName << "_Params." << propertyPair.second << ";\n";
                                 }
@@ -3097,16 +3111,7 @@ namespace FunctionGenerator
 
                         if (GConfig::UsingEnumClasses() && (returnParam.first.Type == EPropertyTypes::UInt8))
                         {
-                            std::string returnType = returnParam.first.GetTypeForClass();
-
-                            if (returnType != "uint8_t")
-                            {
-                                codeStream << "static_cast<" << returnType << ">(" << functionObj.ValidName << "_Params." << returnParam.second << ");\n";
-                            }
-                            else
-                            {
-                                codeStream << functionObj.ValidName << "_Params." << returnParam.second << ";\n";
-                            }
+                            codeStream << "static_cast<" << returnParam.first.GetTypeForClass() << ">(" << functionObj.ValidName << "_Params." << returnParam.second << ");\n";
                         }
                         else
                         {
@@ -3114,7 +3119,7 @@ namespace FunctionGenerator
                         }
                     }
 
-                    codeStream << "};\n\n";
+                    codeStream << "}\n\n";
                 }
             }
 

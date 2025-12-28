@@ -67,7 +67,7 @@ public:
 	bool IsAnArray() const;
 	bool CantConst() const;
 	bool CantReference() const;
-	bool CantMemcpy() const;
+	bool ShouldMemcpy() const;
 
 public:
 	size_t GetSize() const;
@@ -154,7 +154,7 @@ public:
 	GCache() = delete;
 };
 
-// This is only used for the log file if you have "NO_LOGGING" comment out in your config.
+// This is only used for the log file if you don't have the "NO_LOGGING" define commented out in your config.
 class GLogger
 {
 private:
