@@ -319,13 +319,13 @@ enum EClassCastFlag : uint32_t
 #pragma pack(push, 0x4)
 #endif
 
-template<typename TArray>
+template<typename TArrayType>
 class TIterator
 {
 public:
-	using ElementType = typename TArray::ElementType;
-	using ElementPointer = ElementType*;
-	using ElementReference = ElementType&;
+	using ElementType = typename std::remove_cv<TArrayType>::type::ElementType;
+	using ElementPointer = typename std::conditional<std::is_const<TArrayType>::value, const ElementType*, ElementType*>::type;
+	using ElementReference = typename std::conditional<std::is_const<TArrayType>::value, const ElementType&, ElementType&>::type;
 	using ElementConstReference = const ElementType&;
 
 private:
@@ -372,7 +372,17 @@ public:
 		return IteratorData;
 	}
 
+	ElementPointer operator->() const
+	{
+		return IteratorData;
+	}
+
 	ElementReference operator*()
+	{
+		return *IteratorData;
+	}
+
+	ElementReference operator*() const
 	{
 		return *IteratorData;
 	}
@@ -399,6 +409,7 @@ public:
 	using ElementConstPointer = const ElementType*;
 	using ElementConstReference = const ElementType&;
 	using Iterator = TIterator<TArray<ElementType>>;
+	using ConstIterator = TIterator<const TArray<InElementType>>;
 
 private:
 	ElementPointer ArrayData;
@@ -438,23 +449,37 @@ public:
 		return ArrayData[index];
 	}
 
+	ElementConstPointer data()
+	{
+		return ArrayData;
+	}
+
 	ElementConstPointer data() const
 	{
 		return ArrayData;
 	}
 
-	void push_back(ElementConstReference newElement)
+	void push_back(const ElementType& value)  // copy
 	{
 		if (ArrayCount >= ArrayMax)
 		{
 			ReAllocate(sizeof(ElementType) * (ArrayCount + 1));
 		}
 
-		new(&ArrayData[ArrayCount]) ElementType(newElement);
+		new(&ArrayData[ArrayCount]) ElementType(value);
 		ArrayCount++;
 	}
 
-	void push_back(ElementReference& newElement)
+	void push_back(ElementType&& value)  // move
+	{
+		if (ArrayCount >= ArrayMax)
+			ReAllocate(sizeof(ElementType) * (ArrayCount + 1));
+
+		new(&ArrayData[ArrayCount]) ElementType(std::move(value));
+		ArrayCount++;
+	}
+
+	void Add(ElementConstReference newElement)
 	{
 		if (ArrayCount >= ArrayMax)
 		{
@@ -509,9 +534,19 @@ public:
 		return Iterator(ArrayData);
 	}
 
+	ConstIterator begin() const
+	{
+		return ConstIterator(ArrayData);
+	}
+
 	Iterator end()
 	{
 		return Iterator(ArrayData + ArrayCount);
+	}
+
+	ConstIterator end() const
+	{
+		return ConstIterator(ArrayData + ArrayCount);
 	}
 
 private:
