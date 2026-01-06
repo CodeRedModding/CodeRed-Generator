@@ -287,7 +287,7 @@ const std::string& GConfig::GetGNameMask()
 */
 
 // Mainly just used for the printed headers at the top of each generated file.
-std::string GConfig::m_gameNameLong = "Dishonered";
+std::string GConfig::m_gameNameLong = "Dishonored";
 
 // This is used for the output folder name, along with the printed headers at the top of each file.
 std::string GConfig::m_gameNameShort = "DSDK";

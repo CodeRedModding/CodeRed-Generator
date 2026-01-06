@@ -1,4 +1,4 @@
-## CodeRed Generator 3 (v1.1.7)
+## CodeRed Generator 3 (v1.2.0)
 
 This is a C++20 Unreal Engine 3 SDK generator that was originally based off the source of [TheFeckless's UE3 SDK Generator](https://www.unknowncheats.me/forum/unreal-engine-3-a/71911-thefeckless-ue3-sdk-generator.html). It has since grown into its own project which utilizes C++20, strings, filesystem paths, and modern file streams; along with converting legacy UE3 features to more modern and user friendly ones while still being compatible with UE3.
 
@@ -11,7 +11,7 @@ Final generated SDK is plug and play, just `#include "SdkHeaders.hpp"` in your p
 You have the option to generate an SDK using either offsets or patterns for GObjects and GNames.
 
 - **Class Alignment**
-Full support for both x32 bit and x64 bit games, just change the `Alignment` value in `Configuration.cpp`.
+Full support for both x32 bit and x64 bit games, just change the `Alignment` value in [Configuration.cpp](engine/Template/Configuration.cpp).
 
 - **Full Customization**
 You have full customization over the final generated SDK, use enum classes, remove native flags, class alignment, and even comment spacing.
@@ -19,15 +19,16 @@ You have full customization over the final generated SDK, use enum classes, remo
 ### Requirements
 
 - ISO C++20 Standard.
-- Visual Studio or another Windows based compiler (For Windows header files, along with the PSAPI library).
+- CMake 3.20 or higher.
+- A Windows-based compiler such as MSVC or MinGW (for Windows header files and the PSAPI library).
 
 ## Getting Started
 
-Included in this project is a template folder located in `Engine/Template`, to get started copy and paste this folder and rename it to the game you would like to use. To generate from your newly created engine folder don't forget to change the includes in the `Engine.hpp` file.
+Included in this project is a template folder located in [engine/Template](engine/Template), to get started copy and paste this folder and rename it to the game you would like to use.
 
-In the `Configuration.hpp` file there are two defines, one is `NO_LOGGING` which disables writing to a log file, and another define called `UTF16`. If your game is using wide characters you will need to uncomment this define out, if not `UTF8` will be used by default.
+In the [Configuration.hpp](engine/Template/Configuration.hpp) file there are two defines, one is `NO_LOGGING` which disables writing to a log file, and another define called `UTF16`. If your game is using wide characters you will need to uncomment this define out, if not `UTF8` will be used by default.
 
-Any further configuration **MUST BE DONE IN THE `Configuration.cpp` ONLY!** This file contains everything from class alignment, process event settings, global patterns and offsets, your games name and version, and most importantly the directory used for SDK generation.
+Any further configuration **MUST BE DONE IN THE [Configuration.cpp](engine/Template/Configuration.cpp) ONLY!** This file contains everything from class alignment, process event settings, global patterns and offsets, your games name and version, and most importantly the directory used for SDK generation.
 
 ![](https://i.imgur.com/q2tFJ7I.png)
 
@@ -37,15 +38,21 @@ Any further configuration **MUST BE DONE IN THE `Configuration.cpp` ONLY!** This
 
 ## Generation
 
-Once you have your custom engine folder setup, all that's left is to fill out your class and struct fields for your game. This generator uses a unique `REGISTER_MEMBER` macro to define class/struct members. This is very important for your final generated SDK as it's used to calculate offsets and unknown data all automatically, without needing to modify your `PiecesOfCode.cpp` unlike in Feckless's generator.
+Once you have your custom engine folder setup, all that's left is to fill out your class and struct fields for your game. This generator uses a unique `REGISTER_MEMBER` macro to define class/struct members. This is very important for your final generated SDK as it's used to calculate offsets and unknown data all automatically, without needing to modify your [PiecesOfCode.cpp](engine/Template/PiecesOfCode.cpp) unlike in Feckless's generator.
 
 Any class/struct member outside of whats in the `EMemberTypes` does NOT need to be registered with the `REGISTER_MEMBER` macro, so feel free to place padding or buffers in between.
 
 ![](https://i.imgur.com/k9vawPv.png)
 
-Once all your classes are filled out and you've made the necessary changes in `Configuration.cpp`, double check you didn't forget to set an out path in `Configuration.cpp` and have the right files included in `Engine.hpp`. After that just compile as a DLL and manually inject into your game, generation will start automatically and will prompt you when it is completed.
+Once all your classes are filled out and you've made the necessary changes in [Configuration.cpp](engine/Template/Configuration.cpp), double check you didn't forget to set an output path. After that build the project and manually inject the DLL into your game. Generation will start automatically and will prompt you when it is completed.
 
 ## Changelog
+
+### v1.2.0
+- Replaced Visual Studio solution with CMake for cross-compiler support.
+- Restructured project directories: source files are now in [src/](src/), headers in [include/](include/), and engine configurations in [engine/](engine/).
+- Removed precompiled headers (PCH) for simpler builds.
+- CMake auto-detects available engines and allows selection via `-DENGINE=<name>`.
 
 ### v1.1.7
 - Removed the "UnrealProperty::CantMemcpy" function in favor of the new one "UnrealProperty::ShouldMemcpy()".
@@ -61,8 +68,8 @@ Once all your classes are filled out and you've made the necessary changes in `C
 - Moved the "CreateValidName" and "CreateWindowsFunction" functions inside of the "UnrealObject" class.
 - Fixed the comment spacing for classes using the struct spacing instead of class spacing from your config file.
 
-###  v1.1.4
-- Added a new engine folder for Dishonered, which contains all needed fields to generate an sdk for that game.
+### v1.1.4
+- Added a new engine folder for Dishonored, which contains all needed fields to generate an sdk for that game.
 - Added extra safety checks for the string helper functions in "Printer.hpp/cpp".
 - Fixed the object flag values in "GameDefines.hpp" and also "PiecesOfCodes.cpp".
 - Updated the "FindClass" and "FindFunction" functions slightly.
