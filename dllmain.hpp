@@ -1,5 +1,5 @@
 #pragma once
-#include "pch.hpp"
+
 #include "Framework/Printer.hpp"
 #include "Engine/Engine.hpp"
 

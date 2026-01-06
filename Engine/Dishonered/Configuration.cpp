@@ -1,6 +1,8 @@
 #include "Configuration.hpp"
 #include "PiecesOfCode.hpp"
 
+#include <algorithm>
+
 /*
 # ========================================================================================= #
 # Cosmetics

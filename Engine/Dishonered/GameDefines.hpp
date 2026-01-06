@@ -1,16 +1,14 @@
 #pragma once
-#include <algorithm>
-#include <stdlib.h>
-#include <locale.h>
-#include <xlocale>
-#include <ctype.h>
-#include <chrono>
-#include <thread>
-#include <vector>
-#include <map>
-#include <functional>
+
 #include "Configuration.hpp"
 #include "../../Framework/Member.hpp"
+
+#include <cstring>
+#include <cstdlib>
+#include <clocale>
+
+#include <vector>
+#include <algorithm>
 
 /*
 # ========================================================================================= #
@@ -540,6 +538,13 @@ private:
 	}
 };
 
+// FPointer
+// (0x0000 - 0x0004)
+struct FPointer
+{
+	uintptr_t Dummy; // 0x0000 (0x04)
+};
+
 // THIS CLASS CAN BE GAME SPECIFIC, MOST GAMES WILL GENERATE A STRUCT MIRROR!
 template<typename TKey, typename TValue>
 class TMap
@@ -578,7 +583,7 @@ public:
 		MaxBits(0),
 		FirstFreeIndex(0),
 		NumFreeIndices(0),
-		Hash(nullptr),
+		Hash(NULL),
 		InlineHash(0),
 		HashSize(0)
 	{
@@ -591,7 +596,7 @@ public:
 		MaxBits(0),
 		FirstFreeIndex(0),
 		NumFreeIndices(0),
-		Hash(nullptr),
+		Hash(NULL),
 		InlineHash(0),
 		HashSize(0)
 	{
@@ -604,7 +609,7 @@ public:
 		MaxBits(0),
 		FirstFreeIndex(0),
 		NumFreeIndices(0),
-		Hash(nullptr),
+		Hash(NULL),
 		InlineHash(0),
 		HashSize(0)
 	{
@@ -1097,13 +1102,6 @@ struct FScriptDelegate
 {
 	class UObject* Object; // 0x0000 (0x04)
 	class FName FunctionName; // 0x0004 (0x08)
-};
-
-// FPointer
-// (0x0000 - 0x0004)
-struct FPointer
-{
-	uintptr_t Dummy; // 0x0000 (0x04)
 };
 
 // FQWord

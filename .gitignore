@@ -1,0 +1,8 @@
+# MacOS Cache
+.DS_Store
+
+# Cache files
+.cache/
+
+# Build output
+build/

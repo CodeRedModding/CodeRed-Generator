@@ -1,5 +1,8 @@
 #include "dllmain.hpp"
 
+#include <windows.h>
+#include <psapi.h>
+
 static constexpr uint32_t UNKNOWN_DATA_SPACING = 2;
 static constexpr uint32_t LOG_FILE_SPACING = 75;
 static constexpr uint32_t CONST_VALUE_SPACING = 175;
@@ -3783,19 +3786,23 @@ namespace Generator
     }
 }
 
-void OnAttach(HMODULE hModule)
+DWORD OnAttach(HMODULE hModule)
 {
     DisableThreadLibraryCalls(hModule);
     Generator::GenerateSDK();
     Generator::DumpInstances(true, true);
+
+    FreeLibraryAndExitThread(hModule, 0);
+    return 0;
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 {
-    switch (ul_reason_for_call)
+    (void)lpReserved;
+    switch (dwReason)
     {
     case DLL_PROCESS_ATTACH:
-        CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(OnAttach), nullptr, 0, nullptr);
+        CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(OnAttach), hModule, 0, nullptr);
         break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:

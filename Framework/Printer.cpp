@@ -70,7 +70,7 @@ namespace Printer
 
             while (replacePos != std::string::npos)
             {
-                baseStr.replace(replacePos, strToReplace.length(), replaceWithStr);
+                baseStr.replace(replacePos, replaceLength, replaceWithStr);
                 replacePos = baseStr.find(strToReplace);
             }
         }
