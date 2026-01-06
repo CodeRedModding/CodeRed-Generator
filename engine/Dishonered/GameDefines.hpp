@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Configuration.hpp"
-#include "../../Framework/Member.hpp"
+#include <Framework/Member.hpp>
 
 #include <cstring>
 #include <cstdlib>

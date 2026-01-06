@@ -1,5 +1,5 @@
-#include "Printer.hpp"
-#include "../Engine/Engine.hpp"
+#include <Framework/Printer.hpp>
+#include <Engine.hpp>
 
 namespace Printer
 {

@@ -1,4 +1,4 @@
-#include "dllmain.hpp"
+#include <dllmain.hpp>
 
 #include <windows.h>
 #include <psapi.h>

@@ -34,7 +34,7 @@ endif()
 # Auto-detect available engines
 file(GLOB ENGINE_DIRS
      LIST_DIRECTORIES TRUE
-     "${CMAKE_CURRENT_SOURCE_DIR}/Engine/*")
+     "${CMAKE_CURRENT_SOURCE_DIR}/engine/*")
 
 set(AVAILABLE_ENGINES "")
 foreach(DIR ${ENGINE_DIRS})
@@ -45,7 +45,7 @@ foreach(DIR ${ENGINE_DIRS})
 endforeach()
 
 if(NOT AVAILABLE_ENGINES)
-    message(FATAL_ERROR "No engine directories found in Engine/")
+    message(FATAL_ERROR "No engine directories found in engine/")
 endif()
 
 # Set default engine to the "Template" engine if it exists, otherwise the first available engine
@@ -74,24 +74,24 @@ message(STATUS "Using engine: ${ENGINE}")
 
 # Source files
 set(SOURCES
-    dllmain.cpp
-    Framework/Member.cpp
-    Framework/Printer.cpp
-    Engine/Engine.cpp
-    Engine/${ENGINE}/Configuration.cpp
-    Engine/${ENGINE}/GameDefines.cpp
-    Engine/${ENGINE}/PiecesOfCode.cpp
+    src/dllmain.cpp
+    src/Framework/Member.cpp
+    src/Framework/Printer.cpp
+    src/Engine.cpp
+    engine/${ENGINE}/Configuration.cpp
+    engine/${ENGINE}/GameDefines.cpp
+    engine/${ENGINE}/PiecesOfCode.cpp
 )
 
 # Header files
 set(HEADERS
-    dllmain.hpp
-    Framework/Member.hpp
-    Framework/Printer.hpp
-    Engine/Engine.hpp
-    Engine/${ENGINE}/Configuration.hpp
-    Engine/${ENGINE}/GameDefines.hpp
-    Engine/${ENGINE}/PiecesOfCode.hpp
+    include/dllmain.hpp
+    include/Framework/Member.hpp
+    include/Framework/Printer.hpp
+    include/Engine.hpp
+    engine/${ENGINE}/Configuration.hpp
+    engine/${ENGINE}/GameDefines.hpp
+    engine/${ENGINE}/PiecesOfCode.hpp
 )
 
 # Create shared library (DLL)
@@ -101,7 +101,8 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE=${ENGINE})
 
 # Include directories
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/engine)
 
 # Platform-specific settings
 if(WIN32)
