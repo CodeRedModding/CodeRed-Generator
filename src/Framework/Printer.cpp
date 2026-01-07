@@ -1,5 +1,5 @@
-#include "Printer.hpp"
-#include "../Engine/Engine.hpp"
+#include <Framework/Printer.hpp>
+#include <Engine.hpp>
 
 namespace Printer
 {
@@ -70,7 +70,7 @@ namespace Printer
 
             while (replacePos != std::string::npos)
             {
-                baseStr.replace(replacePos, strToReplace.length(), replaceWithStr);
+                baseStr.replace(replacePos, replaceLength, replaceWithStr);
                 replacePos = baseStr.find(strToReplace);
             }
         }

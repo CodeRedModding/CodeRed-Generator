@@ -1,6 +1,8 @@
 #include "Configuration.hpp"
 #include "PiecesOfCode.hpp"
 
+#include <algorithm>
+
 /*
 # ========================================================================================= #
 # Cosmetics
@@ -59,7 +61,7 @@ uint32_t GConfig::GetFunctionSpacing()
 bool GConfig::m_useWindows = true;
 
 // If you want to use objects internal integer for finding static classes and functions, note that these will change every time the game updates.
-bool GConfig::m_useConstants = false;
+bool GConfig::m_useConstants = true;
 
 // If you want to remove the "iNative" index on functions before calling process event.
 bool GConfig::m_removeNativeIndex = true;
@@ -87,7 +89,7 @@ std::vector<std::string> GConfig::m_blacklistedTypes = { "FPointer", "FQWord", "
 
 // Names of classes or structs you want to override with your own custom one.
 std::map<std::string, std::string> GConfig::m_typeOverrides = {
-    //{ "FExampleStruct", PiecesOfTypes::Example_Struct }
+    { "FExampleStruct", PiecesOfTypes::Example_Struct }
 };
 
 bool GConfig::UsingWindows()
@@ -172,10 +174,10 @@ std::string GConfig::GetTypeOverride(const std::string& name)
 */
 
 // If you want to use "m_peIndex" change this to true, if not virutal voids will be generated from "m_peMask" and "m_pePattern".
-bool GConfig::m_useIndex = true;
+bool GConfig::m_useIndex = false;
 
 // Position where the process event function is in UObject's VfTable.
-int32_t GConfig::m_peIndex = 59;
+int32_t GConfig::m_peIndex = -1;
 
 // Half byte mask, use question marks for unknown data.
 std::string GConfig::m_peMask = "xxx???x";
@@ -215,9 +217,9 @@ const std::string& GConfig::GetProcessEventStr()
 */
 
 // If want to use offsets or patterns to initialize global objects and names.
-bool GConfig::m_useOffsets = true;
+bool GConfig::m_useOffsets = false;
 
-uintptr_t GConfig::m_gobjectOffset = 0x1023630;
+uintptr_t GConfig::m_gobjectOffset = 0x0;
 
 // Half byte mask, use question marks for unknown data.
 std::string GConfig::m_gobjectMask = "xxx???x";
@@ -225,7 +227,7 @@ std::string GConfig::m_gobjectMask = "xxx???x";
 // First value is the actual hex escaped pattern, second value is the string version of it printed in the final sdk.
 std::pair<uint8_t*, std::string> GConfig::m_gobjectPattern = { (uint8_t*)"\x10\x11\x12\x00\x00\x00\x13", "\\x10\\x11\\x12\\x00\\x00\\x00\\x13" };
 
-uintptr_t GConfig::m_gnameOffset = 0x1035674;
+uintptr_t GConfig::m_gnameOffset = 0x0;
 
 // Half byte mask, use question marks for unknown data.
 std::string GConfig::m_gnameMask = "xxx???x";
@@ -285,10 +287,10 @@ const std::string& GConfig::GetGNameMask()
 */
 
 // Mainly just used for the printed headers at the top of each generated file.
-std::string GConfig::m_gameNameLong = "Dishonered";
+std::string GConfig::m_gameNameLong = "Template Game";
 
 // This is used for the output folder name, along with the printed headers at the top of each file.
-std::string GConfig::m_gameNameShort = "DSDK";
+std::string GConfig::m_gameNameShort = "TSDK";
 
 // Optional, mainly for your own sake, like comparing sdks you generate or release to people.
 std::string GConfig::m_gameVersion = "1.0.0.0";

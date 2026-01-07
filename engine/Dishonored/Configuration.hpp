@@ -1,6 +1,8 @@
 #pragma once
-#include <map>
+
 #include <string>
+#include <vector>
+#include <map>
 #include <filesystem>
 
 /*
@@ -16,7 +18,7 @@
 //#define UTF16
 
 // Uncomment this if your game uses wide characters (UTF16) for FStrings!
-//#define UTF16_FSTRING
+#define UTF16_FSTRING
 
 // Below are global variables for the generator, make changes in in the cpp file only!
 

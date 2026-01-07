@@ -1,7 +1,7 @@
 #pragma once
-#include "pch.hpp"
-#include "Framework/Printer.hpp"
-#include "Engine/Engine.hpp"
+
+#include <Framework/Printer.hpp>
+#include <Engine.hpp>
 
 class UnrealObject
 {
@@ -177,9 +177,9 @@ public:
 
 namespace Utils
 {
-	void MessageboxInfo(const std::string& message);
-	void MessageboxWarn(const std::string& message);
-	void MessageboxError(const std::string& message);
+	void MessageBoxInfo(const std::string_view& message);
+	void MessageBoxWarn(const std::string_view& message);
+	void MessageBoxError(const std::string_view& message);
 
 	bool SortProperty(const UnrealProperty& unrealPropA, const UnrealProperty& unrealPropB);
 	bool SortPropertyPair(const std::pair<UnrealProperty, std::string>& pairA, const std::pair<UnrealProperty, std::string>& pairB);
@@ -193,7 +193,7 @@ namespace Retrievers
 
 	uintptr_t GetBaseAddress();
 	uintptr_t GetOffset(void* pointer);
-	uintptr_t FindPattern(const uint8_t* pattern, const std::string& mask);
+	uintptr_t FindPattern(const std::basic_string_view<uint8_t>& pattern, const std::string_view& mask);
 }
 
 namespace ConstGenerator

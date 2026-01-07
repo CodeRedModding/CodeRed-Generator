@@ -1,0 +1,5 @@
+{
+  "cmake.configureArgs": [
+    "-DCMAKE_SYSTEM_NAME=Windows"
+  ]
+}
