@@ -1,35 +1,34 @@
 #include <Engine.hpp>
 
+#include <version.hpp>
+
 /*
 # ========================================================================================= #
 # Engine
 # ========================================================================================= #
 */
 
-std::string GEngine::m_name = "CodeRedGenerator";
+std::string_view GEngine::m_name = PROJECT_NAME;
+std::string_view GEngine::m_version = PROJECT_VERSION;
+std::string_view GEngine::m_credits = PROJECT_AUTHORS;
+std::string_view GEngine::m_links = PROJECT_HOMEPAGE_URL;
 
-std::string GEngine::m_version = "v1.1.7";
-
-std::string GEngine::m_credits = "ItsBranK, TheFeckless";
-
-std::string GEngine::m_links = "www.github.com/CodeRedModding/CodeRed-Generator";
-
-const std::string& GEngine::GetName()
+const std::string_view& GEngine::GetName()
 {
 	return m_name;
 }
 
-const std::string& GEngine::GetVersion()
+const std::string_view& GEngine::GetVersion()
 {
 	return m_version;
 }
 
-const std::string& GEngine::GetCredits()
+const std::string_view& GEngine::GetCredits()
 {
 	return m_credits;
 }
 
-const std::string& GEngine::GetLinks()
+const std::string_view& GEngine::GetLinks()
 {
 	return m_links;
 }

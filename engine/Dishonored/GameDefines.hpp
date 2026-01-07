@@ -4,8 +4,6 @@
 #include <Framework/Member.hpp>
 
 #include <cstring>
-#include <cstdlib>
-#include <clocale>
 
 #include <vector>
 #include <algorithm>
@@ -578,12 +576,12 @@ public:
 
 public:
 	TMap() :
-		IndirectData(NULL),
+		IndirectData(0),
 		NumBits(0),
 		MaxBits(0),
 		FirstFreeIndex(0),
 		NumFreeIndices(0),
-		Hash(NULL),
+		Hash(0),
 		InlineHash(0),
 		HashSize(0)
 	{
@@ -591,12 +589,12 @@ public:
 	}
 
 	TMap(struct FMap_Mirror& other) :
-		IndirectData(NULL),
+		IndirectData(0),
 		NumBits(0),
 		MaxBits(0),
 		FirstFreeIndex(0),
 		NumFreeIndices(0),
-		Hash(NULL),
+		Hash(0),
 		InlineHash(0),
 		HashSize(0)
 	{
@@ -604,12 +602,12 @@ public:
 	}
 
 	TMap(const TMap<TKey, TValue>& other) :
-		IndirectData(NULL),
+		IndirectData(0),
 		NumBits(0),
 		MaxBits(0),
 		FirstFreeIndex(0),
 		NumFreeIndices(0),
-		Hash(NULL),
+		Hash(0),
 		InlineHash(0),
 		HashSize(0)
 	{

@@ -9,7 +9,10 @@ cmake_minimum_required(VERSION 3.20)
 project(CodeRedGenerator
         DESCRIPTION "Unreal Engine 3 SDK Generator"
         VERSION 1.2.0
+        HOMEPAGE_URL "https://github.com/CodeRedModding/CodeRed-Generator"
         LANGUAGES CXX C)
+
+configure_file(version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/include/version.hpp @ONLY)
 
 # Generate compile_commands.json for IDE integration
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -20,11 +23,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# Organize targets into folders in IDEs that support it
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 # Enable all, extra, and pedantic warnings
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/W4)
-else()
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
+else()
+    message(WARNING "Unknown compiler: ${CMAKE_CXX_COMPILER_ID}. Warning flags not set.")
 endif()
 
 # --------------------
@@ -57,7 +65,7 @@ endif()
 
 # Option to select the engine
 set(ENGINE "${DEFAULT_ENGINE}" CACHE STRING "Select the engine to build with")
-set_property(CACHE ENGINE PROPERTY STRINGS ${ENGINE_DIRS})
+set_property(CACHE ENGINE PROPERTY STRINGS ${AVAILABLE_ENGINES})
 
 # Validate selected engine
 list(FIND AVAILABLE_ENGINES "${ENGINE}" ENGINE_INDEX)
@@ -72,30 +80,52 @@ message(STATUS "Using engine: ${ENGINE}")
 # Build Configuration
 # -------------------
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # Source files
 set(SOURCES
-    src/dllmain.cpp
-    src/Framework/Member.cpp
-    src/Framework/Printer.cpp
-    src/Engine.cpp
-    engine/${ENGINE}/Configuration.cpp
-    engine/${ENGINE}/GameDefines.cpp
-    engine/${ENGINE}/PiecesOfCode.cpp
+    "src/dllmain.cpp"
+    "src/utils.cpp"
+    "src/Framework/Member.cpp"
+    "src/Framework/Printer.cpp"
+    "src/Engine.cpp"
 )
 
 # Header files
 set(HEADERS
-    include/dllmain.hpp
-    include/Framework/Member.hpp
-    include/Framework/Printer.hpp
-    include/Engine.hpp
-    engine/${ENGINE}/Configuration.hpp
-    engine/${ENGINE}/GameDefines.hpp
-    engine/${ENGINE}/PiecesOfCode.hpp
+    "include/version.hpp"
+    "include/dllmain.hpp"
+    "include/utils.hpp"
+    "include/Framework/Member.hpp"
+    "include/Framework/Printer.hpp"
+    "include/Engine.hpp"
 )
 
+# Engine files
+set(ENGINE_SOURCES
+    "engine/${ENGINE}/Configuration.cpp"
+    "engine/${ENGINE}/GameDefines.cpp"
+    "engine/${ENGINE}/PiecesOfCode.cpp"
+)
+set(ENGINE_HEADERS
+    "engine/${ENGINE}/Configuration.hpp"
+    "engine/${ENGINE}/GameDefines.hpp"
+    "engine/${ENGINE}/PiecesOfCode.hpp"
+)
+
+# Organize source and header files into groups for IDEs
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/engine"
+             PREFIX "Engine Files"
+             FILES ${ENGINE_SOURCES} ${ENGINE_HEADERS})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src"
+             PREFIX "Source Files"
+             FILES ${SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include"
+             PREFIX "Header Files"
+             FILES ${HEADERS})
+
 # Create shared library (DLL)
-add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS} ${ENGINE_SOURCES} ${ENGINE_HEADERS})
 
 # Define the selected engine
 target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE=${ENGINE})
@@ -104,47 +134,137 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE=${ENGINE})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/engine)
 
-# Platform-specific settings
-if(WIN32)
-    # Unicode character set
+# --------------------------
+# Compiler-Specific Settings
+# --------------------------
+
+# Compiler definitions
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    $<$<CONFIG:Debug>:_DEBUG>
+)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # Compiler definitions
     target_compile_definitions(${PROJECT_NAME} PRIVATE
-        UNICODE
-        _UNICODE
-        _CONSOLE
         $<$<CONFIG:Debug>:_DEBUG>
-        $<$<CONFIG:Release>:NDEBUG>
+        _CONSOLE
+        _WINDLL
+        _UNICODE
+        UNICODE
     )
 
-    # Add WIN32 definition for 32-bit builds
-    if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-        target_compile_definitions(${PROJECT_NAME} PRIVATE WIN32)
-    endif()
+    # Compiler options
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        /fp:precise                     # Precise floating-point model
+        /Gd                             # __cdecl calling convention
+        /GS                             # Buffer security checks
+        /Oy-                            # Disable frame pointer omission
+        /permissive-                    # Standards conformance
+        /sdl                            # SDL (Security Development Lifecycle) checks
+        /Zc:wchar_t                     # Treat wchar_t as a native type
+        /Zc:inline                      # Enforce inline semantics
+        /Zc:forScope                    # Enforce for-scope semantics
 
-    # MSVC-specific settings
-    if(MSVC)
-        # Warning level 3
-        target_compile_options(${PROJECT_NAME} PRIVATE /W3)
+        # Enable optimizations
+        $<$<CONFIG:Release>:/GL>
+        $<$<CONFIG:RelWithDebInfo>:/GL>
+        $<$<CONFIG:MinSizeRel>:/GL>
 
-        # SDL checks
-        target_compile_options(${PROJECT_NAME} PRIVATE /sdl)
+        # Function-level linking
+        $<$<CONFIG:Release>:/Gy>
+        $<$<CONFIG:RelWithDebInfo>:/Gy>
+        $<$<CONFIG:MinSizeRel>:/Gy>
 
-        # Conformance mode
-        target_compile_options(${PROJECT_NAME} PRIVATE /permissive-)
+        # Intrinsic functions
+        $<$<CONFIG:Release>:/Oi>
+        $<$<CONFIG:RelWithDebInfo>:/Oi>
+    )
 
-        # Release optimizations
-        target_compile_options(${PROJECT_NAME} PRIVATE
-            $<$<CONFIG:Release>:/Gy>  # Function-level linking
-            $<$<CONFIG:Release>:/Oi>  # Intrinsic functions
+    # Linker definitions
+    target_link_options(${PROJECT_NAME} PRIVATE
+        /NXCOMPAT           # Non-executable memory protection
+        /SUBSYSTEM:CONSOLE  # Console subsystem
+        $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:/SAFESEH>
+
+        # Incremental linking
+        $<$<CONFIG:Release>:/LTCG:incremental>
+        $<$<CONFIG:RelWithDebInfo>:/LTCG:incremental>
+        $<$<CONFIG:MinSizeRel>:/LTCG:incremental>
+
+        # Optimization settings
+        $<$<CONFIG:Release>:/OPT:REF>
+        $<$<CONFIG:Release>:/OPT:ICF>
+        $<$<CONFIG:RelWithDebInfo>:/OPT:REF>
+        $<$<CONFIG:RelWithDebInfo>:/OPT:ICF>
+        $<$<CONFIG:MinSizeRel>:/OPT:REF>
+        $<$<CONFIG:MinSizeRel>:/OPT:ICF>
+    )
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    # Compiler options
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        -fms-extensions                 # Enable MS extensions
+        -fstack-protector-strong        # Buffer security checks (equivalent to /GS)
+        -fno-omit-frame-pointer         # Disable frame pointer omission (equivalent to /Oy-)
+
+        # Enable optimizations for Release builds
+        $<$<CONFIG:Release>:-flto=auto>
+        $<$<CONFIG:RelWithDebInfo>:-flto=auto>
+        $<$<CONFIG:MinSizeRel>:-flto=auto>
+
+        # Function-level linking (equivalent to /Gy)
+        $<$<CONFIG:Release>:-ffunction-sections>
+        $<$<CONFIG:Release>:-fdata-sections>
+        $<$<CONFIG:RelWithDebInfo>:-ffunction-sections>
+        $<$<CONFIG:RelWithDebInfo>:-fdata-sections>
+        $<$<CONFIG:MinSizeRel>:-ffunction-sections>
+        $<$<CONFIG:MinSizeRel>:-fdata-sections>
+    )
+
+    # Linker options
+    target_link_options(${PROJECT_NAME} PRIVATE
+        # Link-time optimization for Release builds
+        $<$<CONFIG:Release>:-flto=auto>
+        $<$<CONFIG:RelWithDebInfo>:-flto=auto>
+        $<$<CONFIG:MinSizeRel>:-flto=auto>
+
+        # Dead code elimination (equivalent to /OPT:REF and /OPT:ICF)
+        $<$<CONFIG:Release>:-Wl,--gc-sections>
+        $<$<CONFIG:RelWithDebInfo>:-Wl,--gc-sections>
+        $<$<CONFIG:MinSizeRel>:-Wl,--gc-sections>
+        -fno-use-linker-plugin
+    )
+
+    #if MinGW, disable linker plugin usage
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_link_libraries(${PROJECT_NAME} PRIVATE
+            -fno-use-linker-plugin
         )
-
-        # Linker settings
-        target_link_options(${PROJECT_NAME} PRIVATE
-            /SUBSYSTEM:CONSOLE
-            $<$<CONFIG:Release>:/OPT:REF>   # Optimize references
-            $<$<CONFIG:Release>:/OPT:ICF>   # COMDAT folding
-        )
     endif()
+else()
+    message(WARNING "Unknown compiler: ${CMAKE_CXX_COMPILER_ID}. Compiler-specific settings not applied.")
 endif()
+
+# --------------------------
+# Platform-Specific Settings
+# --------------------------
+
+if(WIN32)
+    # Link against necessary system libraries
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        psapi
+    )
+elseif(UNIX)
+    # Link against necessary system libraries
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        pthread
+    )
+else()
+    message(WARNING "Unknown platform: ${CMAKE_SYSTEM_NAME}. Platform-specific settings not applied.")
+endif()
+
+# --------------------
+# Output Configuration
+# --------------------
 
 # Set output directory
 set_target_properties(${PROJECT_NAME} PROPERTIES

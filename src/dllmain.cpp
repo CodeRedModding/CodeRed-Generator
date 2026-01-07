@@ -1,7 +1,6 @@
 #include <dllmain.hpp>
 
-#include <windows.h>
-#include <psapi.h>
+#include <format>
 
 static constexpr uint32_t UNKNOWN_DATA_SPACING = 2;
 static constexpr uint32_t LOG_FILE_SPACING = 75;
@@ -959,12 +958,12 @@ bool GLogger::Open()
 
         if (std::filesystem::exists(fullDirectory))
         {
-            m_file.open(fullDirectory / (GEngine::GetName() + ".log"));
+            m_file.open(fullDirectory / (std::format("{}.log", GEngine::GetName())));
             return true;
         }
         else
         {
-            Utils::MessageboxError("Error: Failed to create the log file, might not have the right permissions or your directory is invalid!");
+            Utils::MessageBoxError("Error: Failed to create the log file, might not have the right permissions or your directory is invalid!");
         }
     }
 #endif
@@ -1053,34 +1052,6 @@ void GLogger::LogStructPadding(class UScriptStruct* uScriptStruct, size_t paddin
 
 namespace Utils
 {
-    void MessageboxExt(const std::string& message, uint32_t flags)
-    {
-#ifdef _WIN32
-        MessageBoxA(NULL, message.c_str(), GEngine::GetName().c_str(), flags);
-#endif
-    }
-
-    void MessageboxInfo(const std::string& message)
-    {
-#ifdef _WIN32
-        MessageboxExt(message, (MB_OK | MB_ICONINFORMATION));
-#endif
-    }
-
-    void MessageboxWarn(const std::string& message)
-    {
-#ifdef _WIN32
-        MessageboxExt(message, (MB_OK | MB_ICONWARNING));
-#endif
-    }
-
-    void MessageboxError(const std::string& message)
-    {
-#ifdef _WIN32
-        MessageboxExt(message, (MB_OK | MB_ICONERROR));
-#endif
-    }
-
     bool SortProperty(const UnrealProperty& unrealPropA, const UnrealProperty& unrealPropB)
     {
         if (unrealPropA.Property && unrealPropB.Property)
@@ -1270,11 +1241,6 @@ namespace Retrievers
         }
     }
 
-    uintptr_t GetBaseAddress()
-    {
-        return reinterpret_cast<uintptr_t>(GetModuleHandle(NULL));
-    }
-
     uintptr_t GetOffset(void* pointer)
     {
         uintptr_t baseAddress = GetBaseAddress();
@@ -1285,45 +1251,7 @@ namespace Retrievers
             return (address - baseAddress);
         }
 
-        return NULL;
-    }
-
-    uintptr_t FindPattern(const uint8_t* pattern, const std::string& mask)
-    {
-        if (pattern && !mask.empty())
-        {
-            MODULEINFO miInfos;
-            ZeroMemory(&miInfos, sizeof(MODULEINFO));
-
-            HMODULE hModule = GetModuleHandle(NULL);
-            K32GetModuleInformation(GetCurrentProcess(), hModule, &miInfos, sizeof(MODULEINFO));
-
-            uintptr_t start = reinterpret_cast<uintptr_t>(hModule);
-            uintptr_t end = (start + miInfos.SizeOfImage);
-
-            size_t currentPos = 0;
-            size_t maskLength = (mask.length() - 1);
-
-            for (uintptr_t retAddress = start; retAddress < end; retAddress++)
-            {
-                if (*reinterpret_cast<uint8_t*>(retAddress) == pattern[currentPos] || mask[currentPos] == '?')
-                {
-                    if (currentPos == maskLength)
-                    {
-                        return (retAddress - maskLength);
-                    }
-
-                    currentPos++;
-                }
-                else
-                {
-                    retAddress -= currentPos;
-                    currentPos = 0;
-                }
-            }
-        }
-
-        return NULL;
+        return 0;
     }
 }
 
@@ -1616,7 +1544,7 @@ namespace StructGenerator
 #ifndef NO_LOGGING
                 GLogger::Log("Error: No registered members found for struct type \"" + Member::GetName(structType) + "\"!");
 #endif
-                Utils::MessageboxError("Error: No registered members found for struct type \"" + Member::GetName(structType) + "\"!");
+                Utils::MessageBoxError("Error: No registered members found for struct type \"" + Member::GetName(structType) + "\"!");
             }
         }
     }
@@ -2120,7 +2048,7 @@ namespace ClassGenerator
 #ifndef NO_LOGGING
                     GLogger::LogClassSize(uClass, localSize);
 #endif
-                    Utils::MessageboxError("Error: Incorrect class size detected for \"" + Member::GetName(classType) + "\", check the log file for more details!");
+                    Utils::MessageBoxError("Error: Incorrect class size detected for \"" + Member::GetName(classType) + "\", check the log file for more details!");
                 }
             }
             else
@@ -2128,7 +2056,7 @@ namespace ClassGenerator
 #ifndef NO_LOGGING
                 GLogger::Log("Error: No registered members found for class \"" + uClass->GetName() + "\"!");
 #endif
-                Utils::MessageboxError("Error: No registered members found for \"" + Member::GetName(classType) + "\"!");
+                Utils::MessageBoxError("Error: No registered members found for \"" + Member::GetName(classType) + "\"!");
             }
         }
     }
@@ -2715,7 +2643,7 @@ namespace FunctionGenerator
         else
         {
             stream << "\n\t// FIX PROCESSEVENT IN CONFIGURATION.CPP, INVALID INDEX";
-            Utils::MessageboxWarn("Warning: ProcessEvent is not configured correctly in \"Configuration.cpp\", you set \"UsingIndex\" to true yet you did not provide a valid index for process event!");
+            Utils::MessageBoxWarn("Warning: ProcessEvent is not configured correctly in \"Configuration.cpp\", you set \"UsingIndex\" to true yet you did not provide a valid index for process event!");
         }
 
         if (processEventAddress)
@@ -2742,7 +2670,7 @@ namespace FunctionGenerator
         else
         {
             stream << "\n\t// FIX PROCESSEVENT IN CONFIGURATION.CPP, INVALID ADDRESS";
-            Utils::MessageboxWarn("Warning: ProcessEvent is not configured correctly in \"Configuration.cpp\", failed to find a valid address!");
+            Utils::MessageBoxWarn("Warning: ProcessEvent is not configured correctly in \"Configuration.cpp\", failed to find a valid address!");
         }
     }
 
@@ -3493,7 +3421,7 @@ namespace Generator
         }
         else
         {
-            Utils::MessageboxError("Failed locate the given directory, cannot generate an SDK!");
+            Utils::MessageBoxError("Failed locate the given directory, cannot generate an SDK!");
         }
     }
 
@@ -3510,7 +3438,7 @@ namespace Generator
         {
             if (Initialize(true))
             {
-                Utils::MessageboxInfo("SDK generation has started, do not close the game until prompted to do so!");
+                Utils::MessageBoxInfo("SDK generation has started, do not close the game until prompted to do so!");
                 std::chrono::time_point startTime = std::chrono::system_clock::now();
 
                 ProcessPackages(headerDirectory);
@@ -3527,12 +3455,12 @@ namespace Generator
                 GLogger::Close();
 #endif
 
-                Utils::MessageboxInfo("SDK generation complete, finished in " + formattedTime + " seconds!");
+                Utils::MessageBoxInfo("SDK generation complete, finished in " + formattedTime + " seconds!");
             }
         }
         else
         {
-            Utils::MessageboxError("Failed to create the desired directory, cannot generate an SDK!");
+            Utils::MessageBoxError("Failed to create the desired directory, cannot generate an SDK!");
         }
     }
 
@@ -3540,7 +3468,7 @@ namespace Generator
     {
         if (!GConfig::HasOutputPath())
         {
-            Utils::MessageboxError("Looks like you forgot to set an output path for the generator! Please edit the output path in \"Configuration.cpp\" and recompile.");
+            Utils::MessageBoxError("Looks like you forgot to set an output path for the generator! Please edit the output path in \"Configuration.cpp\" and recompile.");
             return false;
         }
 
@@ -3622,7 +3550,7 @@ namespace Generator
             }
             else
             {
-                Utils::MessageboxError("Failed to validate GObject & GNames, please make sure you have them configured properly in \"Configuration.cpp\"!");
+                Utils::MessageBoxError("Failed to validate GObject & GNames, please make sure you have them configured properly in \"Configuration.cpp\"!");
                 return false;
             }
         }
@@ -3657,7 +3585,7 @@ namespace Generator
                 DumpGObjects();
             }
 
-            Utils::MessageboxInfo("Finished dumping instances!");
+            Utils::MessageBoxInfo("Finished dumping instances!");
         }
     }
 
@@ -3786,11 +3714,22 @@ namespace Generator
     }
 }
 
+void Start()
+{
+    Utils::MessageBoxInfo("Ready to generate SDK!");
+    Generator::GenerateSDK();
+    Generator::DumpInstances(true, true);
+}
+
+#ifdef _WIN32
+
+#include <windows.h>
+
 DWORD OnAttach(HMODULE hModule)
 {
     DisableThreadLibraryCalls(hModule);
-    Generator::GenerateSDK();
-    Generator::DumpInstances(true, true);
+
+    Start();
 
     FreeLibraryAndExitThread(hModule, 0);
     return 0;
@@ -3811,3 +3750,29 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
     }
     return TRUE;
 }
+
+#elif __linux__
+
+#include <pthread.h>
+
+void* OnAttach(void* arg)
+{
+    (void)arg;
+
+    Start();
+
+    pthread_exit(nullptr);
+    return nullptr;
+}
+
+__attribute__((constructor)) void DllMain()
+{
+    pthread_t thread;
+    pthread_create(&thread, nullptr, OnAttach, nullptr);
+}
+
+#else
+
+#error Unsupported platform!
+
+#endif

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <string_view>
 
 // Preprocessor helpers for computed includes
 #define STRINGIFY_IMPL(x) #x
@@ -22,16 +22,16 @@
 class GEngine
 {
 private:
-	static std::string m_name;
-	static std::string m_version;
-	static std::string m_credits;
-	static std::string m_links;
+	static std::string_view m_name;
+	static std::string_view m_version;
+	static std::string_view m_credits;
+	static std::string_view m_links;
 
 public:
-	static const std::string& GetName();
-	static const std::string& GetVersion();
-	static const std::string& GetCredits();
-	static const std::string& GetLinks();
+	static const std::string_view& GetName();
+	static const std::string_view& GetVersion();
+	static const std::string_view& GetCredits();
+	static const std::string_view& GetLinks();
 
 public:
 	GEngine() = delete;

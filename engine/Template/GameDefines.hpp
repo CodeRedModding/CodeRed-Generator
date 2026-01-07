@@ -579,7 +579,7 @@ public:
 
 public:
 	TMap() :
-		IndirectData(NULL),
+		IndirectData(0),
 		NumBits(0),
 		MaxBits(0),
 		FirstFreeIndex(0),
@@ -592,7 +592,7 @@ public:
 	}
 
 	TMap(struct FMap_Mirror& other) :
-		IndirectData(NULL),
+		IndirectData(0),
 		NumBits(0),
 		MaxBits(0),
 		FirstFreeIndex(0),
@@ -605,7 +605,7 @@ public:
 	}
 
 	TMap(const TMap<TKey, TValue>& other) :
-		IndirectData(NULL),
+		IndirectData(0),
 		NumBits(0),
 		MaxBits(0),
 		FirstFreeIndex(0),
