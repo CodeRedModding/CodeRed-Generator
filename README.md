@@ -1,4 +1,4 @@
-## CodeRed Generator 3 (v1.1.7)
+## CodeRed Generator 3 (v1.1.8)
 
 This is a C++20 Unreal Engine 3 SDK generator that was originally based off the source of [TheFeckless's UE3 SDK Generator](https://www.unknowncheats.me/forum/unreal-engine-3-a/71911-thefeckless-ue3-sdk-generator.html). It has since grown into its own project which utilizes C++20, strings, filesystem paths, and modern file streams; along with converting legacy UE3 features to more modern and user friendly ones while still being compatible with UE3.
 
@@ -46,6 +46,10 @@ Any class/struct member outside of whats in the `EMemberTypes` does NOT need to 
 Once all your classes are filled out and you've made the necessary changes in `Configuration.cpp`, double check you didn't forget to set an out path in `Configuration.cpp` and have the right files included in `Engine.hpp`. After that just compile as a DLL and manually inject into your game, generation will start automatically and will prompt you when it is completed.
 
 ## Changelog
+
+### v1.1.8
+- Fixed there being an extra new line after the "StaticClass()" function in classes if the class itself didn't have any functions.
+- Changed the "GCache::m_objects" variable and "GCache::CountObject" function to be "uint64_t"'s instead of "uint32_t"s.
 
 ### v1.1.7
 - Removed the "UnrealProperty::CantMemcpy" function in favor of the new one "UnrealProperty::ShouldMemcpy()".

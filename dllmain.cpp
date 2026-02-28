@@ -519,7 +519,7 @@ std::string UnrealProperty::GetType(bool bIgnoreEnum, bool bFunctionParam, bool 
 
             if (structProperty && structProperty->Struct)
             {
-                uint32_t propertyCount = GCache::CountObject<UScriptStruct>(structProperty->Struct->GetName());
+                uint64_t propertyCount = GCache::CountObject<UScriptStruct>(structProperty->Struct->GetName());
 
                 if (propertyCount > 1)
                 {
@@ -1648,7 +1648,7 @@ namespace StructGenerator
 
                 UScriptStruct* scriptStruct = static_cast<UScriptStruct*>(unrealObj.Object);
                 UScriptStruct* superField = static_cast<UScriptStruct*>(scriptStruct->SuperField);
-                uint32_t structCount = GCache::CountObject<UScriptStruct>(unrealObj.ValidName);
+                uint64_t structCount = GCache::CountObject<UScriptStruct>(unrealObj.ValidName);
 
                 if (superField && (superField != scriptStruct))
                 {
@@ -1657,7 +1657,7 @@ namespace StructGenerator
 
                     std::string fieldName = UnrealObject::CreateValidName(superField->GetName());
                     std::string fieldNameCPP = UnrealObject::CreateValidName(superField->GetNameCPP());
-                    uint32_t fieldStructCount = GCache::CountObject<UScriptStruct>(fieldName);
+                    uint64_t fieldStructCount = GCache::CountObject<UScriptStruct>(fieldName);
 
                     structStream << "// " << Printer::Hex(size, EWidthTypes::Size);
                     structStream << " (" << Printer::Hex(superField->PropertySize, EWidthTypes::Size);
@@ -2488,7 +2488,7 @@ namespace ClassGenerator
                     classStream << "\tstatic UFunction* FindFunction(const std::string& functionFullName);\n";
                 }
 
-                classStream << "};\n\n";
+                classStream << "};\n";
             }
             else
             {
@@ -3260,6 +3260,11 @@ namespace FunctionGenerator
 
                     functionStream << ");\n";
                 }
+            }
+
+            if (!classFunctions.empty())
+            {
+                stream << "\n";
             }
 
             stream << functionStream.str();

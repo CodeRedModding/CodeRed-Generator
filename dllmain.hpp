@@ -114,7 +114,7 @@ namespace std
 class GCache
 {
 private:
-	static inline std::map<std::pair<std::string, class UClass*>, uint32_t> m_objects;
+	static inline std::map<std::pair<std::string, class UClass*>, uint64_t> m_objects;
 	static inline std::map<class UObject*, std::vector<UnrealObject>> m_consts;
 	static inline std::map<class UObject*, std::vector<UnrealObject>> m_enums;
 	static inline std::map<class UObject*, std::vector<UnrealObject>> m_structs;
@@ -133,7 +133,7 @@ public:
 	static std::pair<std::string, class UObject*> GetConstant(const UnrealObject& unrealObj);
 	static UnrealObject GetLargestStruct(const std::string& structFullName);
 	static UnrealObject GetClass(const std::string& classFullName);
-	template<typename T> static uint32_t CountObject(const std::string& objectName)
+	template<typename T> static uint64_t CountObject(const std::string& objectName)
 	{
 		std::pair<std::string, class UClass*> objectPair{ objectName, T::StaticClass() };
 
