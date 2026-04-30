@@ -3039,22 +3039,36 @@ namespace FunctionGenerator
                     {
                         if (propertyPair.first.IsValid())
                         {
+                            std::string parameterName = propertyPair.second;
+
+                            if (propertyPair.first.IsOptionalParameter())
+                            {
+                                parameterName[0] = std::toupper(parameterName[0]);
+                                parameterName = ("optional" + parameterName);
+                            }
+
+                            if (propertyPair.first.IsOutParameter())
+                            {
+                                parameterName[0] = std::toupper(parameterName[0]);
+                                parameterName = ("out" + parameterName);
+                            }
+
                             if (propertyPair.first.ShouldMemcpy())
                             {
                                 if (propertyPair.first.IsAnArray())
                                 {
-                                    codeStream << "\n\tif (" << propertyPair.second << "_" << propertyPair.first.Property->ArrayDim << ")\n\t{\n\t";
+                                    codeStream << "\n\tif (" << parameterName << "_" << propertyPair.first.Property->ArrayDim << ")\n\t{\n\t";
                                 }
 
                                 codeStream << "\tmemcpy_s(&" << functionObj.ValidName << "_Params." << propertyPair.second << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << ")";
 
                                 if (propertyPair.first.IsAnArray())
                                 {
-                                    codeStream << ", " << propertyPair.second << "_" << propertyPair.first.Property->ArrayDim << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << "));\n";
+                                    codeStream << ", " << parameterName << "_" << propertyPair.first.Property->ArrayDim << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << "));\n";
                                 }
                                 else
                                 {
-                                    codeStream << ", &" << propertyPair.second << ", sizeof(" << propertyPair.second << "));\n";
+                                    codeStream << ", &" << parameterName << ", sizeof(" << parameterName << "));\n";
                                 }
 
                                 if (propertyPair.first.IsAnArray())
@@ -3064,11 +3078,11 @@ namespace FunctionGenerator
                             }
                             else if ((propertyPair.first.Type == EPropertyTypes::UInt8) && GConfig::UsingEnumClasses())
                             {
-                                codeStream << "\t" << functionObj.ValidName << "_Params." << propertyPair.second << " = static_cast<" << propertyPair.first.GetTypeForStruct() << ">(" << propertyPair.second << ");\n";
+                                codeStream << "\t" << functionObj.ValidName << "_Params." << propertyPair.second << " = static_cast<" << propertyPair.first.GetTypeForStruct() << ">(" << parameterName << ");\n";
                             }
                             else
                             {
-                                codeStream << "\t" << functionObj.ValidName << "_Params." << propertyPair.second << " = " << propertyPair.second << ";\n";
+                                codeStream << "\t" << functionObj.ValidName << "_Params." << propertyPair.second << " = " << parameterName << ";\n";
                             }
                         }
                     }
@@ -3113,16 +3127,30 @@ namespace FunctionGenerator
                         {
                             if (propertyPair.first.IsValid())
                             {
+                                std::string parameterName = propertyPair.second;
+
+                                if (propertyPair.first.IsOptionalParameter())
+                                {
+                                    parameterName[0] = std::toupper(parameterName[0]);
+                                    parameterName = ("optional" + parameterName);
+                                }
+
+                                if (propertyPair.first.IsOutParameter())
+                                {
+                                    parameterName[0] = std::toupper(parameterName[0]);
+                                    parameterName = ("out" + parameterName);
+                                }
+
                                 if (propertyPair.first.ShouldMemcpy())
                                 {
                                     if (propertyPair.first.IsAnArray())
                                     {
-                                        codeStream << "\tif (" << propertyPair.second << "_" << propertyPair.first.Property->ArrayDim << ")\n\t{\n\t\t";
-                                        codeStream << "memcpy_s(" << propertyPair.second << "_" << propertyPair.first.Property->ArrayDim << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << ")";
+                                        codeStream << "\tif (" << parameterName << "_" << propertyPair.first.Property->ArrayDim << ")\n\t{\n\t\t";
+                                        codeStream << "memcpy_s(" << parameterName << "_" << propertyPair.first.Property->ArrayDim << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << ")";
                                     }
                                     else
                                     {
-                                        codeStream << "\tmemcpy_s(&" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
+                                        codeStream << "\tmemcpy_s(&" << parameterName << ", sizeof(" << parameterName << ")";
                                     }
 
                                     codeStream << ", &" << functionObj.ValidName << "_Params." << propertyPair.second << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << "));\n";
@@ -3134,11 +3162,11 @@ namespace FunctionGenerator
                                 }
                                 else if ((propertyPair.first.Type == EPropertyTypes::UInt8) && GConfig::UsingEnumClasses())
                                 {
-                                    codeStream << "\t" << propertyPair.second << " = static_cast<" << propertyPair.first.GetTypeForClass() << ">(" << propertyPair.second << ");\n";
+                                    codeStream << "\t" << parameterName << " = static_cast<" << propertyPair.first.GetTypeForClass() << ">(" << parameterName << ");\n";
                                 }
                                 else
                                 {
-                                    codeStream << "\t" << propertyPair.second << " = " << functionObj.ValidName << "_Params." << propertyPair.second << ";\n";
+                                    codeStream << "\t" << parameterName << " = " << functionObj.ValidName << "_Params." << propertyPair.second << ";\n";
                                 }
                             }
                         }
