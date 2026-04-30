@@ -340,14 +340,11 @@ bool UnrealProperty::CantConst() const
     return false;
 }
 
-// This is a known bug that still needs to be fixed, out parameters that are arrays cannot be referenced so I've just...disabled that for now.
-// Possible solutions involve wrapping them their own struct, using std::array, or just changing it from an array or a pointer and trusting the user gives the right size.
-
 bool UnrealProperty::CantReference() const
 {
     if (IsValid())
     {
-        return IsAnArray(); // Temp disabled.
+        return IsAnArray();
     }
 
     return false;
@@ -376,6 +373,10 @@ size_t UnrealProperty::GetSize() const
         if (Type == EPropertyTypes::Int32)
         {
             return sizeof(int32_t);
+        }
+        else if (Type == EPropertyTypes::Int64)
+        {
+            return sizeof(int64_t);
         }
         else if (Type == EPropertyTypes::UInt8)
         {
@@ -451,6 +452,10 @@ std::string UnrealProperty::GetType(bool bIgnoreEnum, bool bFunctionParam, bool 
         if (Type == EPropertyTypes::Int32)
         {
             typeStr = "int32_t";
+        }
+        else if (Type == EPropertyTypes::Int64)
+        {
+            typeStr = "int64_t";
         }
         else if (Type == EPropertyTypes::UInt8)
         {
@@ -650,6 +655,10 @@ void UnrealProperty::AssignType()
         else if (Property->IsA<UQWordProperty>())
         {
             Type = EPropertyTypes::UInt64;
+        }
+        else if (Property->IsA<USQWordProperty>())
+        {
+            Type = EPropertyTypes::Int64;
         }
         else if (Property->IsA<UObjectProperty>())
         {
@@ -2635,7 +2644,7 @@ namespace ParameterGenerator
                         parameterStream << "\t";
                         int32_t spacingSub = 0;
 
-                        if (!unrealProp.IsParameter()) // Properties that arent parameters are usually used in some way in the function related to unreal script.
+                        if (!unrealProp.IsParameter()) // Properties that aren't parameters are usually related to unreal script.
                         {
                             parameterStream << "// ";
                             spacingSub = 3;
@@ -2919,9 +2928,26 @@ namespace FunctionGenerator
                                 codeStream << ", ";
                             }
 
-                            codeStream << propertyPair.first.GetTypeForParameter() << " " << propertyPair.second;
+                            codeStream << propertyPair.first.GetTypeForParameter() << " ";
+                            std::string parameterName = propertyPair.second;
 
-                            if (propertyPair.first.IsAnArray())
+                            if (propertyPair.first.IsOptionalParameter())
+                            {
+                                std::string parameterName = propertyPair.second;
+                                parameterName[0] = std::toupper(parameterName[0]);
+                                parameterName = ("optional" + parameterName);
+                            }
+
+                            if (propertyPair.first.IsOutParameter())
+                            {
+                                std::string parameterName = propertyPair.second;
+                                parameterName[0] = std::toupper(parameterName[0]);
+                                parameterName = ("out" + parameterName);
+                            }
+
+                            codeStream << parameterName;
+
+                            if (propertyPair.first.IsAnArray() && !propertyPair.first.IsOutParameter())
                             {
                                 codeStream << "[" << propertyPair.first.Property->ArrayDim << "]";
                             }
@@ -2939,7 +2965,31 @@ namespace FunctionGenerator
                                 codeStream << ", ";
                             }
 
-                            codeStream << propertyPair.first.GetTypeForParameter(true) << "& " << propertyPair.second;
+                            std::string parameterName = propertyPair.second;
+
+                            if (propertyPair.first.IsOptionalParameter())
+                            {
+                                std::string parameterName = propertyPair.second;
+                                parameterName[0] = std::toupper(parameterName[0]);
+                                parameterName = ("optional" + parameterName);
+                            }
+
+                            if (propertyPair.first.IsOutParameter())
+                            {
+                                std::string parameterName = propertyPair.second;
+                                parameterName[0] = std::toupper(parameterName[0]);
+                                parameterName = ("out" + parameterName);
+                            }
+
+                            if (propertyPair.first.IsAnArray())
+                            {
+                                codeStream << propertyPair.first.GetTypeForParameter(true) << "* " << parameterName << "_" << propertyPair.first.Property->ArrayDim;
+                            }
+                            else
+                            {
+                                codeStream << propertyPair.first.GetTypeForParameter(true) << "& " << parameterName;
+                            }
+
                             printComma = true;
                         }
                     }
@@ -2976,20 +3026,7 @@ namespace FunctionGenerator
                             if (propertyPair.first.ShouldMemcpy())
                             {
                                 codeStream << "\tmemcpy_s(&" << functionObj.ValidName << "_Params." << propertyPair.second << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << ")";
-
-                                //if (propertyPair.first.IsAnArray())
-                                //{
-                                //    codeStream << " * " << propertyPair.first.Property->ArrayDim;
-                                //}
-
-                                codeStream << ", &" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
-
-                                //if (propertyPair.first.IsAnArray())
-                                //{
-                                //    codeStream << " * " << propertyPair.first.Property->ArrayDim;
-                                //}
-
-                                codeStream << ");\n";
+                                codeStream << ", &" << propertyPair.second << ", sizeof(" << propertyPair.second << "));\n";
                             }
                             else if ((propertyPair.first.Type == EPropertyTypes::UInt8) && GConfig::UsingEnumClasses())
                             {
@@ -3008,21 +3045,26 @@ namespace FunctionGenerator
                         {
                             if (propertyPair.first.ShouldMemcpy())
                             {
+                                if (propertyPair.first.IsAnArray())
+                                {
+                                    codeStream << "\n\tif (" << propertyPair.second << "_" << propertyPair.first.Property->ArrayDim << ")\n\t{\n\t";
+                                }
+
                                 codeStream << "\tmemcpy_s(&" << functionObj.ValidName << "_Params." << propertyPair.second << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << ")";
 
-                                //if (propertyPair.first.IsAnArray())
-                                //{
-                                //      codeStream << " * " << propertyPair.first.Property->ArrayDim;
-                                //}
+                                if (propertyPair.first.IsAnArray())
+                                {
+                                    codeStream << ", " << propertyPair.second << "_" << propertyPair.first.Property->ArrayDim << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << "));\n";
+                                }
+                                else
+                                {
+                                    codeStream << ", &" << propertyPair.second << ", sizeof(" << propertyPair.second << "));\n";
+                                }
 
-                                codeStream << ", &" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
-
-                                //if (propertyPair.first.IsAnArray())
-                                //{
-                                //      codeStream << " * " << propertyPair.first.Property->ArrayDim;
-                                //}
-
-                                codeStream << ");\n";
+                                if (propertyPair.first.IsAnArray())
+                                {
+                                    codeStream << "\t}\n";
+                                }
                             }
                             else if ((propertyPair.first.Type == EPropertyTypes::UInt8) && GConfig::UsingEnumClasses())
                             {
@@ -3077,21 +3119,22 @@ namespace FunctionGenerator
                             {
                                 if (propertyPair.first.ShouldMemcpy())
                                 {
-                                    codeStream << "\tmemcpy_s(&" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
+                                    if (propertyPair.first.IsAnArray())
+                                    {
+                                        codeStream << "\tif (" << propertyPair.second << "_" << propertyPair.first.Property->ArrayDim << ")\n\t{\n\t\t";
+                                        codeStream << "memcpy_s(" << propertyPair.second << "_" << propertyPair.first.Property->ArrayDim << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << ")";
+                                    }
+                                    else
+                                    {
+                                        codeStream << "\tmemcpy_s(&" << propertyPair.second << ", sizeof(" << propertyPair.second << ")";
+                                    }
 
-                                    //if (propertyPair.first.IsAnArray())
-                                    //{
-                                    //     codeStream << " * " << propertyPair.first.Property->ArrayDim;
-                                    //}
+                                    codeStream << ", &" << functionObj.ValidName << "_Params." << propertyPair.second << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << "));\n";
 
-                                    codeStream << ", &" << functionObj.ValidName << "_Params." << propertyPair.second << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << ")";
-
-                                    //if (propertyPair.first.IsAnArray())
-                                    //{
-                                    //    codeStream << " * " << propertyPair.first.Property->ArrayDim;
-                                    //}
-
-                                    codeStream << ");\n";
+                                    if (propertyPair.first.IsAnArray())
+                                    {
+                                        codeStream << "\t}\n";
+                                    }
                                 }
                                 else if ((propertyPair.first.Type == EPropertyTypes::UInt8) && GConfig::UsingEnumClasses())
                                 {
@@ -3182,19 +3225,18 @@ namespace FunctionGenerator
                             else if (unrealProp.IsOutParameter())
                             {
                                 propertyNameUnique[0] = std::toupper(propertyNameUnique[0]);
-                                outParams.push_back({ unrealProp, ("out" + propertyNameUnique) });
+                                propertyNameUnique = ("out" + propertyNameUnique);
+                                outParams.push_back({ unrealProp, propertyNameUnique });
                             }
                             else if (unrealProp.IsParameter())
                             {
                                 if (unrealProp.IsOptionalParameter())
                                 {
                                     propertyNameUnique[0] = std::toupper(propertyNameUnique[0]);
-                                    funcParams.push_back({ unrealProp, ("optional" + propertyNameUnique) });
+                                    propertyNameUnique = ("optional" + propertyNameUnique);
                                 }
-                                else
-                                {
-                                    funcParams.push_back({ unrealProp, propertyNameUnique });
-                                }
+
+                                funcParams.push_back({ unrealProp, propertyNameUnique });
                             }
                         }
                     }
@@ -3235,7 +3277,7 @@ namespace FunctionGenerator
 
                             functionStream << propertyPair.first.GetTypeForParameter() << " " << propertyPair.second;
 
-                            if (propertyPair.first.IsAnArray())
+                            if (propertyPair.first.IsAnArray() && !propertyPair.first.IsOutParameter())
                             {
                                 functionStream << "[" << propertyPair.first.Property->ArrayDim << "]";
                             }
@@ -3253,7 +3295,15 @@ namespace FunctionGenerator
                                 functionStream << ", ";
                             }
 
-                            functionStream << propertyPair.first.GetTypeForParameter() << "& " << propertyPair.second;
+                            if (propertyPair.first.IsAnArray())
+                            {
+                                functionStream << propertyPair.first.GetTypeForParameter() << "* " << propertyPair.second << "_" << propertyPair.first.Property->ArrayDim;
+                            }
+                            else
+                            {
+                                functionStream << propertyPair.first.GetTypeForParameter() << "& " << propertyPair.second;
+                            }
+
                             printComma = true;
                         }
                     }

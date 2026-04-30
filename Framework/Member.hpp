@@ -70,6 +70,7 @@ enum class EPropertyTypes : uint8_t
 {
 	Unknown,
 	Int32,
+	Int64,
 	UInt8,
 	UInt32,
 	UInt64,
