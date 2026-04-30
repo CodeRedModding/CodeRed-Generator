@@ -2933,14 +2933,12 @@ namespace FunctionGenerator
 
                             if (propertyPair.first.IsOptionalParameter())
                             {
-                                std::string parameterName = propertyPair.second;
                                 parameterName[0] = std::toupper(parameterName[0]);
                                 parameterName = ("optional" + parameterName);
                             }
 
                             if (propertyPair.first.IsOutParameter())
                             {
-                                std::string parameterName = propertyPair.second;
                                 parameterName[0] = std::toupper(parameterName[0]);
                                 parameterName = ("out" + parameterName);
                             }
@@ -2969,14 +2967,12 @@ namespace FunctionGenerator
 
                             if (propertyPair.first.IsOptionalParameter())
                             {
-                                std::string parameterName = propertyPair.second;
                                 parameterName[0] = std::toupper(parameterName[0]);
                                 parameterName = ("optional" + parameterName);
                             }
 
                             if (propertyPair.first.IsOutParameter())
                             {
-                                std::string parameterName = propertyPair.second;
                                 parameterName[0] = std::toupper(parameterName[0]);
                                 parameterName = ("out" + parameterName);
                             }
