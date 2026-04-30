@@ -48,7 +48,7 @@ Once all your classes are filled out and you've made the necessary changes in `C
 ## Changelog
 
 ### v1.1.9
-- Added support for "USQWordProperty which is just a "int64_t, this is present in modern builds of Rocket League.
+- Added support for "USQWordProperty"'s which just are "int64_t"'s, this is present in modern builds of Rocket League.
 - Fixed issues with c-style arrays that were also out parameters, they are now array pointers and the size of them is included in their names. For example a byte array with 10 elements generated "uint8_t& outArray" which is incorrect, now they generate as "uint8_t* outArray_10".
 - Fixed optional function parameters only having "optional" in their name in their header files, and not in their source files.
 
