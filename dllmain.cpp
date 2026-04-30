@@ -3019,18 +3019,32 @@ namespace FunctionGenerator
                     {
                         if (propertyPair.first.IsValid())
                         {
+                            std::string parameterName = propertyPair.second;
+
+                            if (propertyPair.first.IsOptionalParameter())
+                            {
+                                parameterName[0] = std::toupper(parameterName[0]);
+                                parameterName = ("optional" + parameterName);
+                            }
+
+                            if (propertyPair.first.IsOutParameter())
+                            {
+                                parameterName[0] = std::toupper(parameterName[0]);
+                                parameterName = ("out" + parameterName);
+                            }
+
                             if (propertyPair.first.ShouldMemcpy())
                             {
                                 codeStream << "\tmemcpy_s(&" << functionObj.ValidName << "_Params." << propertyPair.second << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << ")";
-                                codeStream << ", &" << propertyPair.second << ", sizeof(" << propertyPair.second << "));\n";
+                                codeStream << ", &" << parameterName << ", sizeof(" << parameterName << "));\n";
                             }
                             else if ((propertyPair.first.Type == EPropertyTypes::UInt8) && GConfig::UsingEnumClasses())
                             {
-                                codeStream << "\t" << functionObj.ValidName << "_Params." << propertyPair.second << " = static_cast<" << propertyPair.first.GetTypeForStruct() << ">(" << propertyPair.second << ");\n";
+                                codeStream << "\t" << functionObj.ValidName << "_Params." << propertyPair.second << " = static_cast<" << propertyPair.first.GetTypeForStruct() << ">(" << parameterName << ");\n";
                             }
                             else
                             {
-                                codeStream << "\t" << functionObj.ValidName << "_Params." << propertyPair.second << " = " << propertyPair.second << ";\n";
+                                codeStream << "\t" << functionObj.ValidName << "_Params." << propertyPair.second << " = " << parameterName << ";\n";
                             }
                         }
                     }
