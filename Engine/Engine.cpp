@@ -8,7 +8,7 @@
 
 std::string GEngine::m_name = "CodeRedGenerator";
 
-std::string GEngine::m_version = "v1.1.9";
+std::string GEngine::m_version = "v1.2.0";
 
 std::string GEngine::m_credits = "ItsBranK, TheFeckless";
 

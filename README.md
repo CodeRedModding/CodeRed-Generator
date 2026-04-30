@@ -1,4 +1,4 @@
-## CodeRed Generator (v1.1.9)
+## CodeRed Generator (v1.2.0)
 
 This is a C++20 Unreal Engine 3 SDK generator that was originally based off the source of [TheFeckless's UE3 SDK Generator](https://www.unknowncheats.me/forum/unreal-engine-3-a/71911-thefeckless-ue3-sdk-generator.html). It has since grown into its own project which utilizes C++20, strings, filesystem paths, and modern file streams; along with converting legacy UE3 features to more modern and user friendly ones while still being compatible with UE3.
 
@@ -46,6 +46,13 @@ Any class/struct member outside of whats in the `EMemberTypes` does NOT need to 
 Once all your classes are filled out and you've made the necessary changes in `Configuration.cpp`, double check you didn't forget to set an out path in `Configuration.cpp` and have the right files included in `Engine.hpp`. After that just compile as a DLL and manually inject into your game, generation will start automatically and will prompt you when it is completed.
 
 ## Changelog
+
+### v1.2.0
+- Added two new functions "UnrealProperty::GetCustomName" and "UnrealProperty::MakeCustomName", which is used by the function parameter and code generators, this is to have a centralized place to modify how the generator makes custom parameter names. For example out parameters have "out" added before its actual name, same with "optional", which is done by the generator and not unreal engine.
+- Added a "std::isprint" check in the "UnrealObject::ValidateName" function, in addition to using "std::find" to looking through "m_unsafeChars" instead of manually looping.
+- Changed the "UnrealObject::AssignName" function to look for window macro names as the very first position, instead of anywhere like I was doing with "std::string::npos". It also now adds "Win" instead of just a "W" at the end of the function, which may result in build errors due to the name change if you are calling the old function name.
+- Fixed parameter names ignoring the unique property name created for them in the function source file, which could have resulted in a redefinition error when building your sdk.
+- Removed some unnecessary includes from the "Member.hpp" file.
 
 ### v1.1.9
 - Added support for "USQWordProperty"'s which are "int64_t"'s, this is present in modern builds of Rocket League.

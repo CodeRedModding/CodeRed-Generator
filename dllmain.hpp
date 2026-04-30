@@ -75,6 +75,8 @@ public:
 	std::string GetTypeForClass() const;
 	std::string GetTypeForStruct() const;
 	std::string GetTypeForParameter(bool bIgnoreConst = false) const;
+	std::string GetCustomName() const;
+	std::string MakeCustomName(std::string validName) const;
 
 private:
 	void Assign(class UProperty* uProperty);

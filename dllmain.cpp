@@ -35,7 +35,9 @@ std::vector<char> UnrealObject::m_unsafeChars = {
     '?'
 };
 
-// These are functions that share the same names as macros, which will result in errors in the final sdk due to conflicting names.
+// These are functions that share the same names as windows macros, which will result in errors in the final sdk due to conflicting names.
+// Feel free to add your own here if you notice your sdk functions conflicting with macros, these are all the ones I've found personally.
+
 std::vector<std::string> UnrealObject::m_unsafeNames = {
     "GetComputerName",
     "GetCurrentTime",
@@ -85,21 +87,19 @@ void UnrealObject::ValidateName(std::string& name)
 {
     if (!name.empty())
     {
-        for (char& a : name)
-        {
-            for (char b : m_unsafeChars)
-            {
-                if (a == b)
-                {
-                    a = '_';
-                    break;
-                }
-            }
-        }
-
-        if (name == "_") // This is common for auto generated lambda functions which can be really annoying.
+        if (name == "_") // I've seen this happen before with auto generated lambda functions which can be really annoying.
         {
             name = "instance";
+        }
+        else
+        {
+            for (char& a : name)
+            {
+                if (!std::isprint(a) || (std::find(m_unsafeChars.begin(), m_unsafeChars.end(), a) != m_unsafeChars.end()))
+                {
+                    a = '_';
+                }
+            }
         }
     }
 }
@@ -192,9 +192,9 @@ void UnrealObject::AssignName()
         {
             for (const std::string& name : m_unsafeNames)
             {
-                if (ValidName.find(name) != std::string::npos)
+                if (ValidName.find(name) == 0)
                 {
-                    ValidName += "W";
+                    ValidName += "Win";
                     break;
                 }
             }
@@ -622,6 +622,33 @@ std::string UnrealProperty::GetTypeForStruct() const
 std::string UnrealProperty::GetTypeForParameter(bool bIgnoreConst) const
 {
     return GetType(false, true, bIgnoreConst);
+}
+
+std::string UnrealProperty::GetCustomName() const
+{
+    return MakeCustomName(ValidName);
+}
+
+std::string UnrealProperty::MakeCustomName(std::string validName) const
+{
+    if (!validName.empty())
+    {
+        // Not sure if its possible for there to be an optional out parameter at the same time, but lets check for both anyway.
+
+        if (IsOutParameter())
+        {
+            validName[0] = std::toupper(validName[0]);
+            validName = ("out" + validName);
+        }
+
+        if (IsOptionalParameter())
+        {
+            validName[0] = std::toupper(validName[0]);
+            validName = ("optional" + validName);
+        }
+    }
+
+    return validName;
 }
 
 void UnrealProperty::Assign(class UProperty* uProperty)
@@ -1761,7 +1788,7 @@ namespace StructGenerator
                         }
                         else
                         {
-                            propertyStream << unrealProp.ValidName << Printer::Decimal(propertyNameMap[unrealProp.ValidName], EWidthTypes::Byte);
+                            propertyStream << unrealProp.ValidName << Printer::Decimal(propertyNameMap.at(unrealProp.ValidName), EWidthTypes::Byte);
                             propertyNameMap[unrealProp.ValidName]++;
                         }
 
@@ -2274,7 +2301,7 @@ namespace ClassGenerator
                             }
                             else
                             {
-                                propertyStream << unrealProp.ValidName << Printer::Decimal(propertyNameMap[unrealProp.ValidName], EWidthTypes::Byte);
+                                propertyStream << unrealProp.ValidName << Printer::Decimal(propertyNameMap.at(unrealProp.ValidName), EWidthTypes::Byte);
                                 propertyNameMap[unrealProp.ValidName]++;
                             }
 
@@ -2617,7 +2644,7 @@ namespace ParameterGenerator
                         }
                         else
                         {
-                            propertyStream << unrealProp.ValidName << Printer::Decimal(propertyNameMap[unrealProp.ValidName], EWidthTypes::Byte);
+                            propertyStream << unrealProp.ValidName << Printer::Decimal(propertyNameMap.at(unrealProp.ValidName), EWidthTypes::Byte);
                             propertyNameMap[unrealProp.ValidName]++;
                         }
 
@@ -2834,7 +2861,7 @@ namespace FunctionGenerator
                             }
                             else
                             {
-                                functionStream << unrealProp.ValidName << Printer::Decimal(propertyNameMap[unrealProp.ValidName], EWidthTypes::Byte);
+                                functionStream << unrealProp.ValidName << Printer::Decimal(propertyNameMap.at(unrealProp.ValidName), EWidthTypes::Byte);
                                 propertyNameUnique = functionStream.str();
                                 Printer::Empty(functionStream);
                                 propertyNameMap[unrealProp.ValidName]++;
@@ -2928,22 +2955,7 @@ namespace FunctionGenerator
                                 codeStream << ", ";
                             }
 
-                            codeStream << propertyPair.first.GetTypeForParameter() << " ";
-                            std::string parameterName = propertyPair.second;
-
-                            if (propertyPair.first.IsOptionalParameter())
-                            {
-                                parameterName[0] = std::toupper(parameterName[0]);
-                                parameterName = ("optional" + parameterName);
-                            }
-
-                            if (propertyPair.first.IsOutParameter())
-                            {
-                                parameterName[0] = std::toupper(parameterName[0]);
-                                parameterName = ("out" + parameterName);
-                            }
-
-                            codeStream << parameterName;
+                            codeStream << propertyPair.first.GetTypeForParameter() << " " << propertyPair.first.MakeCustomName(propertyPair.second);
 
                             if (propertyPair.first.IsAnArray() && !propertyPair.first.IsOutParameter())
                             {
@@ -2963,27 +2975,13 @@ namespace FunctionGenerator
                                 codeStream << ", ";
                             }
 
-                            std::string parameterName = propertyPair.second;
-
-                            if (propertyPair.first.IsOptionalParameter())
-                            {
-                                parameterName[0] = std::toupper(parameterName[0]);
-                                parameterName = ("optional" + parameterName);
-                            }
-
-                            if (propertyPair.first.IsOutParameter())
-                            {
-                                parameterName[0] = std::toupper(parameterName[0]);
-                                parameterName = ("out" + parameterName);
-                            }
-
                             if (propertyPair.first.IsAnArray())
                             {
-                                codeStream << propertyPair.first.GetTypeForParameter(true) << "* " << parameterName << "_" << propertyPair.first.Property->ArrayDim;
+                                codeStream << propertyPair.first.GetTypeForParameter(true) << "* " << propertyPair.first.MakeCustomName(propertyPair.second) << "_" << propertyPair.first.Property->ArrayDim;
                             }
                             else
                             {
-                                codeStream << propertyPair.first.GetTypeForParameter(true) << "& " << parameterName;
+                                codeStream << propertyPair.first.GetTypeForParameter(true) << "& " << propertyPair.first.MakeCustomName(propertyPair.second);
                             }
 
                             printComma = true;
@@ -3019,19 +3017,7 @@ namespace FunctionGenerator
                     {
                         if (propertyPair.first.IsValid())
                         {
-                            std::string parameterName = propertyPair.second;
-
-                            if (propertyPair.first.IsOptionalParameter())
-                            {
-                                parameterName[0] = std::toupper(parameterName[0]);
-                                parameterName = ("optional" + parameterName);
-                            }
-
-                            if (propertyPair.first.IsOutParameter())
-                            {
-                                parameterName[0] = std::toupper(parameterName[0]);
-                                parameterName = ("out" + parameterName);
-                            }
+                            std::string parameterName = propertyPair.first.MakeCustomName(propertyPair.second);
 
                             if (propertyPair.first.ShouldMemcpy())
                             {
@@ -3053,19 +3039,7 @@ namespace FunctionGenerator
                     {
                         if (propertyPair.first.IsValid())
                         {
-                            std::string parameterName = propertyPair.second;
-
-                            if (propertyPair.first.IsOptionalParameter())
-                            {
-                                parameterName[0] = std::toupper(parameterName[0]);
-                                parameterName = ("optional" + parameterName);
-                            }
-
-                            if (propertyPair.first.IsOutParameter())
-                            {
-                                parameterName[0] = std::toupper(parameterName[0]);
-                                parameterName = ("out" + parameterName);
-                            }
+                            std::string parameterName = propertyPair.first.MakeCustomName(propertyPair.second);
 
                             if (propertyPair.first.ShouldMemcpy())
                             {
@@ -3141,19 +3115,7 @@ namespace FunctionGenerator
                         {
                             if (propertyPair.first.IsValid())
                             {
-                                std::string parameterName = propertyPair.second;
-
-                                if (propertyPair.first.IsOptionalParameter())
-                                {
-                                    parameterName[0] = std::toupper(parameterName[0]);
-                                    parameterName = ("optional" + parameterName);
-                                }
-
-                                if (propertyPair.first.IsOutParameter())
-                                {
-                                    parameterName[0] = std::toupper(parameterName[0]);
-                                    parameterName = ("out" + parameterName);
-                                }
+                                std::string parameterName = propertyPair.first.MakeCustomName(propertyPair.second);
 
                                 if (propertyPair.first.ShouldMemcpy())
                                 {
@@ -3250,7 +3212,7 @@ namespace FunctionGenerator
                             }
                             else
                             {
-                                propertyStream << unrealProp.ValidName << Printer::Decimal(propertyNameMap[unrealProp.ValidName], EWidthTypes::Byte);
+                                propertyStream << unrealProp.ValidName << Printer::Decimal(propertyNameMap.at(unrealProp.ValidName), EWidthTypes::Byte);
                                 propertyNameUnique = propertyStream.str();
                                 Printer::Empty(propertyStream);
                                 propertyNameMap[unrealProp.ValidName]++;
@@ -3258,23 +3220,15 @@ namespace FunctionGenerator
 
                             if (unrealProp.IsReturnParameter())
                             {
-                                returnParam = { unrealProp, propertyNameUnique };
+                                returnParam = { unrealProp, unrealProp.MakeCustomName(propertyNameUnique) };
                             }
                             else if (unrealProp.IsOutParameter())
                             {
-                                propertyNameUnique[0] = std::toupper(propertyNameUnique[0]);
-                                propertyNameUnique = ("out" + propertyNameUnique);
-                                outParams.push_back({ unrealProp, propertyNameUnique });
+                                outParams.push_back({ unrealProp, unrealProp.MakeCustomName(propertyNameUnique) });
                             }
                             else if (unrealProp.IsParameter())
                             {
-                                if (unrealProp.IsOptionalParameter())
-                                {
-                                    propertyNameUnique[0] = std::toupper(propertyNameUnique[0]);
-                                    propertyNameUnique = ("optional" + propertyNameUnique);
-                                }
-
-                                funcParams.push_back({ unrealProp, propertyNameUnique });
+                                funcParams.push_back({ unrealProp, unrealProp.MakeCustomName(propertyNameUnique) });
                             }
                         }
                     }
