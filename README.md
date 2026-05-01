@@ -50,7 +50,7 @@ Once all your classes are filled out and you've made the necessary changes in `C
 ### v1.2.0
 - Added two new functions "UnrealProperty::GetCustomName" and "UnrealProperty::MakeCustomName", which is used by the function parameter and code generators, this is to have a centralized place to modify how the generator makes custom parameter names. For example out parameters have "out" added before its actual name, same with "optional", which is done by the generator and not unreal engine.
 - Added a "std::isprint" check in the "UnrealObject::ValidateName" function, in addition to using "std::find" to looking through "m_unsafeChars" instead of manually looping.
-- Changed the "UnrealObject::AssignName" function to look for window macro names as the very first position, instead of anywhere like I was doing with "std::string::npos". It also now adds "Win" instead of just a "W" at the end of the function, which may result in build errors due to the name change if you are calling the old function name.
+- Changed the "UnrealObject::AssignName" function to look for window macro names at the very first position, instead of anywhere like I was doing with "std::string::npos". It also now adds "Win" instead of just a "W" at the end of the function, which may result in build errors due to the name change if you are calling the old function name.
 - Fixed parameter names ignoring the unique property name created for them in the function source file, which could have resulted in a redefinition error when building your sdk.
 - Removed some unnecessary includes from the "Member.hpp" file.
 
