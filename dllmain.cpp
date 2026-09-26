@@ -3036,7 +3036,7 @@ namespace FunctionGenerator
 
 					if (GConfig::UsingConstants())
 					{
-						codeStream << "\t\tuFn" << functionObj.ValidName << " = reinterpret_cast<UFunction*>(UObject::GObjObjects()->at(" << GCache::GetConstant(unrealObj).first << "));\n";
+						codeStream << "\t\tuFn" << functionObj.ValidName << " = reinterpret_cast<UFunction*>(UObject::GObjObjects()->at(" << GCache::GetConstant(functionObj).first << "));\n";
 					}
 					else
 					{
