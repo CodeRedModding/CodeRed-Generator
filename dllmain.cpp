@@ -3054,6 +3054,19 @@ namespace FunctionGenerator
 
 					codeStream << functionObj.ValidName << "_Params " << functionObj.ValidName << "_Params;\n";
 					codeStream << "\tmemset(&" << functionObj.ValidName << "_Params, 0, sizeof(" << functionObj.ValidName << "_Params));\n";
+					codeStream << "\tif (!uFn" << functionObj.ValidName << ")\n";
+					codeStream << "\t{\n";
+
+					if (returnParam.first.IsValid())
+					{
+						codeStream << "\t\treturn {};\n";
+					}
+					else
+					{
+						codeStream << "\t\treturn;\n";
+					}
+
+					codeStream << "\t}\n\n";
 
 					for (const auto& propertyPair : propertyParams)
 					{
