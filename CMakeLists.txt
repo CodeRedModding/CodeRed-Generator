@@ -14,6 +14,22 @@ configure_file(
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# ".clangd" reads the compile database from "build/", while every preset builds into a
+# subfolder of it. Link the stable path at whichever preset configured last, so clangd
+# follows the active one. Visual Studio generators write no database, so they are skipped.
+if(CMAKE_GENERATOR MATCHES "Ninja|Makefiles"
+   AND CMAKE_BINARY_DIR MATCHES "^${CMAKE_SOURCE_DIR}/build/.")
+    file(CREATE_LINK
+        "${CMAKE_BINARY_DIR}/compile_commands.json"
+        "${CMAKE_SOURCE_DIR}/build/compile_commands.json"
+        SYMBOLIC
+        RESULT CODERED_LINK_RESULT
+    )
+    if(NOT CODERED_LINK_RESULT EQUAL 0)
+        message(WARNING "Could not link build/compile_commands.json: ${CODERED_LINK_RESULT}")
+    endif()
+endif()
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
