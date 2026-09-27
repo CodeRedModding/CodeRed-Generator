@@ -3077,7 +3077,15 @@ namespace FunctionGenerator
 							if (propertyPair.first.ShouldMemcpy())
 							{
 								codeStream << "\tmemcpy_s(&" << functionObj.ValidName << "_Params." << propertyPair.second << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << ")";
-								codeStream << ", &" << parameterName << ", sizeof(" << parameterName << "));\n";
+
+								if (propertyPair.first.IsAnArray())
+								{
+									codeStream << ", " << parameterName << ", sizeof(" << functionObj.ValidName << "_Params." << propertyPair.second << "));\n";
+								}
+								else
+								{
+									codeStream << ", &" << parameterName << ", sizeof(" << parameterName << "));\n";
+								}
 							}
 							else if ((propertyPair.first.Type == EPropertyTypes::UInt8) && GConfig::UsingEnumClasses())
 							{
