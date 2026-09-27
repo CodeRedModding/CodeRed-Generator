@@ -125,6 +125,7 @@ enum EPropertyFlags : uint64_t
 	CPF_DuplicateTransient = 0x0000000000200000, // Property should always be reset to the default value during any type of duplication (copy/paste, binary duplication, etc.).
 	CPF_NeedCtorLink = 0x0000000000400000,       // Fields need construction/destruction.
 	CPF_NoExport = 0x0000000000800000,           // Property should not be exported to the native class header file.
+	CPF_NoImport = 0x0000000001000000,           // Property should not be imported when creating an object from text (copy/paste).
 	CPF_NoClear = 0x0000000002000000,            // Hide clear (and browse) button.
 	CPF_EditInline = 0x0000000004000000,         // Edit this object reference inline.
 	CPF_EditInlineUse = 0x0000000010000000,      // EditInline with Use button.
