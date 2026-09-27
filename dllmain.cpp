@@ -3130,11 +3130,11 @@ namespace FunctionGenerator
 						}
 					}
 
-					bool hasNativeIndex = (uFunction->iNative ? true : false);
 					bool hasNativeFlags = (uFunction->FunctionFlags & EFunctionFlags::FUNC_Native);
 
-					if (hasNativeFlags && hasNativeIndex && GConfig::RemoveNativeIndex())
+					if (hasNativeFlags && GConfig::RemoveNativeIndex())
 					{
+						codeStream << "\n\tauto native_" << functionObj.ValidName << " = uFn" << functionObj.ValidName << "->iNative;";
 						codeStream << "\n\tuFn" << functionObj.ValidName << "->iNative = 0;";
 					}
 
@@ -3157,9 +3157,9 @@ namespace FunctionGenerator
 						codeStream << "\tuFn" << functionObj.ValidName << "->FunctionFlags |= " << Printer::Hex(EFunctionFlags::FUNC_Native) << ";\n";
 					}
 
-					if (hasNativeFlags && hasNativeIndex && GConfig::RemoveNativeIndex())
+					if (hasNativeFlags && GConfig::RemoveNativeIndex())
 					{
-						codeStream << "\tuFn" << functionObj.ValidName << "->iNative = " << uFunction->iNative << ";\n";
+						codeStream << "\tuFn" << functionObj.ValidName << "->iNative = native_" << functionObj.ValidName << ";\n";
 					}
 
 					if (!propertyOutParams.empty())
