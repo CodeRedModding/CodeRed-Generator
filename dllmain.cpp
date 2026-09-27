@@ -1146,45 +1146,50 @@ namespace Utils
 
 namespace Retrievers
 {
+#define CRG_EFLAG(rawFlags, enumFlags, flag)      \
+	if (rawFlags & enumFlags::flag)               \
+	{                                             \
+		stream << (first ? "(" : " | ") << #flag; \
+		first = false;                            \
+	}
+
 	void GetAllFunctionFlags(std::ostringstream& stream, uint64_t functionFlags)
 	{
 		bool first = true;
 
-		// clang-format off
-		if (functionFlags & EFunctionFlags::FUNC_Final) { stream << (first ? "(" : " | ") << "FUNC_Final";						                first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Defined) { stream << (first ? "(" : " | ") << "FUNC_Defined";						            first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Iterator) { stream << (first ? "(" : " | ") << "FUNC_Iterator";						        first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Latent) { stream << (first ? "(" : " | ") << "FUNC_Latent";						            first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_PreOperator) { stream << (first ? "(" : " | ") << "FUNC_PreOperator";						    first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Singular) { stream << (first ? "(" : " | ") << "FUNC_Singular";						        first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Net) { stream << (first ? "(" : " | ") << "FUNC_Net";						                    first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_NetReliable) { stream << (first ? "(" : " | ") << "FUNC_NetReliable";						    first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Simulated) { stream << (first ? "(" : " | ") << "FUNC_Simulated";						        first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Exec) { stream << (first ? "(" : " | ") << "FUNC_Exec";						                first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Native) { stream << (first ? "(" : " | ") << "FUNC_Native";						            first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Event) { stream << (first ? "(" : " | ") << "FUNC_Event";						                first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Operator) { stream << (first ? "(" : " | ") << "FUNC_Operator";						        first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Static) { stream << (first ? "(" : " | ") << "FUNC_Static";						            first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_OptionalParm) { stream << (first ? "(" : " | ") << "FUNC_OptionalParm";						first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Const) { stream << (first ? "(" : " | ") << "FUNC_Const";						                first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Invariant) { stream << (first ? "(" : " | ") << "FUNC_Invariant";						        first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Public) { stream << (first ? "(" : " | ") << "FUNC_Public";						            first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Private) { stream << (first ? "(" : " | ") << "FUNC_Private";						            first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Protected) { stream << (first ? "(" : " | ") << "FUNC_Protected";						        first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Delegate) { stream << (first ? "(" : " | ") << "FUNC_Delegate";						        first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_NetServer) { stream << (first ? "(" : " | ") << "FUNC_NetServer";						        first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_HasOutParms) { stream << (first ? "(" : " | ") << "FUNC_HasOutParms";						    first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_HasDefaults) { stream << (first ? "(" : " | ") << "FUNC_HasDefaults";						    first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_NetClient) { stream << (first ? "(" : " | ") << "FUNC_NetClient";						        first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_DLLImport) { stream << (first ? "(" : " | ") << "FUNC_DLLImport";						        first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_K2Call) { stream << (first ? "(" : " | ") << "FUNC_K2Call";						            first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_K2Override) { stream << (first ? "(" : " | ") << "FUNC_K2Override";						    first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_K2Pure) { stream << (first ? "(" : " | ") << "FUNC_K2Pure";						            first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_EditorOnly) { stream << (first ? "(" : " | ") << "FUNC_EditorOnly";						    first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_Lambda) { stream << (first ? "(" : " | ") << "FUNC_Lambda";						            first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_NetValidate) { stream << (first ? "(" : " | ") << "FUNC_NetValidate";						    first = false; }
-		if (functionFlags & EFunctionFlags::FUNC_AllFlags) { stream << (first ? "(" : " | ") << "FUNC_AllFlags";						        first = false; }
-		// clang-format on
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Final);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Defined);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Iterator);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Latent);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_PreOperator);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Singular);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Net);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_NetReliable);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Simulated);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Exec);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Native);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Event);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Operator);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Static);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_OptionalParm);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Const);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Invariant);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Public);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Private);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Protected);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Delegate);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_NetServer);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_HasOutParms);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_HasDefaults);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_NetClient);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_DLLImport);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_K2Call);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_K2Override);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_K2Pure);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_EditorOnly);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_Lambda);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_NetValidate);
+		CRG_EFLAG(functionFlags, EFunctionFlags, FUNC_AllFlags);
 
 		if (!first)
 		{
@@ -1196,53 +1201,51 @@ namespace Retrievers
 	{
 		bool first = true;
 
-		// clang-format off
-		if (propertyFlags & EPropertyFlags::CPF_Edit) { stream << (first ? "(" : " | ") << "CPF_Edit";							                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_Const) { stream << (first ? "(" : " | ") << "CPF_Const";						                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_Input) { stream << (first ? "(" : " | ") << "CPF_Input";						                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_ExportObject) { stream << (first ? "(" : " | ") << "CPF_ExportObject";			                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_OptionalParm) { stream << (first ? "(" : " | ") << "CPF_OptionalParm";			                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_Net) { stream << (first ? "(" : " | ") << "CPF_Net";							                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_EditFixedSize) { stream << (first ? "(" : " | ") << "CPF_EditFixedSize";		                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_Parm) { stream << (first ? "(" : " | ") << "CPF_Parm";							                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_OutParm) { stream << (first ? "(" : " | ") << "CPF_OutParm";					                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_SkipParm) { stream << (first ? "(" : " | ") << "CPF_SkipParm";					                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_ReturnParm) { stream << (first ? "(" : " | ") << "CPF_ReturnParm";				                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_CoerceParm) { stream << (first ? "(" : " | ") << "CPF_CoerceParm";				                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_Native) { stream << (first ? "(" : " | ") << "CPF_Native";						                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_Transient) { stream << (first ? "(" : " | ") << "CPF_Transient";				                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_Config) { stream << (first ? "(" : " | ") << "CPF_Config";						                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_Localized) { stream << (first ? "(" : " | ") << "CPF_Localized";				                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_Travel) { stream << (first ? "(" : " | ") << "CPF_Travel";						                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_EditConst) { stream << (first ? "(" : " | ") << "CPF_EditConst";				                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_GlobalConfig) { stream << (first ? "(" : " | ") << "CPF_GlobalConfig";			                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_Component) { stream << (first ? "(" : " | ") << "CPF_Component";				                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_AlwaysInit) { stream << (first ? "(" : " | ") << "CPF_AlwaysInit";				                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_DuplicateTransient) { stream << (first ? "(" : " | ") << "CPF_DuplicateTransient";              first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_NeedCtorLink) { stream << (first ? "(" : " | ") << "CPF_NeedCtorLink";			                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_NoExport) { stream << (first ? "(" : " | ") << "CPF_NoExport";					                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_NoImport) { stream << (first ? "(" : " | ") << "CPF_NoImport";					                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_NoClear) { stream << (first ? "(" : " | ") << "CPF_NoClear";					                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_EditInline) { stream << (first ? "(" : " | ") << "CPF_EditInline";				                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_EditInlineUse) { stream << (first ? "(" : " | ") << "CPF_EditInlineUse";		                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_EditFindable) { stream << (first ? "(" : " | ") << "CPF_EditFindable";			                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_Deprecated) { stream << (first ? "(" : " | ") << "CPF_Deprecated";				                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_DataBinding) { stream << (first ? "(" : " | ") << "CPF_DataBinding";	                        first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_SerializeText) { stream << (first ? "(" : " | ") << "CPF_SerializeText";	                    first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_RepNotify) { stream << (first ? "(" : " | ") << "CPF_RepNotify";				                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_Interp) { stream << (first ? "(" : " | ") << "CPF_Interp";						                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_NonTransactional) { stream << (first ? "(" : " | ") << "CPF_NonTransactional";	                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_EditorOnly) { stream << (first ? "(" : " | ") << "CPF_EditorOnly";	                            first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_NotForConsole) { stream << (first ? "(" : " | ") << "CPF_NotForConsole";	                    first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_RepRetry) { stream << (first ? "(" : " | ") << "CPF_RepRetry";	                                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_PrivateWrite) { stream << (first ? "(" : " | ") << "CPF_PrivateWrite";	                        first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_ProtectedWrite) { stream << (first ? "(" : " | ") << "CPF_ProtectedWrite";	                    first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_ArchetypeProperty) { stream << (first ? "(" : " | ") << "CPF_ArchetypeProperty";	            first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_EditHide) { stream << (first ? "(" : " | ") << "CPF_EditHide";	                                first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_EditTextBox) { stream << (first ? "(" : " | ") << "CPF_EditTextBox";	                        first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_CrossLevelPassive) { stream << (first ? "(" : " | ") << "CPF_CrossLevelPassive";	            first = false; }
-		if (propertyFlags & EPropertyFlags::CPF_CrossLevelActive) { stream << (first ? "(" : " | ") << "CPF_CrossLevelActive";	                first = false; }
-		// clang-format on
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Edit);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Const);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Input);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_ExportObject);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_OptionalParm);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Net);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_EditFixedSize);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Parm);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_OutParm);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_SkipParm);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_ReturnParm);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_CoerceParm);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Native);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Transient);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Config);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Localized);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Travel);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_EditConst);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_GlobalConfig);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Component);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_AlwaysInit);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_DuplicateTransient);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_NeedCtorLink);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_NoExport);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_NoImport);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_NoClear);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_EditInline);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_EditInlineUse);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_EditFindable);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Deprecated);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_DataBinding);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_SerializeText);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_RepNotify);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_Interp);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_NonTransactional);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_EditorOnly);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_NotForConsole);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_RepRetry);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_PrivateWrite);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_ProtectedWrite);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_ArchetypeProperty);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_EditHide);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_EditTextBox);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_CrossLevelPassive);
+		CRG_EFLAG(propertyFlags, EPropertyFlags, CPF_CrossLevelActive);
 
 		if (!first)
 		{
@@ -1254,69 +1257,69 @@ namespace Retrievers
 	{
 		bool first = true;
 
-		// clang-format off
-		if (objectFlags & EObjectFlags::RF_InSingularFunc) { stream << (first ? "(" : " | ") << "RF_InSingularFunc";						    first = false; }
-		if (objectFlags & EObjectFlags::RF_StateChanged) { stream << (first ? "(" : " | ") << "RF_StateChanged";						        first = false; }
-		if (objectFlags & EObjectFlags::RF_DebugPostLoad) { stream << (first ? "(" : " | ") << "RF_DebugPostLoad";						        first = false; }
-		if (objectFlags & EObjectFlags::RF_DebugSerialize) { stream << (first ? "(" : " | ") << "RF_DebugSerialize";						    first = false; }
-		if (objectFlags & EObjectFlags::RF_DebugFinishDestroyed) { stream << (first ? "(" : " | ") << "RF_DebugFinishDestroyed";				first = false; }
-		if (objectFlags & EObjectFlags::RF_EdSelected) { stream << (first ? "(" : " | ") << "RF_EdSelected";						            first = false; }
-		if (objectFlags & EObjectFlags::RF_ZombieComponent) { stream << (first ? "(" : " | ") << "RF_ZombieComponent";						    first = false; }
-		if (objectFlags & EObjectFlags::RF_Protected) { stream << (first ? "(" : " | ") << "RF_Protected";						                first = false; }
-		if (objectFlags & EObjectFlags::RF_ClassDefaultObject) { stream << (first ? "(" : " | ") << "RF_ClassDefaultObject";				    first = false; }
-		if (objectFlags & EObjectFlags::RF_ArchetypeObject) { stream << (first ? "(" : " | ") << "RF_ArchetypeObject";						    first = false; }
-		if (objectFlags & EObjectFlags::RF_ForceTagExp) { stream << (first ? "(" : " | ") << "RF_ForceTagExp";						            first = false; }
-		if (objectFlags & EObjectFlags::RF_TokenStreamAssembled) { stream << (first ? "(" : " | ") << "RF_TokenStreamAssembled";				first = false; }
-		if (objectFlags & EObjectFlags::RF_MisalignedObject) { stream << (first ? "(" : " | ") << "RF_MisalignedObject";						first = false; }
-		if (objectFlags & EObjectFlags::RF_RootSet) { stream << (first ? "(" : " | ") << "RF_RootSet";						                    first = false; }
-		if (objectFlags & EObjectFlags::RF_BeginDestroyed) { stream << (first ? "(" : " | ") << "RF_BeginDestroyed";						    first = false; }
-		if (objectFlags & EObjectFlags::RF_FinishDestroyed) { stream << (first ? "(" : " | ") << "RF_FinishDestroyed";						    first = false; }
-		if (objectFlags & EObjectFlags::RF_DebugBeginDestroyed) { stream << (first ? "(" : " | ") << "RF_DebugBeginDestroyed";					first = false; }
-		if (objectFlags & EObjectFlags::RF_MarkedByCooker) { stream << (first ? "(" : " | ") << "RF_MarkedByCooker";						    first = false; }
-		if (objectFlags & EObjectFlags::RF_LocalizedResource) { stream << (first ? "(" : " | ") << "RF_LocalizedResource";						first = false; }
-		if (objectFlags & EObjectFlags::RF_InitializedProps) { stream << (first ? "(" : " | ") << "RF_InitializedProps";						first = false; }
-		if (objectFlags & EObjectFlags::RF_PendingFieldPatches) { stream << (first ? "(" : " | ") << "RF_PendingFieldPatches";					first = false; }
-		if (objectFlags & EObjectFlags::RF_IsCrossLevelReferenced) { stream << (first ? "(" : " | ") << "RF_IsCrossLevelReferenced";			first = false; }
-		if (objectFlags & EObjectFlags::RF_Saved) { stream << (first ? "(" : " | ") << "RF_Saved";						                        first = false; }
-		if (objectFlags & EObjectFlags::RF_Transactional) { stream << (first ? "(" : " | ") << "RF_Transactional";						        first = false; }
-		if (objectFlags & EObjectFlags::RF_Unreachable) { stream << (first ? "(" : " | ") << "RF_Unreachable";						            first = false; }
-		if (objectFlags & EObjectFlags::RF_Public) { stream << (first ? "(" : " | ") << "RF_Public";						                    first = false; }
-		if (objectFlags & EObjectFlags::RF_TagImp) { stream << (first ? "(" : " | ") << "RF_TagImp";						                    first = false; }
-		if (objectFlags & EObjectFlags::RF_TagExp) { stream << (first ? "(" : " | ") << "RF_TagExp";						                    first = false; }
-		if (objectFlags & EObjectFlags::RF_Obsolete) { stream << (first ? "(" : " | ") << "RF_Obsolete";						                first = false; }
-		if (objectFlags & EObjectFlags::RF_TagGarbage) { stream << (first ? "(" : " | ") << "RF_TagGarbage";						            first = false; }
-		if (objectFlags & EObjectFlags::RF_DisregardForGC) { stream << (first ? "(" : " | ") << "RF_DisregardForGC";						    first = false; }
-		if (objectFlags & EObjectFlags::RF_PerObjectLocalized) { stream << (first ? "(" : " | ") << "RF_PerObjectLocalized";					first = false; }
-		if (objectFlags & EObjectFlags::RF_NeedLoad) { stream << (first ? "(" : " | ") << "RF_NeedLoad";						                first = false; }
-		if (objectFlags & EObjectFlags::RF_AsyncLoading) { stream << (first ? "(" : " | ") << "RF_AsyncLoading";						        first = false; }
-		if (objectFlags & EObjectFlags::RF_NeedPostLoadSubobjects) { stream << (first ? "(" : " | ") << "RF_NeedPostLoadSubobjects";			first = false; }
-		if (objectFlags & EObjectFlags::RF_Suppress) { stream << (first ? "(" : " | ") << "RF_Suppress";						                first = false; }
-		if (objectFlags & EObjectFlags::RF_InEndState) { stream << (first ? "(" : " | ") << "RF_InEndState";						            first = false; }
-		if (objectFlags & EObjectFlags::RF_Transient) { stream << (first ? "(" : " | ") << "RF_Transient";						                first = false; }
-		if (objectFlags & EObjectFlags::RF_Cooked) { stream << (first ? "(" : " | ") << "RF_Cooked";						                    first = false; }
-		if (objectFlags & EObjectFlags::RF_LoadForClient) { stream << (first ? "(" : " | ") << "RF_LoadForClient";						        first = false; }
-		if (objectFlags & EObjectFlags::RF_LoadForServer) { stream << (first ? "(" : " | ") << "RF_LoadForServer";						        first = false; }
-		if (objectFlags & EObjectFlags::RF_LoadForEdit) { stream << (first ? "(" : " | ") << "RF_LoadForEdit";						            first = false; }
-		if (objectFlags & EObjectFlags::RF_Standalone) { stream << (first ? "(" : " | ") << "RF_Standalone";						            first = false; }
-		if (objectFlags & EObjectFlags::RF_NotForClient) { stream << (first ? "(" : " | ") << "RF_NotForClient";						        first = false; }
-		if (objectFlags & EObjectFlags::RF_NotForServer) { stream << (first ? "(" : " | ") << "RF_NotForServer";						        first = false; }
-		if (objectFlags & EObjectFlags::RF_NotForEdit) { stream << (first ? "(" : " | ") << "RF_NotForEdit";						            first = false; }
-		if (objectFlags & EObjectFlags::RF_NeedPostLoad) { stream << (first ? "(" : " | ") << "RF_NeedPostLoad";						        first = false; }
-		if (objectFlags & EObjectFlags::RF_HasStack) { stream << (first ? "(" : " | ") << "RF_HasStack";						                first = false; }
-		if (objectFlags & EObjectFlags::RF_Native) { stream << (first ? "(" : " | ") << "RF_Native";						                    first = false; }
-		if (objectFlags & EObjectFlags::RF_Marked) { stream << (first ? "(" : " | ") << "RF_Marked";						                    first = false; }
-		if (objectFlags & EObjectFlags::RF_ErrorShutdown) { stream << (first ? "(" : " | ") << "RF_ErrorShutdown";						        first = false; }
-		if (objectFlags & EObjectFlags::RF_PendingKill) { stream << (first ? "(" : " | ") << "RF_PendingKill";						            first = false; }
-		if (objectFlags & EObjectFlags::RF_MarkedByCookerTemp) { stream << (first ? "(" : " | ") << "RF_MarkedByCookerTemp";					first = false; }
-		if (objectFlags & EObjectFlags::RF_CookedStartupObject) { stream << (first ? "(" : " | ") << "RF_CookedStartupObject";					first = false; }
-		if (objectFlags & EObjectFlags::RF_AllFlags) { stream << (first ? "(" : " | ") << "RF_AllFlags";						                first = false; }
-		// clang-format on
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_InSingularFunc);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_StateChanged);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_DebugPostLoad);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_DebugSerialize);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_DebugFinishDestroyed);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_EdSelected);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_ZombieComponent);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_Protected);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_ClassDefaultObject);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_ArchetypeObject);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_ForceTagExp);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_TokenStreamAssembled);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_MisalignedObject);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_RootSet);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_BeginDestroyed);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_FinishDestroyed);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_DebugBeginDestroyed);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_MarkedByCooker);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_LocalizedResource);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_InitializedProps);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_PendingFieldPatches);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_IsCrossLevelReferenced);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_Saved);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_Transactional);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_Unreachable);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_Public);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_TagImp);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_TagExp);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_Obsolete);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_TagGarbage);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_DisregardForGC);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_PerObjectLocalized);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_NeedLoad);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_AsyncLoading);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_NeedPostLoadSubobjects);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_Suppress);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_InEndState);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_Transient);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_Cooked);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_LoadForClient);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_LoadForServer);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_LoadForEdit);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_Standalone);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_NotForClient);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_NotForServer);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_NotForEdit);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_NeedPostLoad);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_HasStack);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_Native);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_Marked);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_ErrorShutdown);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_PendingKill);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_MarkedByCookerTemp);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_CookedStartupObject);
+		CRG_EFLAG(objectFlags, EObjectFlags, RF_AllFlags);
 
 		if (!first)
 		{
 			stream << ")";
 		}
 	}
+
+#undef CRG_EFLAG
 
 	uintptr_t GetBaseAddress()
 	{
