@@ -13,7 +13,7 @@ ImplementationFileExtensions:
   - cpp
   - cxx
 
-HeaderFilterRegex: '.*/include/.*|.*/src/.*|.*/tests/(?!compile_fail).*'
+HeaderFilterRegex: '.*/(Engine|Framework)/.*|.*/(pch|dllmain)\.hpp'
 ExcludeHeaderFilterRegex: ''
 
 Checks: >
