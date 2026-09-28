@@ -88,10 +88,18 @@ class UObject* UObject::GetPackageObj()
 class UClass* UObject::FindClass(const std::string& classFullName)
 {
 	static std::map<std::string, UClass*> classCache;
+	static int32_t cachedCount = 0;
 
-	if (classCache.empty())
+	if (classCache.contains(classFullName))
 	{
-		for (int32_t i = 0; i < (UObject::GObjObjects()->size() - 1); i++)
+		return classCache[classFullName];
+	}
+
+	if (UObject::GObjObjects()->size() != cachedCount)
+	{
+		classCache.clear();
+
+		for (int32_t i = 0; i < UObject::GObjObjects()->size(); i++)
 		{
 			UObject* uObject = UObject::GObjObjects()->at(i);
 
@@ -105,11 +113,13 @@ class UClass* UObject::FindClass(const std::string& classFullName)
 				}
 			}
 		}
-	}
 
-	if (classCache.contains(classFullName))
-	{
-		return classCache[classFullName];
+		cachedCount = UObject::GObjObjects()->size();
+
+		if (classCache.contains(classFullName))
+		{
+			return classCache[classFullName];
+		}
 	}
 
 	return nullptr;
@@ -146,10 +156,18 @@ bool UObject::IsA(int32_t objInternalInteger)
 class UFunction* UFunction::FindFunction(const std::string& functionFullName)
 {
 	static std::map<std::string, UFunction*> functionCache;
+	static int32_t cachedCount = 0;
 
-	if (functionCache.empty())
+	if (functionCache.contains(functionFullName))
 	{
-		for (int32_t i = 0; i < (UObject::GObjObjects()->size() - 1); i++)
+		return functionCache[functionFullName];
+	}
+
+	if (UObject::GObjObjects()->size() != cachedCount)
+	{
+		functionCache.clear();
+
+		for (int32_t i = 0; i < UObject::GObjObjects()->size(); i++)
 		{
 			UObject* uObject = UObject::GObjObjects()->at(i);
 
@@ -163,11 +181,13 @@ class UFunction* UFunction::FindFunction(const std::string& functionFullName)
 				}
 			}
 		}
-	}
 
-	if (functionCache.contains(functionFullName))
-	{
-		return functionCache[functionFullName];
+		cachedCount = UObject::GObjObjects()->size();
+
+		if (functionCache.contains(functionFullName))
+		{
+			return functionCache[functionFullName];
+		}
 	}
 
 	return nullptr;

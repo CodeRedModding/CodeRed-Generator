@@ -1,0 +1,26 @@
+name: Setup LLVM
+description: Install LLVM toolchain for CI
+
+inputs:
+  llvm-version:
+    description: LLVM major version
+    required: true
+  extra-tools:
+    description: Additional tools for update-alternatives (space-separated)
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Install LLVM
+      shell: bash
+      run: |
+        sudo apt-get remove -y clang-format clang-tidy || true
+        wget -qO /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+        sudo bash /tmp/llvm.sh ${{ inputs.llvm-version }} all
+        sudo apt-get install -y ninja-build python3 msitools python3-simplejson python3-six
+        for tool in clang-cl lld-link llvm-lib llvm-rc llvm-mt ${{ inputs.extra-tools }}; do
+          sudo update-alternatives --install /usr/bin/$tool $tool \
+            /usr/bin/$tool-${{ inputs.llvm-version }} 1000
+        done

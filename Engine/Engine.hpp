@@ -1,9 +1,19 @@
 #pragma once
 #include <string>
 
-// Here is where you include your custom engine files, only "GameDefines.hpp" and "PiecesOfCode.hpp" is needed.
-#include "Template/GameDefines.hpp"
-#include "Template/PiecesOfCode.hpp"
+// Which engine folder to generate from is chosen by the build, which defines ENGINE as the
+// folder name (for example -DENGINE=Template). Only "GameDefines.hpp" and "PiecesOfCode.hpp"
+// are needed from it.
+#ifndef ENGINE
+#error "ENGINE is not defined, configure the build with -DENGINE=<engine folder name>."
+#endif
+
+#define ENGINE_STRINGIFY_IMPL(x) #x
+#define ENGINE_STRINGIFY(x) ENGINE_STRINGIFY_IMPL(x)
+#define ENGINE_INCLUDE(file) ENGINE_STRINGIFY(ENGINE/file)
+
+#include ENGINE_INCLUDE(GameDefines.hpp)
+#include ENGINE_INCLUDE(PiecesOfCode.hpp)
 
 /*
 # ========================================================================================= #

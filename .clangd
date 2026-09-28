@@ -1,0 +1,26 @@
+CompileFlags:
+  CompilationDatabase: ./build/
+
+InlayHints:
+  Enabled: true
+  ParameterNames: true
+  DeducedTypes: true
+
+Hover:
+  ShowAKA: true
+
+Completion:
+  AllScopes: true
+
+Index:
+  Background: Build
+
+---
+If:
+  PathMatch: [.*\.in]
+Diagnostics:
+  Suppress:
+    - '*'
+  ClangTidy:
+    Remove:
+      - '*'

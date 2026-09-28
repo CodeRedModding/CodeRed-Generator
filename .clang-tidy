@@ -1,0 +1,58 @@
+FormatStyle:     file
+SystemHeaders:   false
+
+HeaderFileExtensions:
+  - ''
+  - h
+  - hh
+  - hpp
+  - hxx
+ImplementationFileExtensions:
+  - c
+  - cc
+  - cpp
+  - cxx
+
+HeaderFilterRegex: '.*/(Engine|Framework)/.*|.*/(pch|dllmain)\.hpp'
+ExcludeHeaderFilterRegex: ''
+
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-forward-declaration-namespace,
+  concurrency-*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-do-while,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-avoid-non-const-global-variables,
+  -cppcoreguidelines-pro-type-vararg,
+  google-*,
+  -google-build-using-namespace,
+  llvm-*,
+  -llvm-header-guard,
+  -llvm-include-order,
+  -llvm-prefer-static-over-anonymous-namespace,
+  -llvmlibc-*,
+  misc-*,
+  -misc-include-cleaner,
+  modernize-*,
+  performance-*,
+  -performance-avoid-endl,
+  -performance-no-int-to-ptr,
+  portability-*,
+  -portability-avoid-pragma-once,
+  readability-*,
+  -readability-duplicate-include,
+  -readability-else-after-return,
+  -readability-identifier-length,
+  -readability-magic-numbers,
+  clang-diagnostic-*,
+  clang-analyzer-*,
+
+WarningsAsErrors: ''
+
+CheckOptions:
+  # Performance Checks
+  performance-for-range-copy.WarnOnAllAutoCopies: 'true'
+  performance-inefficient-string-concatenation.StrictMode: 'true'

@@ -6,9 +6,9 @@
 # ========================================================================================= #
 */
 
-Member::Member() : Type(EMemberTypes::Unknown), Label(GetLabel(Type)), Offset(0), Size(1) {}
+Member::Member() : Type(EMemberTypes::Unknown), Label("uint8_t UnknownMemberType[0x1];"), Offset(0), Size(1) {}
 
-Member::Member(EMemberTypes type, size_t size) : Type(type), Label(GetLabel(type)), Offset(GetOffset(type)), Size(size) {}
+Member::Member(EMemberTypes type, size_t size, const std::string& label) : Type(type), Label(label), Offset(GetOffset(type)), Size(size) {}
 
 Member::Member(const Member& member) : Type(member.Type), Label(member.Label), Offset(member.Offset), Size(member.Size) {}
 
@@ -57,82 +57,10 @@ std::string Member::GetName(EClassTypes type)
 	}
 }
 
-std::string Member::GetLabel(EMemberTypes type)
-{
-	switch (type)
-	{
-	case EMemberTypes::FNameEntry_HashNext:
-		return "class FNameEntry* HashNext;";
-	case EMemberTypes::FNameEntry_Index:
-		return "int32_t Index;";
-	case EMemberTypes::FNameEntry_Flags:
-		return "uint64_t Flags;";
-	case EMemberTypes::FNameEntry_Name:
-#ifdef UTF16
-		return "wchar_t Name[0x400];";
-#else
-		return "char Name[0x400];";
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #endif
-	case EMemberTypes::UObject_VfTable:
-		return "struct FPointer VfTableObject;";
-	case EMemberTypes::UObject_Integer:
-		return "int32_t ObjectInternalInteger;";
-	case EMemberTypes::UObject_Outer:
-		return "class UObject* Outer;";
-	case EMemberTypes::UObject_Name:
-		return "class FName Name;";
-	case EMemberTypes::UObject_Class:
-		return "class UClass* Class;";
-	case EMemberTypes::UField_Next:
-		return "class UField* Next;";
-	case EMemberTypes::UField_SuperField:
-		return "class UField* SuperField;";
-	case EMemberTypes::UEnum_Names:
-		return "class TArray<class FName> Names;";
-	case EMemberTypes::UConst_Value:
-		return "class FString Value;";
-	case EMemberTypes::UProperty_Dim:
-		return "int32_t ArrayDim;";
-	case EMemberTypes::UProperty_Size:
-		return "int32_t ElementSize;";
-	case EMemberTypes::UProperty_Flags:
-		return "uint64_t PropertyFlags;";
-	case EMemberTypes::UProperty_Offset:
-		return "int32_t Offset;";
-	case EMemberTypes::UStruct_SuperField:
-		return "class UField* SuperField;";
-	case EMemberTypes::UStruct_Children:
-		return "class UField* Children;";
-	case EMemberTypes::UStruct_Size:
-		return "int32_t PropertySize;";
-	case EMemberTypes::UStruct_Alignment:
-		return "int32_t MinAlignment;";
-	case EMemberTypes::UFunction_Flags:
-		return "uint64_t FunctionFlags;";
-	case EMemberTypes::UFunction_Native:
-		return "uint16_t iNative;";
-	case EMemberTypes::UStructProperty_Struct:
-		return "class UStruct* Struct;";
-	case EMemberTypes::UObjectProperty_Class:
-		return "class UClass* PropertyClass;";
-	case EMemberTypes::UClassProperty_Meta:
-		return "class UClass* MetaClass;";
-	case EMemberTypes::UMapProperty_Key:
-		return "class UProperty* Key;";
-	case EMemberTypes::UMapProperty_Value:
-		return "class UProperty* Value;";
-	case EMemberTypes::UInterfaceProperty_Class:
-		return "class UClass* InterfaceClass;";
-	case EMemberTypes::UByteProperty_Enum:
-		return "class UEnum* Enum;";
-	case EMemberTypes::UBoolProperty_BitMask:
-		return "uint32_t BitMask;";
-	case EMemberTypes::UArrayProperty_Inner:
-		return "class UProperty* Inner;";
-	default:
-		return "uint8_t UnknownMemberType[0x1];";
-	}
-}
 
 uintptr_t Member::GetOffset(EMemberTypes type)
 {
@@ -211,6 +139,10 @@ uintptr_t Member::GetOffset(EMemberTypes type)
 	}
 }
 
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
 size_t Member::GetClassSize(EClassTypes type)
 {
 	switch (type)
@@ -226,7 +158,7 @@ size_t Member::GetClassSize(EClassTypes type)
 	case EClassTypes::UConst:
 		return sizeof(UConst);
 	case EClassTypes::UProperty:
-		return  sizeof(UProperty);
+		return sizeof(UProperty);
 	case EClassTypes::UStruct:
 		return sizeof(UStruct);
 	case EClassTypes::UFunction:
@@ -293,9 +225,9 @@ size_t Member::GetClassOffset(EClassTypes type)
 	}
 }
 
-void Member::Register(EMemberTypes type, size_t size)
+void Member::Register(EMemberTypes type, size_t size, const std::string& label)
 {
-	m_registeredMembers[type] = Member(type, size);
+	m_registeredMembers[type] = Member(type, size, label);
 }
 
 std::map<size_t, Member*> Member::GetRegistered(EClassTypes type)
@@ -322,6 +254,8 @@ void Member::AddRegistered(std::map<size_t, Member*>& members, EMemberTypes type
 }
 
 std::map<EClassTypes, std::vector<EMemberTypes>> Member::m_classMembers = {
+	// clang-format off
+
 	// Core Objects
 
 	{ EClassTypes::FNameEntry, {
@@ -405,6 +339,8 @@ std::map<EClassTypes, std::vector<EMemberTypes>> Member::m_classMembers = {
 	{ EClassTypes::UArrayProperty, {
 		EMemberTypes::UArrayProperty_Inner
 	} },
+
+	// clang-format on
 };
 
 Member& Member::operator=(const Member& member)

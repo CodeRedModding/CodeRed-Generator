@@ -1,4 +1,5 @@
 #include "Configuration.hpp"
+
 #include "PiecesOfCode.hpp"
 
 /*
@@ -21,32 +22,32 @@ uint32_t GConfig::m_functionSpacing = 50;
 
 uint32_t GConfig::GetConstSpacing()
 {
-    return m_constantSpacing;
+	return m_constantSpacing;
 }
 
 uint32_t GConfig::GetCommentSpacing()
 {
-    return m_commentSpacing;
+	return m_commentSpacing;
 }
 
 uint32_t GConfig::GetEnumSpacing()
 {
-    return m_enumSpacing;
+	return m_enumSpacing;
 }
 
 uint32_t GConfig::GetClassSpacing()
 {
-    return m_classSpacing;
+	return m_classSpacing;
 }
 
 uint32_t GConfig::GetStructSpacing()
 {
-    return m_structSpacing;
+	return m_structSpacing;
 }
 
 uint32_t GConfig::GetFunctionSpacing()
 {
-    return m_functionSpacing;
+	return m_functionSpacing;
 }
 
 /*
@@ -87,82 +88,82 @@ std::vector<std::string> GConfig::m_blacklistedTypes = { "FPointer", "FQWord", "
 
 // Names of classes or structs you want to override with your own custom one.
 std::map<std::string, std::string> GConfig::m_typeOverrides = {
-    { "FExampleStruct", PiecesOfTypes::Example_Struct }
+	{ "FExampleStruct", PiecesOfTypes::Example_Struct }
 };
 
 bool GConfig::UsingWindows()
 {
-    return m_useWindows;
+	return m_useWindows;
 }
 
 bool GConfig::UsingConstants()
 {
-    return m_useConstants;
+	return m_useConstants;
 }
 
 bool GConfig::RemoveNativeIndex()
 {
-    return m_removeNativeIndex;
+	return m_removeNativeIndex;
 }
 
 bool GConfig::RemoveNativeFlags()
 {
-    return m_removeNativeFlags;
+	return m_removeNativeFlags;
 }
 
 bool GConfig::PrintEnumFlags()
 {
-    return m_printEnumFlags;
+	return m_printEnumFlags;
 }
 
 bool GConfig::UsingEnumClasses()
 {
-    return m_useEnumClasses;
+	return m_useEnumClasses;
 }
 
 const std::string& GConfig::GetEnumClassType()
 {
-    return m_enumClassType;
+	return m_enumClassType;
 }
 
 uint32_t GConfig::GetGameAlignment()
 {
-    return m_gameAlignment;
+	return m_gameAlignment;
 }
 
 uint32_t GConfig::GetFinalAlignment()
 {
-    return m_finalAlignment;
+	return m_finalAlignment;
 }
 
 bool GConfig::IsTypeBlacklisted(const std::string& name)
 {
-    if (!m_blacklistedTypes.empty() && !name.empty())
-    {
-        return (std::find(m_blacklistedTypes.begin(), m_blacklistedTypes.end(), name) != m_blacklistedTypes.end());
-    }
+	if (!m_blacklistedTypes.empty() && !name.empty())
+	{
+		return (std::find(m_blacklistedTypes.begin(), m_blacklistedTypes.end(), name) != m_blacklistedTypes.end());
+	}
 
-    return false;
+	return false;
 }
 
 bool GConfig::IsTypeOveridden(const std::string& name)
 {
-    if (!name.empty())
-    {
-        return m_typeOverrides.contains(name);
-    }
+	if (!name.empty())
+	{
+		return m_typeOverrides.contains(name);
+	}
 
-    return false;
+	return false;
 }
 
 std::string GConfig::GetTypeOverride(const std::string& name)
 {
-    if (IsTypeOveridden(name))
-    {
-        return m_typeOverrides[name];
-    }
+	if (IsTypeOveridden(name))
+	{
+		return m_typeOverrides[name];
+	}
 
-    return "";
+	return "";
 }
 
 /*
@@ -185,27 +186,27 @@ std::pair<uint8_t*, std::string> GConfig::m_pePattern = { (uint8_t*)"\x10\x11\x1
 
 bool GConfig::UsingProcessEventIndex()
 {
-    return (m_useIndex && (m_peIndex != -1));
+	return (m_useIndex && (m_peIndex != -1));
 }
 
 int32_t GConfig::GetProcessEventIndex()
 {
-    return m_peIndex;
+	return m_peIndex;
 }
 
 const std::string& GConfig::GetProcessEventMask()
 {
-    return m_peMask;
+	return m_peMask;
 }
 
 uint8_t* GConfig::GetProcessEventPattern()
 {
-    return m_pePattern.first;
+	return m_pePattern.first;
 }
 
 const std::string& GConfig::GetProcessEventStr()
 {
-    return m_pePattern.second;
+	return m_pePattern.second;
 }
 
 /*
@@ -235,47 +236,47 @@ std::pair<uint8_t*, std::string> GConfig::m_gnamePattern = { (uint8_t*)"\x10\x11
 
 bool GConfig::UsingOffsets()
 {
-    return m_useOffsets;
+	return m_useOffsets;
 }
 
 uintptr_t GConfig::GetGObjectOffset()
 {
-    return m_gobjectOffset;
+	return m_gobjectOffset;
 }
 
 uint8_t* GConfig::GetGObjectPattern()
 {
-    return m_gobjectPattern.first;
+	return m_gobjectPattern.first;
 }
 
 const std::string& GConfig::GetGObjectStr()
 {
-    return m_gobjectPattern.second;
+	return m_gobjectPattern.second;
 }
 
 const std::string& GConfig::GetGObjectMask()
 {
-    return m_gobjectMask;
+	return m_gobjectMask;
 }
 
 uintptr_t GConfig::GetGNameOffset()
 {
-    return m_gnameOffset;
+	return m_gnameOffset;
 }
 
 uint8_t* GConfig::GetGNamePattern()
 {
-    return m_gnamePattern.first;
+	return m_gnamePattern.first;
 }
 
 const std::string& GConfig::GetGNameStr()
 {
-    return m_gnamePattern.second;
+	return m_gnamePattern.second;
 }
 
 const std::string& GConfig::GetGNameMask()
 {
-    return m_gnameMask;
+	return m_gnameMask;
 }
 
 /*
@@ -298,27 +299,27 @@ std::filesystem::path GConfig::m_outputPath = "I_FORGOT_TO_SET_A_PATH";
 
 const std::string& GConfig::GetGameNameLong()
 {
-    return m_gameNameLong;
+	return m_gameNameLong;
 }
 
 const std::string& GConfig::GetGameNameShort()
 {
-    return m_gameNameShort;
+	return m_gameNameShort;
 }
 
 const std::string& GConfig::GetGameVersion()
 {
-    return m_gameVersion;
+	return m_gameVersion;
 }
 
 const std::filesystem::path& GConfig::GetOutputPath()
 {
-    return m_outputPath;
+	return m_outputPath;
 }
 
 bool GConfig::HasOutputPath()
 {
-    return (!GetOutputPath().string().empty() && (GetOutputPath().string() != "I_FORGOT_TO_SET_A_PATH"));
+	return (!GetOutputPath().string().empty() && (GetOutputPath().string() != "I_FORGOT_TO_SET_A_PATH"));
 }
 
 /*

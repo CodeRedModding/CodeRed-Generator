@@ -1,0 +1,5 @@
+set(CMAKE_SYSTEM_PROCESSOR AMD64)
+set(TOOLCHAIN_ARCH x64)
+set(CMAKE_C_COMPILER_TARGET   x86_64-pc-windows-msvc)
+set(CMAKE_CXX_COMPILER_TARGET x86_64-pc-windows-msvc)
+include("${CMAKE_CURRENT_LIST_DIR}/msvc-wine-clang-cl.cmake")

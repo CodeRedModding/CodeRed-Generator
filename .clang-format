@@ -1,0 +1,139 @@
+---
+# Base style
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: Latest
+DisableFormat: false
+
+# Indentation
+AccessModifierOffset: -4
+IndentWidth: 4
+TabWidth: 4
+UseTab: AlignWithSpaces
+ContinuationIndentWidth: 4
+IndentCaseLabels: false
+IndentPPDirectives: None
+IndentWrappedFunctionNames: false
+NamespaceIndentation: All
+CompactNamespaces: false
+FixNamespaceComments: false
+
+# Alignment
+AlignAfterOpenBracket: Align
+AlignConsecutiveMacros: None
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
+AlignEscapedNewlines: Left
+AlignOperands: Align
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 0
+DerivePointerAlignment: false
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Single-line and short constructs
+AllowAllArgumentsOnNextLine: true
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: false
+
+# Line breaking
+# ColumnLimit 0 disables all reflow: clang-format normalizes indentation,
+# spacing and braces but never joins or splits a line. The sources routinely
+# run past 200 columns (generated-code tables reach 433), so any finite limit
+# rewrites them wholesale.
+ColumnLimit: 0
+BinPackArguments: true
+BinPackParameters: true
+AlwaysBreakBeforeMultilineStrings: false
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Allman
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: AfterColon
+BreakInheritanceList: BeforeColon
+BreakStringLiterals: false
+BreakTemplateDeclarations: No
+PackConstructorInitializers: CurrentLine
+Cpp11BracedListStyle: false
+InsertNewlineAtEOF: true
+MaxEmptyLinesToKeep: 1
+KeepEmptyLines:
+  AtStartOfBlock: false
+ReflowComments: Never
+
+# Includes
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  # Precompiled header, before anything else in the files that use it
+  - Regex: '^"pch\.hpp"'
+    Priority: 1
+  # C standard library
+  - Regex: '^<c(ctype|inttypes|locale|stdarg|stdint|stdio|stdlib|string)>'
+    Priority: 10
+  # C++ standard library (catch-all for angle brackets without .h)
+  - Regex: '^<[a-z_]+(|/.*)>$'
+    Priority: 20
+  # Windows.h must precede headers that depend on it (SortPriority 0 is
+  # a sentinel in clang-format, so every entry uses a non-zero value)
+  - Regex: '^<Windows\.h>'
+    Priority: 30
+    SortPriority: 30
+  # Windows headers that require Windows.h first, kept in their own block
+  - Regex: '^<direct\.h>'
+    Priority: 31
+    SortPriority: 31
+  - Regex: '^<Psapi\.h>'
+    Priority: 31
+    SortPriority: 32
+  # Angle-bracket fallback
+  - Regex: '^<'
+    Priority: 25
+  # Generated headers (Framework/Version.hpp.in)
+  - Regex: '^"Version\.hpp"'
+    Priority: 40
+  # Framework headers
+  - Regex: '^"(\.\./)*Framework/'
+    Priority: 50
+  # Engine headers
+  - Regex: '^"(\.\./)*Engine/'
+    Priority: 60
+  # Other project headers
+  - Regex: '^"'
+    Priority: 70
+
+
+# Spaces
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterForeachMacros: true
+  AfterIfMacros: true
+  AfterPlacementOperator: false
+SpaceBeforeRangeBasedForLoopColon: true
+SpacesInAngles: Never
+SpacesInContainerLiterals: false
+SpacesInParens: Never
+SpacesInSquareBrackets: false
+
+# Misc
+SortUsingDeclarations: Never
+
+# ENGINE_INCLUDE builds an include path with a bare "/" that clang-format would
+# otherwise read as a division operator and pad with spaces, corrupting the
+# stringified path.
+WhitespaceSensitiveMacros:
+  - ENGINE_STRINGIFY
+  - ENGINE_STRINGIFY_IMPL
+  - ENGINE_INCLUDE

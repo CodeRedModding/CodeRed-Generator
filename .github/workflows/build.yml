@@ -1,0 +1,124 @@
+name: Build
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  LLVM_VERSION: '22'
+  MSVC_WINE_COMMIT: '514f8ea34842cd6d831804d0e9658d3a32870ae1'
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-llvm
+        with:
+          llvm-version: ${{ env.LLVM_VERSION }}
+          extra-tools: clang-format
+
+      - name: Check formatting
+        run: git ls-files '*.cpp' '*.hpp' | xargs clang-format --dry-run -Werror
+
+  build-windows:
+    name: Build (Windows, ${{ matrix.preset }})
+    runs-on: windows-2022
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [windows-x64, windows-x86]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
+
+      - name: Build Release
+        run: cmake --build --preset ${{ matrix.preset }}-release
+
+      - name: Build Debug
+        run: cmake --build --preset ${{ matrix.preset }}-debug
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: CodeRedGenerator-${{ matrix.preset }}-${{ github.sha }}
+          path: |
+            build/${{ matrix.preset }}/bin/Release/*.dll
+            build/${{ matrix.preset }}/bin/Debug/*.dll
+          if-no-files-found: error
+
+  build-wine:
+    name: Build (Wine cross-compile, ${{ matrix.preset }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [wine-x64, wine-x86]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-llvm
+        with:
+          llvm-version: ${{ env.LLVM_VERSION }}
+
+      - name: Clone msvc-wine
+        run: git clone https://github.com/mstorsjo/msvc-wine.git /tmp/msvc-wine && git -C /tmp/msvc-wine checkout $MSVC_WINE_COMMIT
+
+      - name: Get MSVC version
+        id: msvc-version
+        run: |
+          MSVC_VER=$(/tmp/msvc-wine/vsdownload.py --print-version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?' | tail -1)
+          echo "version=$MSVC_VER" >> "$GITHUB_OUTPUT"
+
+      - name: Restore msvc-wine cache
+        id: msvc-wine-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.msvc
+          key: msvc-wine-${{ steps.msvc-version.outputs.version }}-${{ hashFiles('cmake/toolchains/*.cmake') }}
+          restore-keys: msvc-wine-
+
+      - name: Install msvc-wine
+        if: steps.msvc-wine-cache.outputs.cache-hit != 'true'
+        run: |
+          /tmp/msvc-wine/vsdownload.py --accept-license --dest ~/.msvc
+          /tmp/msvc-wine/install.sh ~/.msvc
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
+
+      - name: Build Release
+        run: cmake --build --preset ${{ matrix.preset }}-release
+
+      - name: Build Debug
+        run: cmake --build --preset ${{ matrix.preset }}-debug
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: CodeRedGenerator-${{ matrix.preset }}-${{ github.sha }}
+          path: |
+            build/${{ matrix.preset }}/bin/Release/*.dll
+            build/${{ matrix.preset }}/bin/Debug/*.dll
+          if-no-files-found: error
+

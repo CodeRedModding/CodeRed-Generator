@@ -1,8 +1,9 @@
 #pragma once
-#include <sstream>
-#include <fstream>
-#include <string>
 #include <cstdarg>
+
+#include <fstream>
+#include <sstream>
+#include <string>
 
 enum class EWidthTypes : uint32_t
 {
