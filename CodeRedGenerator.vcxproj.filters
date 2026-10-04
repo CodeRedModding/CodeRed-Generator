@@ -17,7 +17,7 @@
     <Filter Include="Framework">
       <UniqueIdentifier>{b83839af-c722-41d1-8066-a179934937ed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Dishonered">
+    <Filter Include="Engine\Dishonored">
       <UniqueIdentifier>{3beb0f8b-1c3e-44fb-9ab8-bc9c7aa9dd90}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -43,17 +43,17 @@
     <ClCompile Include="Framework\Member.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Dishonered\GameDefines.cpp">
-      <Filter>Engine\Dishonered</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Dishonered\PiecesOfCode.cpp">
-      <Filter>Engine\Dishonered</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Dishonered\Configuration.cpp">
-      <Filter>Engine\Dishonered</Filter>
-    </ClCompile>
     <ClCompile Include="Framework\Printer.cpp">
       <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Dishonored\Configuration.cpp">
+      <Filter>Engine\Dishonored</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Dishonored\GameDefines.cpp">
+      <Filter>Engine\Dishonored</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Dishonored\PiecesOfCode.cpp">
+      <Filter>Engine\Dishonored</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -78,17 +78,17 @@
     <ClInclude Include="Framework\Member.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Dishonered\Configuration.hpp">
-      <Filter>Engine\Dishonered</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Dishonered\GameDefines.hpp">
-      <Filter>Engine\Dishonered</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Dishonered\PiecesOfCode.hpp">
-      <Filter>Engine\Dishonered</Filter>
-    </ClInclude>
     <ClInclude Include="Framework\Printer.hpp">
       <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Dishonored\Configuration.hpp">
+      <Filter>Engine\Dishonored</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Dishonored\GameDefines.hpp">
+      <Filter>Engine\Dishonored</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Dishonored\PiecesOfCode.hpp">
+      <Filter>Engine\Dishonored</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

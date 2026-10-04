@@ -112,7 +112,7 @@ namespace std
 	};
 }
 
-// Caches all need objects and strings for sdk generation, caching is only needed to be done one time on initialization.
+// Caches all need objects and strings for sdk generation, caching is only done once after initialization.
 class GCache
 {
 private:
@@ -156,7 +156,7 @@ public:
 	GCache() = delete;
 };
 
-// This is only used for the log file if you don't have the "NO_LOGGING" define commented out in your config.
+// This is only used for the log file if you don't have the "NO_LOGGING" define commented out in your "Configuration.hpp" file.
 class GLogger
 {
 private:
@@ -255,6 +255,7 @@ namespace Generator
 	void DumpGObjects();
 	void DumpGNames();
 
+	// These are just some basic logic checks for their TArray values.
 	bool AreGObjectsValid();
 	bool AreGNamesValid();
 	bool AreGlobalsValid();

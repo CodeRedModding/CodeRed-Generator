@@ -1,4 +1,4 @@
-## CodeRed Generator (v1.2.0)
+## CodeRed Generator (v1.2.1)
 
 This is a C++20 Unreal Engine 3 SDK generator that was originally based off the source of [TheFeckless's UE3 SDK Generator](https://www.unknowncheats.me/forum/unreal-engine-3-a/71911-thefeckless-ue3-sdk-generator.html). It has since grown into its own project which utilizes C++20, strings, filesystem paths, and modern file streams; along with converting legacy UE3 features to more modern and user friendly ones while still being compatible with UE3.
 
@@ -47,6 +47,10 @@ Once all your classes are filled out and you've made the necessary changes in `C
 
 ## Changelog
 
+### v1.2.1
+- Upgraded the solution to VS26, including the C++ platform toolset to v145.
+- Minor spelling fixes and improvements throughout the project.
+
 ### v1.2.0
 - Added two new functions "UnrealProperty::GetCustomName" and "UnrealProperty::MakeCustomName", which is used by the function parameter and code generators, this is to have a centralized place to modify how the generator makes custom parameter names. For example out parameters have "out" added before its actual name, same with "optional", which is done by the generator and not unreal engine.
 - Added a "std::isprint" check in the "UnrealObject::ValidateName" function, in addition to using "std::find" to looking through "m_unsafeChars" instead of manually looping.
@@ -78,7 +82,7 @@ Once all your classes are filled out and you've made the necessary changes in `C
 - Fixed the comment spacing for classes using the struct spacing instead of class spacing from your config file.
 
 ###  v1.1.4
-- Added a new engine folder for Dishonered, which contains all needed fields to generate an sdk for that game.
+- Added a new engine folder for Dishonored, which contains all needed fields to generate an sdk for that game.
 - Added extra safety checks for the string helper functions in "Printer.hpp/cpp".
 - Fixed the object flag values in "GameDefines.hpp" and also "PiecesOfCodes.cpp".
 - Updated the "FindClass" and "FindFunction" functions slightly.

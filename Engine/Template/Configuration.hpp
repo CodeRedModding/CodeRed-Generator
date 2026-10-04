@@ -5,7 +5,7 @@
 
 /*
 # ========================================================================================= #
-# Configuration
+# Template Configuration
 # ========================================================================================= #
 */
 
@@ -22,7 +22,7 @@
 
 class GConfig
 {
-private: // Cosmetics
+private: // Text spacing.
 	static uint32_t m_constantSpacing;
 	static uint32_t m_commentSpacing; 
 	static uint32_t m_enumSpacing;
@@ -38,7 +38,7 @@ public:
 	static uint32_t GetStructSpacing();
 	static uint32_t GetFunctionSpacing();
 
-private: // Generator Settings
+private: // Generator settings.
 	static bool m_useWindows;
 	static bool m_useConstants;
 	static bool m_removeNativeIndex;
@@ -65,7 +65,7 @@ public:
 	static bool IsTypeOveridden(const std::string& name);
 	static std::string GetTypeOverride(const std::string& name);
 
-private: // Process Event
+private: // Process event.
 	static bool m_useIndex;
 	static int32_t m_peIndex;
 	static std::string m_peMask;
@@ -78,7 +78,7 @@ public:
 	static const std::string& GetProcessEventStr();
 	static const std::string& GetProcessEventMask();
 
-private: // Global Objects & Names
+private: // Global objects & names.
 	static bool m_useOffsets;
 	static uintptr_t m_gobjectOffset;
 	static std::string m_gobjectMask;
@@ -98,7 +98,7 @@ public:
 	static const std::string& GetGNameStr();
 	static const std::string& GetGNameMask();
 
-private: // Game Info
+private: // Game info.
 	static std::string m_gameNameLong;
 	static std::string m_gameNameShort;
 	static std::string m_gameVersion;

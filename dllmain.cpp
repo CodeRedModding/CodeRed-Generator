@@ -3795,26 +3795,12 @@ namespace Generator
 
     bool AreGObjectsValid()
     {
-        if (GObjects
-            && !UObject::GObjObjects()->empty()
-            && (UObject::GObjObjects()->capacity() > UObject::GObjObjects()->size()))
-        {
-            return true;
-        }
-
-        return false;
+        return (GObjects && !UObject::GObjObjects()->empty() && (UObject::GObjObjects()->capacity() > UObject::GObjObjects()->size()));
     }
 
     bool AreGNamesValid()
     {
-        if (GNames
-            && !FName::Names()->empty()
-            && (FName::Names()->capacity() > FName::Names()->size()))
-        {
-            return true;
-        }
-
-        return false;
+        return (GNames && !FName::Names()->empty() && (FName::Names()->capacity() > FName::Names()->size()));
     }
 
     bool AreGlobalsValid()

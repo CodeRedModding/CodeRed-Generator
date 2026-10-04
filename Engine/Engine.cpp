@@ -8,9 +8,9 @@
 
 std::string GEngine::m_name = "CodeRedGenerator";
 
-std::string GEngine::m_version = "v1.2.0";
+std::string GEngine::m_version = "v1.2.1";
 
-std::string GEngine::m_credits = "ItsBranK, TheFeckless";
+std::string GEngine::m_credits = "ItsBrank, TheFeckless";
 
 std::string GEngine::m_links = "www.github.com/CodeRedModding/CodeRed-Generator";
 
